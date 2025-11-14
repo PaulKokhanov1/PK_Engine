@@ -28,6 +28,39 @@
     <Filter Include="Source Files\Core">
       <UniqueIdentifier>{d577e8be-af08-4118-a3b4-9478b5f78e45}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Exception">
+      <UniqueIdentifier>{3db2c6c6-80d9-4c9a-99dd-6f9af74ec8d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Exception">
+      <UniqueIdentifier>{e519633f-e755-47eb-ab9d-d6d8363d8886}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{089742d3-62ce-409b-b81c-360e3377d424}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{98af529a-0449-4074-a269-4f6066a488a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ThirdParty">
+      <UniqueIdentifier>{9297ad73-a97e-4074-b373-fa2dbddb1d70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ThirdParty\cy">
+      <UniqueIdentifier>{38f7dda7-8c5b-4ce3-b829-aabacccdc86e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Models">
+      <UniqueIdentifier>{1c3c7e55-de9d-42f4-9cb8-7335ecc88196}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Rendering">
+      <UniqueIdentifier>{17e4f728-7a4c-4238-b24e-124f90a0d3a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Rendering">
+      <UniqueIdentifier>{73a18876-421d-4ab5-a0f9-ef5c84b612eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Scene">
+      <UniqueIdentifier>{1ab74b2d-b9fd-4504-a5ff-9a577ff2a88a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Scene">
+      <UniqueIdentifier>{db75f8bc-9b1a-4c96-9fbd-0fb9eb11e1ac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -57,6 +90,24 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderException.cpp">
+      <Filter>Source Files\Exception</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderCommon.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshComponent.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files\Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\Engine\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EngineConfig.h">
@@ -82,6 +133,42 @@
     </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderException.h">
+      <Filter>Header Files\Exception</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderCommon.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshComponent.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="GLDebug.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\cyTriMesh.h">
+      <Filter>Header Files\ThirdParty\cy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\cyCore.h">
+      <Filter>Header Files\ThirdParty\cy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\cyVector.h">
+      <Filter>Header Files\ThirdParty\cy</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Header Files\Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files\Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexKey.h">
+      <Filter>Header Files\Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

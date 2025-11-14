@@ -17,8 +17,18 @@ std::string get_file_contents(const char* filename)
 	throw(errno);
 }
 
+Shader::Shader()
+{
+	ID = -1;
+	vertexFile = "";
+	fragmentFile = "";
+}
+
 Shader::Shader(const char* vertexFile, const char* fragmentFile)
 {
+	this->vertexFile = vertexFile;
+	this->fragmentFile = fragmentFile;
+
 	std::string vertexCode = get_file_contents(vertexFile);
 	std::string fragmentCode = get_file_contents(fragmentFile);
 
@@ -31,8 +41,10 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
 	glCompileShader(vertexShader);
 
 	// Handle Compilation errors
-	if (checkCompileErrors(vertexShader, VERTEX)) {
+	if (checkCompileErrors(vertexShader, VERTEXSHADER)) {
+
 		glDeleteShader(vertexShader);
+		throw(ShaderException("Compiling shader failed", VERTEXSHADER, vertexFile));
 	}
 
 	// Create fragment shader obj, get ref and compile
@@ -41,8 +53,10 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
 	glCompileShader(fragmentShader);
 
 	// Handle Compilation errors
-	if (checkCompileErrors(fragmentShader, FRAGMENT)) {
+	if (checkCompileErrors(fragmentShader, FRAGMENTSHADER)) {
+
 		glDeleteShader(fragmentShader);
+		throw(ShaderException("Compiling fragment failed", FRAGMENTSHADER, fragmentFile));
 	}
 
 	// Create program
@@ -58,6 +72,7 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
 	if (checkCompileErrors(ID, PROGRAM)) {
 		// The program is useless now. So delete it.
 		glDeleteShader(ID);
+		throw(ShaderException("Linking program failed", PROGRAM));
 	}
 
 	// Delete unnecessary shader objects
@@ -86,7 +101,7 @@ bool Shader::checkCompileErrors(GLuint id, errorType type)
 {
 	GLint success = 0;
 
-	if (type == VERTEX || type == FRAGMENT) {
+	if (type == VERTEXSHADER || type == FRAGMENTSHADER) {
 
 		glGetShaderiv(id, GL_COMPILE_STATUS, &success);
 		if (success == GL_FALSE) {
@@ -125,3 +140,18 @@ bool Shader::checkCompileErrors(GLuint id, errorType type)
 	return false;
 
 }
+
+bool Shader::isValid() const {
+	return glIsProgram(ID) == GL_TRUE;
+}
+
+const char* Shader::getVertexFile()
+{
+	return vertexFile;
+}
+
+const char* Shader::getFragmentFile()
+{
+	return fragmentFile;
+}
+

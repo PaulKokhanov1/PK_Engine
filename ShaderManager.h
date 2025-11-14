@@ -5,11 +5,12 @@
 #include <unordered_map>
 #include "Shader.h"
 
-class shaderManager
+
+class ShaderManager
 {
 public:
-	shaderManager();
-	~shaderManager();
+	ShaderManager();
+	~ShaderManager();
 
 	void load(std::string programName, const char* vertexShader, const char* fragmentShader);
 	bool remove(std::string programName);
@@ -17,10 +18,12 @@ public:
 
 	Shader* get(std::string programName);
 
+	void reloadAll();
+
 
 private:
 	
-	std::unordered_map<std::string, Shader> shaderPrograms;
+	std::unordered_map<std::string, std::unique_ptr<Shader>> shaderPrograms;
 };
 
 

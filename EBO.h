@@ -3,15 +3,19 @@
 
 #include<glad/glad.h>
 #include<iostream>
+#include<vector>
 
 class EBO
 {
 public:
 	// Reference ID of the Vertex Buffer Object
 	GLuint ID;
-	// Constructor that generates a Element Buffer Object and links it to vertices
-	EBO(GLuint* indices, GLsizeiptr size);
+	// Default constructor to create EBO's to default values
+	EBO();
+	~EBO();
 
+	// Generates a Element Buffer Object and links it to vertices
+	void Construct(std::vector<GLuint>& indices);
 	// Binds the VBO
 	void Bind();
 	// Unbinds the VBO

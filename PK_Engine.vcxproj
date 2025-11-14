@@ -139,24 +139,42 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="EBO.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeshComponent.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShaderCommon.cpp" />
+    <ClCompile Include="ShaderException.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="VAO.cpp" />
     <ClCompile Include="VBO.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Downloads\cyCore.h" />
+    <ClInclude Include="..\..\..\Downloads\cyTriMesh.h" />
+    <ClInclude Include="..\..\..\Downloads\cyVector.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="EBO.h" />
     <ClInclude Include="EngineConfig.h" />
+    <ClInclude Include="GLDebug.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="MeshComponent.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShaderCommon.h" />
+    <ClInclude Include="ShaderException.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="VAO.h" />
     <ClInclude Include="VBO.h" />
+    <ClInclude Include="Vertex.h" />
+    <ClInclude Include="VertexKey.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>

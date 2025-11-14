@@ -6,8 +6,6 @@ Window::Window(int height, int width, std::string name)
 	windowWidth = width;
 	winName = name;
 	window = nullptr;
-	inputManager = nullptr;
-
 }
 
 bool Window::initialize()
@@ -32,14 +30,7 @@ bool Window::initialize()
 	gladLoadGL();
 
 	glViewport(0, 0, windowWidth, windowHeight);
-
-	// Create InputManger variable
-	inputManager = new InputManager(window);
-
-	inputManager->registerCallbacks();
-
-	// Initialize key callbacks
-	glfwSetKeyCallback(window, Window::onKeyEvent);
+	enableDepthTest();
 
 	return true;
 }
@@ -55,6 +46,11 @@ void Window::swapBuffers()
 	glfwSwapBuffers(window);
 }
 
+void Window::update(float deltaTime)
+{
+	pollEvents();
+}
+
 void Window::pollEvents()
 {
 	// Take care of all GLFW events
@@ -67,11 +63,15 @@ void Window::terminateWindow()
 	glfwTerminate();
 }
 
-void Window::onKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
+void Window::enableDepthTest()
 {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		std::cout << "ESC CALLED" << std::endl;
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-	}
+	glEnable(GL_DEPTH_TEST);
 }
+
+GLFWwindow* Window::getGLFWwindow()
+{
+	return window;
+}
+
+
 

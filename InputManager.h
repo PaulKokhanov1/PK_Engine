@@ -43,6 +43,10 @@ public:
 	// System loop
 	void update(float deltaTime);
 
+	// Setters
+	void setInputMode(int mode, int value);
+	void setCursorPos(double xpos, double ypos);
+
 	// Query's
 	bool isKeyPressed(int key) const;
 	bool isKeyHeld(int key) const;

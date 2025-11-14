@@ -18,7 +18,8 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
 
 		inputManager->keyReleasedThisFrame.insert(key);
 		inputManager->keyHeld.erase(key);
-	} else {
+	}
+	else if (action != GLFW_REPEAT) {
 		std::cerr << "[InputManager] Unknown key action: " << action << "\n";
 	}
 }
@@ -111,6 +112,16 @@ void InputManager::update(float deltaTime)
 	}
 
 	clearInputFrameStates();
+}
+
+void InputManager::setInputMode(int mode, int value)
+{
+	glfwSetInputMode(window, mode, value);
+}
+
+void InputManager::setCursorPos(double xpos, double ypos)
+{
+	glfwSetCursorPos(window, xpos, ypos);
 }
 
 bool InputManager::isKeyPressed(int key) const

@@ -4,6 +4,7 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include"InputManager.h"
+#include"ShaderManager.h"
 
 class Window {
 
@@ -11,8 +12,6 @@ class Window {
 	int windowWidth;
 	std::string winName;
 	GLFWwindow* window;
-	InputManager* inputManager;	// will have multiple input Managers per window
-
 
 public:
 
@@ -20,11 +19,12 @@ public:
 	bool initialize();
 	bool shouldClose();
 	void swapBuffers();
+	void update(float deltaTime);
 	void pollEvents();
 	void terminateWindow();
+	void enableDepthTest();
 
-	// input handling, calling appropriate functions, must be static to not directly reference THIS instance of the window since GLFW doesn't now what "THIS" is
-	static void onKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
-
+	// Getters and setters
+	GLFWwindow* getGLFWwindow();
 
 };
