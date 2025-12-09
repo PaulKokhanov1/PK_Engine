@@ -14,7 +14,7 @@ void ShaderManager::load(std::string programName, const char* vertexShader, cons
 		shaderPrograms[programName] = std::make_unique<Shader>(vertexShader, fragmentShader);
 
 		if (!shaderPrograms[programName]->isValid()) {
-			std::cerr << "[ShaderManager] Error: Invalid shader created.\n";
+			LogShaderManagerError("Invalid shader created.");
 		}
 	}
 	catch (const ShaderException& e) {
@@ -27,7 +27,7 @@ void ShaderManager::load(std::string programName, const char* vertexShader, cons
 bool ShaderManager::remove(std::string programName)
 {
 	if (shaderPrograms.find(programName) == shaderPrograms.end()) {
-		std::cerr << "[ShaderManager] Error: Shader program '" << programName << "' not found.\n";
+		LogShaderManagerError("Shader program '" + programName + "' not found.");
 		return false;
 	}
 
@@ -38,7 +38,7 @@ bool ShaderManager::remove(std::string programName)
 bool ShaderManager::bind(std::string programName)
 {
 	if (shaderPrograms.find(programName) == shaderPrograms.end()) {
-		std::cerr << "[ShaderManager] Error: Shader program '" << programName << "' not found.\n";
+		LogShaderManagerError("Shader program '" + programName + "' not found.");
 		return false;
 	}
 	shaderPrograms[programName]->Activate();
@@ -48,7 +48,7 @@ bool ShaderManager::bind(std::string programName)
 Shader* ShaderManager::get(std::string programName)
 {
 	if (shaderPrograms.find(programName) == shaderPrograms.end()) {
-		std::cerr << "[ShaderManager] Error: Shader program '" << programName << "' not found.\n";
+		LogShaderManagerError("Shader program '" + programName + "' not found.");
 		return nullptr;
 	}
 	return shaderPrograms[programName].get();
@@ -64,7 +64,8 @@ void ShaderManager::reloadAll()
 		try {
 			shaderPrograms[sh.first] = std::make_unique<Shader>(sh.second->getVertexFile(), sh.second->getFragmentFile());	// Keep same program name
 
-			std::cout << "Sucess recompiling Shader: " << sh.first << std::endl;
+			LogShaderManagerInfo("Success recompiling Shader: " + sh.first);
+
 
 		}
 		catch (const ShaderException& e) {

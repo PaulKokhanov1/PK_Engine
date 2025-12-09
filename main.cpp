@@ -51,7 +51,7 @@ int main() {
 	std::vector<VERTEX> verts(vertices, vertices + sizeof(vertices) / sizeof(VERTEX));
 	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
 	MeshComponent triangle(name, verts, ind);
-	//MeshComponent teapot("teapot.obj");
+	MeshComponent teapot("teapoasdt.obj");
 	
 	// STRESS TEST OBJ READER
 	//MeshComponent cubeParseTest("square.obj");
@@ -59,7 +59,7 @@ int main() {
 	//MeshComponent no_normals("stress_test_obj/no_normals.obj");
 	//MeshComponent quad_face("stress_test_obj/quad_face.obj");
 	//MeshComponent redundant_vertices("stress_test_obj/redundant_vertices.obj");
-	MeshComponent shared_position_diff_normals("stress_test_obj/shared_position_diff_normals.obj");
+	//MeshComponent shared_position_diff_normals("stress_test_obj/shared_position_diff_normals.obj");
 	//MeshComponent triangle_basic("stress_test_obj/triangle_basic.obj");
 	//MeshComponent triangle_mismatched_normals("stress_test_obj/triangle_mismatched_normals.obj");
 
@@ -70,7 +70,7 @@ int main() {
 
 	// Create Scene
 	Scene basic;
-	basic.AddMesh(&shared_position_diff_normals);
+	basic.AddMesh(&teapot);
 	basic.setCamera(std::make_unique<Camera>(engineConfig::DEFAULT_HEIGHT, engineConfig::DEFAULT_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f), 45.0f, 0.1f, 100.0f));
 	
 	// deltaTime setup

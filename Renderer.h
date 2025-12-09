@@ -5,6 +5,7 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
+#include"LogRenderer.h"
 #include "Scene.h"
 #include "Window.h"
 #include"ShaderManager.h"

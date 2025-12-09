@@ -6,7 +6,13 @@ MeshComponent::MeshComponent(const char* filename, std::string shaderName) : sha
 {
 	// Using Cem Yuksel's obj file parsing
 	cyTriMesh mesh;
-	mesh.LoadFromFileObj(filename);
+
+	// Redundant error check on file load
+	if (!mesh.LoadFromFileObj(filename)) {
+		LogMeshError("Failed to load OBJ: " + filename);
+		return;
+	}
+
 
 	std::cout << "Loaded OBJ: " << filename <<std::endl;
 	std::cout << "Vertices: " << mesh.NV() << "\n";
@@ -15,7 +21,7 @@ MeshComponent::MeshComponent(const char* filename, std::string shaderName) : sha
 
 	 //Compute Normals if no normals are specified
 	if (mesh.NVN() == 0) {
-		std::cout << "[MeshComponent] No normals found - computing per-vertex normals.\n";
+		LogMeshInfo("No normals found - computing per-vertex normals.");
 		mesh.ComputeNormals();
 	}
 
@@ -68,7 +74,7 @@ MeshComponent::MeshComponent(const char* filename, std::string shaderName) : sha
 				vertices.push_back(VERTEX{ pos, norm });
 			}
 
-			// Add either old or new vertex index to EBO
+			// Add either old or new vertex index to EBO, always pushing back because each face vertex needs to be represented in our EBO
 			indices.push_back(newVertexIndex[key]);
 		}
 
@@ -98,7 +104,7 @@ MeshComponent::MeshComponent(const char* filename, std::string shaderName) : sha
 	cyVec3f size = maxBoundcy - minBoundcy;
 
 	if (size.Length() == 0.0f) {
-		std::cerr << "[MeshComponent] Warning: Zero-size bounding box — skipping normalization.\n";
+		LogMeshWarn("Warning: Zero-size bounding box — skipping normalization.");
 		return;
 	}
 
@@ -119,7 +125,7 @@ MeshComponent::MeshComponent(const char* filename, std::string shaderName) : sha
 MeshComponent::MeshComponent(std::string name, std::vector<VERTEX>& vertices, std::vector<GLuint>& indices, std::string shaderName) : meshName(name), vertices(vertices), indices(indices), shaderName(shaderName)
 {
 	if (vertices.empty() || indices.empty()) {
-		std::cerr << "[Mesh Creation Error]: Empty vertices or indices for mesh: " << name << std::endl;
+		LogMeshError("Empty vertices or indices for mesh: " + name);
 	}
 
 	CreateMeshObject();
@@ -150,6 +156,12 @@ std::string MeshComponent::getShaderName() const
 std::string MeshComponent::getMeshName() const
 {
 	return this->meshName;
+}
+
+// Manually creating model matrix at the moment
+glm::mat4 MeshComponent::getModelMatrix() const
+{
+	return glm::mat4(1.0f);
 }
 
 void MeshComponent::CreateMeshObject()

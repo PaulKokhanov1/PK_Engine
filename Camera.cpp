@@ -15,13 +15,13 @@ void Camera::sendToShader(Shader& shader)
 	// Ensure uniform location exists for View and Projection
 	GLint viewMatrixLocation = glGetUniformLocation(shader.ID, "viewMatrix");
 	if (viewMatrixLocation == -1) {
-		std::cerr << "[Camera] Warning: uniform viewMatrix not found in shader.\n";
+		LogCameraWarn("Uniform viewMatrix not found in shader.");
 		return;
 	}	
 	
 	GLint projectionMatrixLocation = glGetUniformLocation(shader.ID, "projectionMatrix");
 	if (projectionMatrixLocation == -1) {
-		std::cerr << "[Camera] Warning: uniform projectionMatrix not found in shader.\n";
+		LogCameraWarn("Uniform projectionMatrix not found in shader.");
 		return;
 	}
 
@@ -117,7 +117,7 @@ float Camera::getDistanceScale() const
 	if (distance <= 1e-6f) {
 		return 1.0f;
 	}
-	return isPerspective ? 1 : ( referenceDistance / distance);
+	return isPerspective ? 1 : (referenceDistance / distance);
 }
 
 inline float Camera::getAspectRatio() const
@@ -140,13 +140,15 @@ void Camera::setClipPlanes(float nearP, float farP)
 
 void Camera::recomputeProjection() const
 {
+	// create Projection matrix for perspective projection
 	if (isPerspective) {
 		projection = glm::perspective(glm::radians(FOV), getAspectRatio(), nearPlane, farPlane);
 		return;
 	}
 
+	// Multiply by aspectRatio to have equal proportions
 	float halfHeight = referenceDistance * tanf(glm::radians(FOV) / 2);
-	float halfWidth = halfHeight * getAspectRatio();
+	float halfWidth = halfHeight * getAspectRatio(); 
 
 	projection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, nearPlane, farPlane);
 	return;

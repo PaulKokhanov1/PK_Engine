@@ -28,7 +28,7 @@ void Renderer::RenderFrame(Scene* scene, InputManager* inputManager, float dt)
 			Shader* curShader = shaderManager.get(mesh->getShaderName());
 
 			if (!curShader) {
-				std::cerr << "[Renderer] Warning: Shader not found for " << mesh->getMeshName() << "\n";
+				LogRendererWarn("Shader not found for " + mesh->getShaderName());
 				continue;
 			}
 
@@ -39,7 +39,7 @@ void Renderer::RenderFrame(Scene* scene, InputManager* inputManager, float dt)
 			Camera& cam = scene->getCamera();
 
 			// Setup the mvp matrix, for NOW MANUALLY DOING IT HERE, send model seperately to vertex shader
-			glm::mat4 model = glm::mat4(1.0f) * cam.getDistanceScale();
+			glm::mat4 model = mesh->getModelMatrix() * cam.getDistanceScale();
 
 			// Send model to Vertex Shader
 			glUniformMatrix4fv(glGetUniformLocation(curShader->ID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));

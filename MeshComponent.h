@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include"LogMesh.h"
 #include"Shader.h"
 #include"VAO.h"
 #include"EBO.h"
@@ -35,6 +36,7 @@ public:
 	// Get Shader, preventing change of Shader Name
 	std::string getShaderName() const;
 	std::string getMeshName() const;
+	glm::mat4 getModelMatrix() const;
 
 private:
 
@@ -48,6 +50,10 @@ private:
 	VAO vao;
 	VBO vbo; // currently only storing position
 	EBO ebo;
+
+	glm::mat4 trans;
+	glm::mat4 rot;
+	glm::mat4 sca;
 
 };
 

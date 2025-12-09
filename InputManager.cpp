@@ -20,7 +20,7 @@ void InputManager::key_callback(GLFWwindow* window, int key, int scancode, int a
 		inputManager->keyHeld.erase(key);
 	}
 	else if (action != GLFW_REPEAT) {
-		std::cerr << "[InputManager] Unknown key action: " << action << "\n";
+		LogInputManagerError("Unknown key action: " + to_string(action));
 	}
 }
 
@@ -81,7 +81,7 @@ InputManager::~InputManager()
 void InputManager::registerCallbacks()
 {
 	if (!window) {
-		std::cerr << "[InputManager] Error: Cannot register callbacks, window is null.\n";
+		LogInputManagerError("Cannot register callbacks, window is null.");
 		return;
 	}
 

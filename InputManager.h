@@ -3,7 +3,9 @@
 
 #include<unordered_set>
 #include<iostream>
-#include<GLFW/glfw3.h>>
+#include<GLFW/glfw3.h>
+
+#include "LogInputManager.h"
 
 class InputManager
 {

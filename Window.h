@@ -5,6 +5,7 @@
 #include<GLFW/glfw3.h>
 #include"InputManager.h"
 #include"ShaderManager.h"
+#include"LogWindow.h"
 
 class Window {
 

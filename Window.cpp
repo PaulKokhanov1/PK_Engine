@@ -20,7 +20,7 @@ bool Window::initialize()
 	// Attempt to create GLFWwindow object
 	window = glfwCreateWindow(windowWidth, windowHeight, winName.c_str(), NULL, NULL);
 	if (!window) {
-		std::cout << "Failed to Create Window" << std::endl;
+		LogWindowError("Failed to Create Window");
 		glfwTerminate();
 		return false;
 	}

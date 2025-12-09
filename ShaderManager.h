@@ -2,8 +2,9 @@
 #define SHADERMANAGER_CLASS_H
 
 #include"iostream"
-#include <unordered_map>
-#include "Shader.h"
+#include<unordered_map>
+#include"Shader.h"
+#include"LogShaderManager.h"
 
 
 class ShaderManager

@@ -11,6 +11,7 @@
 #include<glm/gtx/vector_angle.hpp>
 #include<vector>
 
+#include"LogCamera.h"
 #include"EngineConfig.h"
 #include"Shader.h"
 #include"InputManager.h"
