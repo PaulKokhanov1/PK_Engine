@@ -185,6 +185,15 @@
     <ClInclude Include="LogCamera.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="LogInputManager.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="LogWindow.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="LogShaderManager.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="default.vert">
