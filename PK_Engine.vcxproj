@@ -143,8 +143,10 @@
     <ClCompile Include="EBO.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="MeshComponent.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -165,6 +167,7 @@
     <ClInclude Include="EngineConfig.h" />
     <ClInclude Include="GLDebug.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="LogCamera.h" />
     <ClInclude Include="Logging.h" />
     <ClInclude Include="LogInputManager.h" />
@@ -172,6 +175,7 @@
     <ClInclude Include="LogRenderer.h" />
     <ClInclude Include="LogShaderManager.h" />
     <ClInclude Include="LogWindow.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="MeshComponent.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />

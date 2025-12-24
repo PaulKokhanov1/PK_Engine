@@ -161,7 +161,13 @@ std::string MeshComponent::getMeshName() const
 // Manually creating model matrix at the moment
 glm::mat4 MeshComponent::getModelMatrix() const
 {
-	return glm::mat4(1.0f);
+	// Must return in order: translation * rotation * scale
+	return trans * rot * sca;
+}
+
+Material& MeshComponent::getMaterial()
+{
+	return material;
 }
 
 void MeshComponent::CreateMeshObject()

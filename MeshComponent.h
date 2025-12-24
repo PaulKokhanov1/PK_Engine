@@ -16,6 +16,7 @@
 #include"VertexKey.h"
 #include"GLDebug.h"
 #include"cyTriMesh.h"
+#include"Material.h"
 
 
 // Used to create obj from .obj files or creating objects manually
@@ -37,6 +38,7 @@ public:
 	std::string getShaderName() const;
 	std::string getMeshName() const;
 	glm::mat4 getModelMatrix() const;
+	Material& getMaterial();	// By reference because we'd want to edit the material information
 
 private:
 
@@ -51,9 +53,13 @@ private:
 	VBO vbo; // currently only storing position
 	EBO ebo;
 
-	glm::mat4 trans;
-	glm::mat4 rot;
-	glm::mat4 sca;
+	// Used to create Model Matrix
+	glm::mat4 trans = glm::mat4(1.0f);
+	glm::mat4 rot = glm::mat4(1.0f);
+	glm::mat4 sca = glm::mat4(1.0f);
+
+	// Currently used for shading
+	Material material;
 
 };
 

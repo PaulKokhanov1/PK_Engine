@@ -9,6 +9,7 @@
 #include"Vertex.h"
 #include"Renderer.h"
 #include"Camera.h"
+#include"Light.h"
 
 int main() {
 
@@ -51,7 +52,7 @@ int main() {
 	std::vector<VERTEX> verts(vertices, vertices + sizeof(vertices) / sizeof(VERTEX));
 	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
 	MeshComponent triangle(name, verts, ind);
-	MeshComponent teapot("teapoasdt.obj");
+	MeshComponent teapot("teapot.obj");
 	
 	// STRESS TEST OBJ READER
 	//MeshComponent cubeParseTest("square.obj");
@@ -63,6 +64,14 @@ int main() {
 	//MeshComponent triangle_basic("stress_test_obj/triangle_basic.obj");
 	//MeshComponent triangle_mismatched_normals("stress_test_obj/triangle_mismatched_normals.obj");
 
+	// TEMPORARY LIGHTS
+	Light light;
+	light.color = glm::vec3(1.0f);
+	light.position = glm::vec3(6, 0, 6);
+	light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+	light.diffuse = glm::vec3(0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+	light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+
 	//------------------------------------------------------------------------------------------------------------
 	
 	// load default vertex shader and fragement shader into shaderManager
@@ -71,6 +80,7 @@ int main() {
 	// Create Scene
 	Scene basic;
 	basic.AddMesh(&teapot);
+	basic.Addlight(&light);
 	basic.setCamera(std::make_unique<Camera>(engineConfig::DEFAULT_HEIGHT, engineConfig::DEFAULT_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f), 45.0f, 0.1f, 100.0f));
 	
 	// deltaTime setup
