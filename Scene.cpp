@@ -45,8 +45,6 @@ void Scene::update(InputManager& input, float deltaTime)
 				light->yaw += lightMovementSensitivity * input.getDeltaMouseX();
 				light->pitch += lightMovementSensitivity * input.getDeltaMouseY();
 
-				//light->pitch = glm::clamp(light->pitch, -89.0f, 89.0f);
-
 				float dirX = cos(glm::radians(light->yaw)) * cos(glm::radians(light->pitch));
 				float dirY = -sin(glm::radians(light->pitch));
 				float dirZ = sin(glm::radians(light->yaw)) * cos(glm::radians(light->pitch));
@@ -60,8 +58,6 @@ void Scene::update(InputManager& input, float deltaTime)
 			}
 
 		}
-
-
 
 	} else {
 		// Handle looking around and movement, only if user is not holding down CTRL

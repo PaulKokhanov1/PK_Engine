@@ -2,7 +2,7 @@
 
 
 // ADD REMAINING PARTS OF POSSIBLE OBJ FILE COMPOENENTS, ex: textures
-MeshComponent::MeshComponent(const char* filename, std::string shaderName) : shaderName(shaderName)
+MeshComponent::MeshComponent(const char* filename)
 {
 	// Using Cem Yuksel's obj file parsing
 	cyTriMesh mesh;
@@ -118,11 +118,10 @@ MeshComponent::MeshComponent(const char* filename, std::string shaderName) : sha
 	// Initialize remaining member variables
 	this->meshName = filename;
 	CreateMeshObject();
-	
 
 }
 
-MeshComponent::MeshComponent(std::string name, std::vector<VERTEX>& vertices, std::vector<GLuint>& indices, std::string shaderName) : meshName(name), vertices(vertices), indices(indices), shaderName(shaderName)
+MeshComponent::MeshComponent(std::string name, std::vector<VERTEX>& vertices, std::vector<GLuint>& indices) : meshName(name), vertices(vertices), indices(indices)
 {
 	if (vertices.empty() || indices.empty()) {
 		LogMeshError("Empty vertices or indices for mesh: " + name);
@@ -148,11 +147,6 @@ void MeshComponent::Draw()
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 }
 
-std::string MeshComponent::getShaderName() const
-{
-	return this->shaderName;
-}
-
 std::string MeshComponent::getMeshName() const
 {
 	return this->meshName;
@@ -168,6 +162,13 @@ glm::mat4 MeshComponent::getModelMatrix() const
 Material& MeshComponent::getMaterial()
 {
 	return material;
+}
+
+void MeshComponent::setTransform(Transform transform)
+{
+	trans = glm::translate(trans, transform.translation);
+	rot = glm::mat4_cast(transform.rotation);
+	sca = glm::scale(sca, transform.scale);
 }
 
 void MeshComponent::CreateMeshObject()

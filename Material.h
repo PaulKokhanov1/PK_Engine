@@ -1,6 +1,8 @@
 #pragma once
 
 #include<glm/glm.hpp>
+#include<string>
+
 
 struct MaterialData
 {
@@ -13,10 +15,13 @@ struct MaterialData
 class Material
 {
 public:
-	Material();
+	Material(std::string shaderName = "default");
 	~Material();
 
 	void setAttributes(glm::vec3 Ka, glm::vec3 Kd, glm::vec3 Ks, float shininess);
+
+	// Get Shader, preventing change of Shader Name
+	std::string getShaderName() const;
 	MaterialData getAttributes();
 
 private:
@@ -25,7 +30,9 @@ private:
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;
-
 	float shininess;
+
+	// Reference to used shader for material
+	std::string shaderName;
 
 };

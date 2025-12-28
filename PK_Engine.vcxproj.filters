@@ -61,6 +61,12 @@
     <Filter Include="Source Files\Engine\Scene">
       <UniqueIdentifier>{db75f8bc-9b1a-4c96-9fbd-0fb9eb11e1ac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Math">
+      <UniqueIdentifier>{9d7e172a-dacf-4a9e-8624-ebd2c34fcb37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Math">
+      <UniqueIdentifier>{dcb56450-87d9-4a4c-82db-3eab1da86b0d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -116,6 +122,9 @@
     </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Source Files\Engine\Math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -205,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Header Files\Engine\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

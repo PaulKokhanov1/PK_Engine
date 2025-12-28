@@ -17,6 +17,8 @@ void Renderer::RenderFrame(Scene* scene, InputManager* inputManager, float dt)
 {
 	BeginFrame();
 
+	// Eventual Workflow -> collect renderables from Scene -> group by material -> for each group bind shader and upload data -> for each mesh in group, upload transform and draw
+
 	// Handle scene updates 
 	scene->update(*inputManager, dt);
 	
@@ -24,10 +26,10 @@ void Renderer::RenderFrame(Scene* scene, InputManager* inputManager, float dt)
 	if (scene->meshes.size() > 0) {
 		for (auto mesh : scene->meshes) {
 
-			Shader* curShader = shaderManager.get(mesh->getShaderName());
+			Shader* curShader = shaderManager.get(mesh->getMaterial().getShaderName());
 
 			if (!curShader) {
-				LogRendererWarn("Shader not found for " + mesh->getShaderName());
+				LogRendererWarn("Shader not found for " + mesh->getMaterial().getShaderName());
 				continue;
 			}
 

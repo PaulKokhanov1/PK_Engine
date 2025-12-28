@@ -17,6 +17,7 @@
 #include"GLDebug.h"
 #include"cyTriMesh.h"
 #include"Material.h"
+#include"Transform.h"
 
 
 // Used to create obj from .obj files or creating objects manually
@@ -24,9 +25,9 @@ class MeshComponent
 {
 public:
 	// Create obj from .obj file
-	MeshComponent(const char* filename, std::string shaderName = "default");
+	MeshComponent(const char* filename);
 	// Create obj manually
-	MeshComponent(std::string name, std::vector<VERTEX>& vertices, std::vector<GLuint>& indices, std::string shaderName = "default");
+	MeshComponent(std::string name, std::vector<VERTEX>& vertices, std::vector<GLuint>& indices);
 	~MeshComponent();
 
 	// Draw the object
@@ -34,11 +35,11 @@ public:
 
 	// Getters and Setters
 
-	// Get Shader, preventing change of Shader Name
-	std::string getShaderName() const;
 	std::string getMeshName() const;
 	glm::mat4 getModelMatrix() const;
 	Material& getMaterial();	// By reference because we'd want to edit the material information
+
+	void setTransform(Transform transform);
 
 private:
 
@@ -46,7 +47,6 @@ private:
 	void CreateMeshObject();
 
 	std::string meshName;
-	std::string shaderName;
 	std::vector<VERTEX> vertices;
 	std::vector<GLuint> indices;
 	VAO vao;
