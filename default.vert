@@ -5,8 +5,6 @@ layout (location = 0) in vec3 aPos;
 // Normals
 layout (location = 1) in vec3 aNormal;
 
-// Outputs the current position in world space for the Fragment Shader
-out vec3 crntPos;
 // Outputs the current position in view space for the Fragment Shader
 out vec3 crntPosView;
 // Outputs normals for Fragment Shader
@@ -22,8 +20,8 @@ uniform vec3 lightPosWorld;
 
 void main()
 {
-   	// Calculates current position
-	crntPos = vec3(modelMatrix * vec4(aPos, 1.0f));
+   	// Calculates current fragment position in world space
+	vec3 crntPos = vec3(modelMatrix * vec4(aPos, 1.0f));
 	// Outputs the positions/coordinates of all vertices
 	gl_Position = projectionMatrix * viewMatrix * vec4(crntPos, 1.0);
 

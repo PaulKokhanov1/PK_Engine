@@ -39,10 +39,8 @@ void Renderer::RenderFrame(Scene* scene, InputManager* inputManager, float dt)
 			// Setup appropriate MVP matrix
 			Camera& cam = scene->getCamera();
 
-			// Setup the mvp matrix, for NOW MANUALLY DOING IT HERE, send model seperately to vertex shader
-			glm::mat4 model = mesh->getModelMatrix() * cam.getDistanceScale();
-
 			// Send model to Vertex Shader
+			glm::mat4 model = mesh->getModelMatrix() * cam.getDistanceScale();
 			glUniformMatrix4fv(glGetUniformLocation(curShader->ID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 
 			// Send view & projection matrix to Vertex Shader
@@ -58,6 +56,7 @@ void Renderer::RenderFrame(Scene* scene, InputManager* inputManager, float dt)
 
 			// Upload light data to Vertex Shader, may be inefficient to loop through all lights per mesh, potentially group meshes, lights and other obj's per shader
 			for (auto light : scene->lights) {
+				if (light->dirty) light->validate();
 				glUniform3fv(glGetUniformLocation(curShader->ID, "lightPosWorld"), 1, glm::value_ptr(light->position));
 				glUniform3fv(glGetUniformLocation(curShader->ID, "lightColor"), 1, glm::value_ptr(light->color));
 				glUniform3fv(glGetUniformLocation(curShader->ID, "lightKa"), 1, glm::value_ptr(light->ambient));

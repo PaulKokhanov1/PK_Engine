@@ -5,8 +5,6 @@ out vec4 FragColor;
 
 // Normals from Vertex Shader
 in vec3 Normal;
-// Current position from Vertex Shader
-in vec3 crntPos;
 // Current fragment position in ViewSpace
 in vec3 crntPosView;
 // Light Position in View Space
@@ -49,12 +47,15 @@ vec4 pointLight()
 	return vec4(diffuse + ambient + specular, 1.0);
 }
 
-void main()
-{
+vec4 normalLight() {
 	vec3 normal = normalize(Normal);
 
 	// Change color of object depending on direction normal is pointing
-	// FragColor = vec4(abs(normal), 1.0f);
+	return vec4(abs(normal), 1.0f);
+}
+
+void main()
+{
 
 	FragColor = pointLight();
 }

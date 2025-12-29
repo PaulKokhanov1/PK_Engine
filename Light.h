@@ -1,6 +1,10 @@
 #pragma once
 
 #include<glm/glm.hpp>
+#include<limits>
+
+#include"LogLight.h"
+#include"MathCommon.h"
 
 // Point Light for Now
 struct Light
@@ -15,4 +19,8 @@ struct Light
 	float yaw = -90.0f;
 	float pitch = 0.0f;
 	float radius = 6.0f; // TEMPORARY FOR TESTING
+
+	bool dirty = true;
+
+	bool validate();
 };

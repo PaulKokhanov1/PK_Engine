@@ -218,6 +218,12 @@
     <ClInclude Include="Transform.h">
       <Filter>Header Files\Engine\Math</Filter>
     </ClInclude>
+    <ClInclude Include="LogLight.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="MathCommon.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="default.vert">

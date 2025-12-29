@@ -25,7 +25,6 @@ private:
 
 	Window& window;
 	ShaderManager& shaderManager;
-
 };
 
 

@@ -6,8 +6,7 @@ Material::Material(std::string shaderName) :
 	ambient(glm::vec3(1.0f, 1.0f, 1.0f)), 
 	specular(glm::vec3(1.0f, 1.0f, 1.0f)), 
 	shininess(100.f)
-{
-}
+{}
 
 Material::~Material()
 {

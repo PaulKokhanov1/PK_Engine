@@ -172,11 +172,13 @@
     <ClInclude Include="LogCamera.h" />
     <ClInclude Include="Logging.h" />
     <ClInclude Include="LogInputManager.h" />
+    <ClInclude Include="LogLight.h" />
     <ClInclude Include="LogMesh.h" />
     <ClInclude Include="LogRenderer.h" />
     <ClInclude Include="LogShaderManager.h" />
     <ClInclude Include="LogWindow.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MathCommon.h" />
     <ClInclude Include="MeshComponent.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
