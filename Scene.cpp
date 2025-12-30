@@ -18,7 +18,7 @@ void Scene::AddMesh(MeshComponent* mesh)
 		return;
 	}
 
-	meshes.push_back(mesh);
+	meshes.insert(mesh);
 }
 
 void Scene::Addlight(Light* light)
@@ -61,11 +61,18 @@ void Scene::update(InputManager& input, float deltaTime)
 
 	} else {
 		// Handle looking around and movement, only if user is not holding down CTRL
-		camera->updateInputs(input, deltaTime);
+		if (camera) camera->updateInputs(input, deltaTime);
 	}
 
-	camera->updateViewProjection();
+	if (camera) camera->updateViewProjection();
 
+}
+
+void Scene::validate()
+{
+	if (camera == nullptr) {
+		throw (SceneException("Current camera is not set!"));
+	}
 }
 
 void Scene::setCamera(std::unique_ptr<Camera> camera)

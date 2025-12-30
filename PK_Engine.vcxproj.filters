@@ -126,6 +126,9 @@
     <ClCompile Include="Transform.cpp">
       <Filter>Source Files\Engine\Math</Filter>
     </ClCompile>
+    <ClCompile Include="SceneException.cpp">
+      <Filter>Source Files\Exception</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EngineConfig.h">
@@ -223,6 +226,9 @@
     </ClInclude>
     <ClInclude Include="MathCommon.h">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneException.h">
+      <Filter>Header Files\Exception</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

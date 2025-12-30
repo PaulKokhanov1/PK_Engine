@@ -150,6 +150,7 @@
     <ClCompile Include="MeshComponent.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneException.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderCommon.cpp" />
     <ClCompile Include="ShaderException.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="MeshComponent.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneException.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderCommon.h" />
     <ClInclude Include="ShaderException.h" />

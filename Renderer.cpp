@@ -39,6 +39,7 @@ void Renderer::RenderFrame(Scene* scene, InputManager* inputManager, float dt)
 			// Setup appropriate MVP matrix
 			Camera& cam = scene->getCamera();
 
+
 			// Send model to Vertex Shader
 			glm::mat4 model = mesh->getModelMatrix() * cam.getDistanceScale();
 			glUniformMatrix4fv(glGetUniformLocation(curShader->ID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));

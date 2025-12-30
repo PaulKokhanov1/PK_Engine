@@ -10,6 +10,7 @@
 #include"Renderer.h"
 #include"Camera.h"
 #include"Light.h"
+#include "SceneException.h"
 
 int main() {
 
@@ -82,6 +83,15 @@ int main() {
 	basic.AddMesh(&teapot);
 	basic.Addlight(&light);
 	basic.setCamera(std::make_unique<Camera>(engineConfig::DEFAULT_HEIGHT, engineConfig::DEFAULT_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f), 45.0f, 0.1f, 100.0f));
+
+	// Validate Scene, Return early if scene's are not created properly
+	try {
+		basic.validate();
+	}
+	catch (const SceneException& e) {
+		std::cerr << e.what() << std::endl;
+		return -1;
+	}
 	
 	// deltaTime setup
 	float prevTime = glfwGetTime();

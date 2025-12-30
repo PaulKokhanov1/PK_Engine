@@ -2,11 +2,13 @@
 #define SCENE_CLASS_H
 
 #include<vector>
+#include<set>
 #include<glm/glm.hpp>
 
 #include "MeshComponent.h"
 #include "Camera.h"
 #include "Light.h"
+#include "SceneException.h"
 
 class Scene
 {
@@ -15,7 +17,7 @@ public:
 	~Scene();
 
 	// Collections of pointers to meshes used in this scene
-	std::vector<MeshComponent*> meshes;
+	std::set<MeshComponent*> meshes;
 
 	// Collections of pointers to lights in used in this scene
 	std::vector<Light*> lights;
@@ -29,6 +31,8 @@ public:
 	// Constant Scene updates
 	void update(InputManager& input, float deltaTime);
 
+	// Used prior to rendering to ensure all needed objects are created for a scene to be created
+	void validate();
 
 	// Getters and Setters
 
