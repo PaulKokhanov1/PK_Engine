@@ -17,6 +17,7 @@ MeshComponent::MeshComponent(const char* filename)
 	std::cout << "Loaded OBJ: " << filename <<std::endl;
 	std::cout << "Vertices: " << mesh.NV() << "\n";
 	std::cout << "Normals:  " << mesh.NVN() << "\n";
+	std::cout << "Tex Coords:  " << mesh.NVT() << "\n";
 	std::cout << "Faces:    " << mesh.NF() << "\n";
 
 	 //Compute Normals if no normals are specified
@@ -29,10 +30,13 @@ MeshComponent::MeshComponent(const char* filename)
 	for (int i = 0; i < std::min(5, (int) mesh.NV()); ++i) {
 		auto v = mesh.V(i);
 		auto n = mesh.VN(i);
+		auto t = mesh.VT(i);
 		std::cout << "Vertex " << i << ": Pos("
 			<< v.x << ", " << v.y << ", " << v.z << ")  "
 			<< "Norm("
-			<< n.x << ", " << n.y << ", " << n.z << ")\n";
+			<< n.x << ", " << n.y << ", " << n.z << ")  "
+			<< "Tex("
+			<< t.x << ", " << t.y << ", " << t.z << ")\n";
 	}
 
 	for (int i = 0; i < std::min(3, (int)mesh.NF()); ++i) {
@@ -46,23 +50,28 @@ MeshComponent::MeshComponent(const char* filename)
 	for (int i = 0; i < std::min(5, (int)mesh.NF()); ++i) {
 		auto f = mesh.F(i);
 		auto fn = mesh.FN(i);
+		auto ft = mesh.FT(i);
 		std::cout << "Face " << i << " position indices:  "
 			<< f.v[0] << "," << f.v[1] << "," << f.v[2]
 			<< "  | normal indices: "
-			<< fn.v[0] << "," << fn.v[1] << "," << fn.v[2] << "\n";
+			<< fn.v[0] << "," << fn.v[1] << "," << fn.v[2] << 
+			"  | texture indices: "
+			<< ft.v[0] << "," << ft.v[1] << "," << ft.v[2] << "\n";
 	}
 
 	// Handle duplciation of vertices if resued attributes mixed with seperate attributes
-	// Ex; vertex {pos1, norm1} then later vertex {pos1, norm2} need to duplicate so ebo doesn't reuse old vertex
+	// Ex; vertex {pos1, norm1, tex1} then later vertex {pos1, norm2, tex1} need to duplicate so ebo doesn't reuse old vertex
 	std::unordered_map<VertexKey, long> newVertexIndex;
 
-	// Handling only position and normal for NOW
-	// Also assuming each face will have a position AND a normal assigned, maybe handle this after you finish implementation
+	// Handling only position and normal and tex Coords
+	// Also assuming each face will have a position, a normal AND a texCoord assigned, maybe handle this after you finish implementation
 	for (int i = 0; i < mesh.NF(); ++i) {
 		auto f = mesh.F(i);
 		auto fn = mesh.FN(i);
+		auto ft = mesh.FT(i);
 		for (int j = 0; j < 3; ++j) {
-			VertexKey key = VertexKey{ f.v[j], fn.v[j] };
+			// Using the indices are the faces to make a vertex Key so no need to worry that tex coord is 2D
+			VertexKey key = VertexKey{ f.v[j], fn.v[j], ft.v[j]};
 
 			if (newVertexIndex.find(key) == newVertexIndex.end()) {
 				// Create new Vertex
@@ -71,7 +80,9 @@ MeshComponent::MeshComponent(const char* filename)
 				// Add it to vertices
 				glm::vec3 pos = glm::vec3(mesh.V(f.v[j]).x, mesh.V(f.v[j]).y, mesh.V(f.v[j]).z);
 				glm::vec3 norm = glm::vec3(mesh.VN(fn.v[j]).x, mesh.VN(fn.v[j]).y, mesh.VN(fn.v[j]).z);
-				vertices.push_back(VERTEX{ pos, norm });
+				glm::vec2 tex = glm::vec2(mesh.VT(ft.v[j]).x, mesh.VT(ft.v[j]).y);
+
+				vertices.push_back(VERTEX{ pos, norm, tex });
 			}
 
 			// Add either old or new vertex index to EBO, always pushing back because each face vertex needs to be represented in our EBO
@@ -182,6 +193,8 @@ void MeshComponent::CreateMeshObject()
 	// Link attributes to VAO
 	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(VERTEX), (void*)0); // Eventually change THIS TO NOT MANUALLY, currently only processign a position
 	vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, sizeof(VERTEX), (void*)(3 * sizeof(float)));
+	vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, sizeof(VERTEX), (void*)(6 * sizeof(float)));
+
 
 	// Unbind all buffer's, MUST unbind EBO AFTER VAO
 	vao.Unbind();

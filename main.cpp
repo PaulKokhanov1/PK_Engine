@@ -53,7 +53,7 @@ int main() {
 	std::vector<VERTEX> verts(vertices, vertices + sizeof(vertices) / sizeof(VERTEX));
 	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
 	MeshComponent triangle(name, verts, ind);
-	MeshComponent teapot("teapot.obj");
+	MeshComponent teapot("OBJ/teapot/teapot.obj");
 	
 	// STRESS TEST OBJ READER
 	//MeshComponent cubeParseTest("square.obj");
