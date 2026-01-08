@@ -144,6 +144,7 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -155,6 +156,7 @@
     <ClCompile Include="ShaderCommon.cpp" />
     <ClCompile Include="ShaderException.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="VAO.cpp" />
     <ClCompile Include="VBO.cpp" />
@@ -170,6 +172,7 @@
     <ClInclude Include="GLDebug.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="lodepng.h" />
     <ClInclude Include="LogCamera.h" />
     <ClInclude Include="Logging.h" />
     <ClInclude Include="LogInputManager.h" />
@@ -177,6 +180,7 @@
     <ClInclude Include="LogMesh.h" />
     <ClInclude Include="LogRenderer.h" />
     <ClInclude Include="LogShaderManager.h" />
+    <ClInclude Include="LogTexture.h" />
     <ClInclude Include="LogWindow.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MathCommon.h" />
@@ -188,6 +192,7 @@
     <ClInclude Include="ShaderCommon.h" />
     <ClInclude Include="ShaderException.h" />
     <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="VAO.h" />
     <ClInclude Include="VBO.h" />

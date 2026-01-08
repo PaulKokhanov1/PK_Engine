@@ -54,6 +54,21 @@ void Renderer::RenderFrame(Scene* scene, InputManager* inputManager, float dt)
 			glUniform3fv(glGetUniformLocation(curShader->ID, "Ks"), 1, glm::value_ptr(Ks));
 			glUniform1f(glGetUniformLocation(curShader->ID, "shininess"), shininess);
 
+			// Upload textures to Vertex Shader, assuming one smapler type per shader
+			auto [difTextures, ambTextures, specTextures] = mesh->getMaterial().getTextures();
+
+			for (auto t : difTextures) {
+				t->sendUniformToShader(*curShader, "texDiff");
+			}
+
+			for (auto t : ambTextures) {
+				t->sendUniformToShader(*curShader, "texAmb");
+			}
+
+			for (auto t : specTextures) {
+				t->sendUniformToShader(*curShader, "texSpec");
+			}
+
 
 			// Upload light data to Vertex Shader, may be inefficient to loop through all lights per mesh, potentially group meshes, lights and other obj's per shader
 			for (auto light : scene->lights) {

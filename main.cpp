@@ -69,8 +69,8 @@ int main() {
 	Light light;
 	light.color = glm::vec3(1.0f);
 	light.position = glm::vec3(6, 0, 6);
-	light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-	light.diffuse = glm::vec3(0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+	light.ambient = glm::vec3(0.6f, 0.6f, 0.6f);
+	light.diffuse = glm::vec3(0.7f, 0.7f, 0.7f); // darken diffuse light a bit
 	light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	//------------------------------------------------------------------------------------------------------------

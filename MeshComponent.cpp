@@ -19,6 +19,8 @@ MeshComponent::MeshComponent(const char* filename)
 	std::cout << "Normals:  " << mesh.NVN() << "\n";
 	std::cout << "Tex Coords:  " << mesh.NVT() << "\n";
 	std::cout << "Faces:    " << mesh.NF() << "\n";
+	std::cout << "Materials:    " << mesh.NM() << "\n";
+	std::cout << "Material Index:    " << mesh.GetMaterialIndex(3) << "\n";
 
 	 //Compute Normals if no normals are specified
 	if (mesh.NVN() == 0) {
@@ -126,6 +128,21 @@ MeshComponent::MeshComponent(const char* filename)
 		v.position = (v.position - centerGLM) * scaleFactor;
 	}
 
+	// Get Material properties, assuming 1 material per obj AT THE MOMENT and 1 material per each face
+	glm::vec3 ka = glm::vec3{ mesh.M(0).Ka[0], mesh.M(0).Ka[1], mesh.M(0).Ka[2]};
+	glm::vec3 kd = glm::vec3{ mesh.M(0).Kd[0], mesh.M(0).Kd[1], mesh.M(0).Kd[2] };
+	glm::vec3 ks = glm::vec3{ mesh.M(0).Ks[0], mesh.M(0).Ks[1], mesh.M(0).Ks[2] };
+	const char* map_ka = mesh.M(0).map_Ka;
+	const char* map_kd = mesh.M(0).map_Kd;
+	const char* map_ks = mesh.M(0).map_Ks;
+
+	// Send to material
+	material.setAttributes(ka, kd, ks, 100.0f);
+
+	// Set and Load texture(s) in material
+	material.setTextures(map_ka, map_kd, map_ks);
+	material.loadTextures();
+
 	// Initialize remaining member variables
 	this->meshName = filename;
 	CreateMeshObject();
@@ -191,7 +208,7 @@ void MeshComponent::CreateMeshObject()
 	ebo.Construct(indices);
 
 	// Link attributes to VAO
-	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(VERTEX), (void*)0); // Eventually change THIS TO NOT MANUALLY, currently only processign a position
+	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(VERTEX), (void*)0); // Eventually change THIS TO NOT MANUALLY
 	vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, sizeof(VERTEX), (void*)(3 * sizeof(float)));
 	vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, sizeof(VERTEX), (void*)(6 * sizeof(float)));
 
