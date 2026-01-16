@@ -9,9 +9,8 @@
 class Texture
 {
 public:
-	Texture(const char* filename, GLenum texType, GLenum slot, GLenum format, GLenum pixelType);
+	Texture(const char* filename, const char* texType, GLenum slot, GLenum format, GLenum pixelType);
 	~Texture();
-
 
 	// Sends texture unit to shader
 	void sendUniformToShader(Shader& shader, const char* uniform);
@@ -27,9 +26,7 @@ private:
 	// Number refering to texture
 	GLuint texID;
 	// Texture type;
-	GLenum type;
+	const char* type;
 	// Texture unit
 	GLuint unit;
-
-
 };

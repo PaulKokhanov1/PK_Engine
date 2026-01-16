@@ -15,7 +15,6 @@ in vec2 texCoord;
 
 // Light Attributes
 uniform vec3 lightColor;
-uniform float lightIntensity;
 uniform vec3 lightKa;	// Intensities of ambient, diffuse and specular
 uniform vec3 lightKd;
 uniform vec3 lightKs;

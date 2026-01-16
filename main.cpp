@@ -54,6 +54,22 @@ int main() {
 	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
 	MeshComponent triangle(name, verts, ind);
 	MeshComponent teapot("OBJ/teapot/teapot.obj");
+	//MeshComponent yoda("OBJ/yoda/yoda.obj");
+
+	// Rotate Yoda
+	// Define the rotation angle (90 degrees) and axis (Y-axis)
+	float angle_degrees = -90.0f;
+	glm::vec3 rotation_axis(1.0f, 0.0f, 0.0f); // Rotate around the Y-axis
+
+	// Create the quaternion
+	glm::quat rotation_quat = glm::angleAxis(glm::radians(angle_degrees), rotation_axis);
+	Transform t = {
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		rotation_quat,
+		glm::vec3(1.0f, 1.0f, 1.0f)
+	};
+	//yoda.setTransform(t);
+
 	
 	// STRESS TEST OBJ READER
 	//MeshComponent cubeParseTest("square.obj");
@@ -68,9 +84,9 @@ int main() {
 	// TEMPORARY LIGHTS
 	Light light;
 	light.color = glm::vec3(1.0f);
-	light.position = glm::vec3(6, 0, 6);
-	light.ambient = glm::vec3(0.6f, 0.6f, 0.6f);
-	light.diffuse = glm::vec3(0.7f, 0.7f, 0.7f); // darken diffuse light a bit
+	light.position = glm::vec3(3, 0, 3);
+	light.ambient = glm::vec3(0.6f);
+	light.diffuse = glm::vec3(1.0f); // darken diffuse light a bit
 	light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	//------------------------------------------------------------------------------------------------------------

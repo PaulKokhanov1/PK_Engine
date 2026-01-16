@@ -13,6 +13,9 @@ MeshComponent::MeshComponent(const char* filename)
 		return;
 	}
 
+	// create filepath
+	filepath = removeLastWord(filename);
+	cout << "FILEPATH: " << filepath << endl;
 
 	std::cout << "Loaded OBJ: " << filename <<std::endl;
 	std::cout << "Vertices: " << mesh.NV() << "\n";
@@ -21,6 +24,7 @@ MeshComponent::MeshComponent(const char* filename)
 	std::cout << "Faces:    " << mesh.NF() << "\n";
 	std::cout << "Materials:    " << mesh.NM() << "\n";
 	std::cout << "Material Index:    " << mesh.GetMaterialIndex(3) << "\n";
+	std::cout << "Faces for material 0:		" << mesh.GetMaterialFaceCount(0) << "\n";
 
 	 //Compute Normals if no normals are specified
 	if (mesh.NVN() == 0) {
@@ -65,7 +69,7 @@ MeshComponent::MeshComponent(const char* filename)
 	// Ex; vertex {pos1, norm1, tex1} then later vertex {pos1, norm2, tex1} need to duplicate so ebo doesn't reuse old vertex
 	std::unordered_map<VertexKey, long> newVertexIndex;
 
-	// Handling only position and normal and tex Coords
+	// Handling only position, normal and tex Coords
 	// Also assuming each face will have a position, a normal AND a texCoord assigned, maybe handle this after you finish implementation
 	for (int i = 0; i < mesh.NF(); ++i) {
 		auto f = mesh.F(i);
@@ -103,6 +107,37 @@ MeshComponent::MeshComponent(const char* filename)
 			<< ") - newVertexIndex = " << newIndex << "\n";
 	}*/
 
+	// Handle creating submeshes
+	uint32_t idxOffset = 0;
+	for (int i = 0; i < mesh.NM(); ++i) {
+
+		// Create new submesh
+		SubMesh subMesh;
+
+		subMesh.indexStart = idxOffset;
+
+		idxOffset += (mesh.GetMaterialFaceCount(i) * 3);
+		subMesh.indexCount = mesh.GetMaterialFaceCount(i) * 3;
+
+		// Set material for Submesh
+			
+		// Get Material properties, assuming 1 material per obj AT THE MOMENT and 1 material per each face
+		glm::vec3 ka = glm::vec3{ mesh.M(i).Ka[0], mesh.M(i).Ka[1], mesh.M(i).Ka[2] };
+		glm::vec3 kd = glm::vec3{ mesh.M(i).Kd[0], mesh.M(i).Kd[1], mesh.M(i).Kd[2] };
+		glm::vec3 ks = glm::vec3{ mesh.M(i).Ks[0], mesh.M(i).Ks[1], mesh.M(i).Ks[2] };
+		const char* map_ka = mesh.M(i).map_Ka;
+		const char* map_kd = mesh.M(i).map_Kd;
+		const char* map_ks = mesh.M(i).map_Ks;
+
+		// Send to material
+		subMesh.material.setAttributes(ka, kd, ks, 100.0f);
+
+		// Set and Load texture(s) in material
+		subMesh.material.setTextures(map_ka, map_kd, map_ks);
+		subMesh.material.loadTextures(filepath.c_str());
+
+		submeshes.push_back(subMesh);
+	}
 
 	std::cout << "\n[MeshComponent] Final mesh:\n";
 	std::cout << "  Unique vertices created: " << vertices.size() << "\n";
@@ -128,21 +163,6 @@ MeshComponent::MeshComponent(const char* filename)
 		v.position = (v.position - centerGLM) * scaleFactor;
 	}
 
-	// Get Material properties, assuming 1 material per obj AT THE MOMENT and 1 material per each face
-	glm::vec3 ka = glm::vec3{ mesh.M(0).Ka[0], mesh.M(0).Ka[1], mesh.M(0).Ka[2]};
-	glm::vec3 kd = glm::vec3{ mesh.M(0).Kd[0], mesh.M(0).Kd[1], mesh.M(0).Kd[2] };
-	glm::vec3 ks = glm::vec3{ mesh.M(0).Ks[0], mesh.M(0).Ks[1], mesh.M(0).Ks[2] };
-	const char* map_ka = mesh.M(0).map_Ka;
-	const char* map_kd = mesh.M(0).map_Kd;
-	const char* map_ks = mesh.M(0).map_Ks;
-
-	// Send to material
-	material.setAttributes(ka, kd, ks, 100.0f);
-
-	// Set and Load texture(s) in material
-	material.setTextures(map_ka, map_kd, map_ks);
-	material.loadTextures();
-
 	// Initialize remaining member variables
 	this->meshName = filename;
 	CreateMeshObject();
@@ -167,12 +187,12 @@ MeshComponent::~MeshComponent()
 
 }
 
-void MeshComponent::Draw()
+void MeshComponent::DrawSubMesh(SubMesh& s)
 {
 	vao.Bind();
 
-	// Draw mesh
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, s.indexCount, GL_UNSIGNED_INT, (void*)(s.indexStart * sizeof(uint32_t)));
+
 }
 
 std::string MeshComponent::getMeshName() const
@@ -187,9 +207,9 @@ glm::mat4 MeshComponent::getModelMatrix() const
 	return trans * rot * sca;
 }
 
-Material& MeshComponent::getMaterial()
+std::vector<SubMesh>& MeshComponent::getSubMeshes()
 {
-	return material;
+	return submeshes;
 }
 
 void MeshComponent::setTransform(Transform transform)
@@ -217,4 +237,15 @@ void MeshComponent::CreateMeshObject()
 	vao.Unbind();
 	vbo.Unbind();
 	ebo.Unbind();
+}
+
+std::string MeshComponent::removeLastWord(std::string filename)
+{
+	size_t lastDelimiterPos = filename.find_last_of('/');
+	if (lastDelimiterPos == std::string::npos) {
+		return "";
+	}
+
+	filename.erase(lastDelimiterPos + 1);
+	return filename;
 }

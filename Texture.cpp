@@ -1,6 +1,6 @@
 #include "Texture.h"
 
-Texture::Texture(const char* filename, GLenum texType, GLuint slot, GLenum format, GLenum pixelType)
+Texture::Texture(const char* filename, const char* texType, GLuint slot, GLenum format, GLenum pixelType)
 {
 	type = texType;
 	unit = slot;
@@ -10,8 +10,7 @@ Texture::Texture(const char* filename, GLenum texType, GLuint slot, GLenum forma
 
 	// setup img data
 	std::vector<unsigned char> img_data;
-	std::string filepath = std::string("OBJ/teapot/") + filename;
-	unsigned err = lodepng::decode(img_data, width, height, filepath.c_str());	// each row of img_data is 4 bytes, so 1 bytes per channel
+	unsigned err = lodepng::decode(img_data, width, height, filename);	// each row of img_data is 4 bytes, so 1 bytes per channel
 
 	// Handle error
 	if (err) {
@@ -22,19 +21,19 @@ Texture::Texture(const char* filename, GLenum texType, GLuint slot, GLenum forma
 	glGenTextures(1, &texID);
 
 	glActiveTexture(GL_TEXTURE0 + slot); // texture unit
-	glBindTexture(texType, texID);	// binds texture to texture unit: slot
+	glBindTexture(GL_TEXTURE_2D, texID);	// binds texture to texture unit: slot
 
 	// Set texture parameters so we use bi-linear interpolation
-	glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// To avoid "dancing pixels"
-	glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// To avoid "dancing pixels"
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// How texture coordinates are handled outside of region 0,0 to 1,1
-	glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	// Assign img data to binded texture
 	glTexImage2D(
-		texType,			// typically will be GL_TEXTURE_2D, texture, but there are multiple 2D texture format's
+		GL_TEXTURE_2D,			// typically will be GL_TEXTURE_2D, texture, but there are multiple 2D texture format's
 		0,					// Mipmap level, meaning highest resolution img
 		GL_RGBA,			// Internal Format
 		width,
@@ -46,7 +45,7 @@ Texture::Texture(const char* filename, GLenum texType, GLuint slot, GLenum forma
 	);
 
 	// Generate Mipmap levels
-	glGenerateMipmap(texType);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
 
 	GLenum error = glGetError();
@@ -73,12 +72,12 @@ void Texture::sendUniformToShader(Shader& shader, const char* uniform)
 void Texture::Bind()
 {
 	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindTexture(type, texID);
+	glBindTexture(GL_TEXTURE_2D, texID);
 }
 
 void Texture::Unbind()
 {
-	glBindTexture(type, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Texture::Delete()

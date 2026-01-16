@@ -17,9 +17,9 @@ struct MaterialData
 
 struct TextureData
 {
-	vector<Texture*> diffuseTextures;
-	vector<Texture*> ambientTextures;
-	vector<Texture*> specularTextures;
+	Texture* diffuseTexture;
+	Texture* ambientTexture;
+	Texture* specularTexture;
 };
 
 class Material
@@ -28,7 +28,7 @@ public:
 	Material(std::string shaderName = "default");
 	~Material();
 
-	void loadTextures();
+	void loadTextures(const char* filepath);
 
 	void setAttributes(glm::vec3 Ka, glm::vec3 Kd, glm::vec3 Ks, float shininess);
 	void setTextures(const char* map_ka, const char* map_kd, const char* map_ks);
@@ -48,9 +48,9 @@ private:
 	std::string map_ka;
 	std::string map_kd;
 	std::string map_ks;
-	unordered_map<string, Texture*> loadedDiffuseTextures;
-	unordered_map<string, Texture*> loadedAmbientTextures;
-	unordered_map<string, Texture*> loadedSpecularTextures;
+	Texture* loadedDiffuseTexture = nullptr;
+	Texture* loadedAmbientTexture = nullptr;
+	Texture* loadedSpecularTexture = nullptr;
 
 
 	// Reference to used shader for material

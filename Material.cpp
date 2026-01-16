@@ -41,55 +41,31 @@ MaterialData Material::getAttributes()
 
 TextureData Material::getTextures()
 {
-
-	vector<Texture*> outputDif;
-	for (auto t : loadedDiffuseTextures) {
-		outputDif.push_back(t.second);
-	}	
-
-	vector<Texture*> outputAmb;
-	for (auto t : loadedAmbientTextures) {
-		outputAmb.push_back(t.second);
-	}	
-
-	vector<Texture*> outputSpec;
-	for (auto t : loadedSpecularTextures) {
-		outputSpec.push_back(t.second);
-	}
-
 	return TextureData{
-		outputDif,
-		outputAmb,
-		outputSpec
+		loadedDiffuseTexture,
+		loadedAmbientTexture,
+		loadedSpecularTexture
 	};
 }
 
-void Material::loadTextures()
+void Material::loadTextures(const char* filepath)
 {
-	// Once using multiple textures per material, will need to hold a vector of textures are parse and load each
+	// Each material holds 1 type of texture
 
 	// Load Diffuse texture
-	if (loadedDiffuseTextures.find(map_kd) == loadedDiffuseTextures.end()) {
-		Texture* difTex = new Texture(map_kd.c_str(), GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
-		loadedDiffuseTextures[map_kd] = difTex;
-	}
+	
+	if (map_ka != "") loadedDiffuseTexture = new Texture((filepath + map_kd).c_str(), "Diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE);
 
 	// Load Ambient texture
-	if (loadedAmbientTextures.find(map_ka) == loadedAmbientTextures.end()) {
-		Texture* ambTex = new Texture(map_ka.c_str(), GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
-		loadedAmbientTextures[map_ka] = ambTex;
-	}
+	if (map_kd != "") loadedAmbientTexture = new Texture((filepath + map_ka).c_str(), "Ambient", 1, GL_RGBA, GL_UNSIGNED_BYTE);
 
 	// Load Specular texture
-	if (loadedSpecularTextures.find(map_ks) == loadedSpecularTextures.end()) {
-		Texture* specTex = new Texture(map_ks.c_str(), GL_TEXTURE_2D, 2, GL_RED, GL_UNSIGNED_BYTE);
-		loadedSpecularTextures[map_ks] = specTex;
-	}
+	if (map_ks != "") loadedSpecularTexture = new Texture((filepath + map_ks).c_str(), "Specular", 2, GL_RED, GL_UNSIGNED_BYTE);
 }
 
 void Material::setTextures(const char* map_ka, const char* map_kd, const char* map_ks)
 {
-	this->map_ka = map_ka;
-	this->map_kd = map_kd;
-	this->map_ks = map_ks;
+	if (map_ka) this->map_ka = map_ka;
+	if (map_kd) this->map_kd = map_kd;
+	if (map_ks) this->map_ks = map_ks;
 }

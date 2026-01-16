@@ -19,6 +19,11 @@
 #include"Material.h"
 #include"Transform.h"
 
+struct SubMesh {
+	Material material;
+	uint32_t indexStart;
+	uint32_t indexCount;
+};
 
 // Used to create obj from .obj files or creating objects manually
 class MeshComponent
@@ -31,13 +36,13 @@ public:
 	~MeshComponent();
 
 	// Draw the object
-	void Draw();
+	void DrawSubMesh(SubMesh& s);
 
 	// Getters and Setters
 
 	std::string getMeshName() const;
 	glm::mat4 getModelMatrix() const;
-	Material& getMaterial();	// By reference because we'd want to edit the material information
+	std::vector<SubMesh>& getSubMeshes();	// By reference because we'd want to edit the material information
 
 	void setTransform(Transform transform);
 
@@ -47,7 +52,7 @@ private:
 	void CreateMeshObject();
 
 	std::string meshName;
-	std::vector<VERTEX> vertices;
+	std::vector<VERTEX> vertices;	// All vertices, MeshGeometry then takes specific index range from it
 	std::vector<GLuint> indices;
 	VAO vao;
 	VBO vbo; // currently only storing position
@@ -58,8 +63,14 @@ private:
 	glm::mat4 rot = glm::mat4(1.0f);
 	glm::mat4 sca = glm::mat4(1.0f);
 
-	// Currently used for shading
-	Material material;
+	// Hold all submeshes that may have seperate textures/materials, store object for better locality rather than pointers
+	std::vector<SubMesh> submeshes;
+
+	// filepath for obj location
+	std::string filepath = "";
+
+	// Function used for finding folder path of related OBJ, MTL and PNG files related to mess
+	std::string removeLastWord(std::string filename);
 
 };
 
