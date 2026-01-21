@@ -45,44 +45,22 @@ void Renderer::RenderFrame(Scene* scene, InputManager* inputManager, float dt)
 
 				// Send model to Vertex Shader
 				glm::mat4 model = mesh->getModelMatrix() * cam.getDistanceScale();
-				glUniformMatrix4fv(glGetUniformLocation(curShader->ID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+				glUniformMatrix4fv(curShader->getUniformLocation("modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 
 				// Send view & projection matrix to Vertex Shader
 				cam.sendToShader(*curShader);
 
 				// Upload material data to Vertex Shader
-				auto [Ka, Kd, Ks, shininess] = subMesh.material.getAttributes();
-				glUniform3fv(glGetUniformLocation(curShader->ID, "Ka"), 1, glm::value_ptr(Ka));
-				glUniform3fv(glGetUniformLocation(curShader->ID, "Kd"), 1, glm::value_ptr(Kd));
-				glUniform3fv(glGetUniformLocation(curShader->ID, "Ks"), 1, glm::value_ptr(Ks));
-				glUniform1f(glGetUniformLocation(curShader->ID, "shininess"), shininess);
-
-				// Upload textures to Vertex Shader, assuming one smapler type per shader
-				auto [difTexture, ambTexture, specTexture] = subMesh.material.getTextures();
-
-				if (difTexture) {
-					difTexture->sendUniformToShader(*curShader, "texDiff");
-					difTexture->Bind();
-				}
-				if (ambTexture) {
-					ambTexture->sendUniformToShader(*curShader, "texAmb");
-					ambTexture->Bind();
-
-				}
-				if (specTexture) {
-					specTexture->sendUniformToShader(*curShader, "texSpec");
-					specTexture->Bind();
-				}
-
+				subMesh.material.uploadData(*curShader);
 
 				// Upload light data to Vertex Shader, may be inefficient to loop through all lights per mesh, potentially group meshes, lights and other obj's per shader
 				for (auto light : scene->lights) {
 					if (light->dirty) light->validate();
-					glUniform3fv(glGetUniformLocation(curShader->ID, "lightPosWorld"), 1, glm::value_ptr(light->position));
-					glUniform3fv(glGetUniformLocation(curShader->ID, "lightColor"), 1, glm::value_ptr(light->color));
-					glUniform3fv(glGetUniformLocation(curShader->ID, "lightKa"), 1, glm::value_ptr(light->ambient));
-					glUniform3fv(glGetUniformLocation(curShader->ID, "lightKd"), 1, glm::value_ptr(light->diffuse));
-					glUniform3fv(glGetUniformLocation(curShader->ID, "lightKs"), 1, glm::value_ptr(light->specular));
+					glUniform3fv(curShader->getUniformLocation("lightPosWorld"), 1, glm::value_ptr(light->position));
+					glUniform3fv(curShader->getUniformLocation("lightColor"), 1, glm::value_ptr(light->color));
+					glUniform3fv(curShader->getUniformLocation("lightKa"), 1, glm::value_ptr(light->ambient));
+					glUniform3fv(curShader->getUniformLocation("lightKd"), 1, glm::value_ptr(light->diffuse));
+					glUniform3fv(curShader->getUniformLocation("lightKs"), 1, glm::value_ptr(light->specular));
 				}
 
 				mesh->DrawSubMesh(subMesh);

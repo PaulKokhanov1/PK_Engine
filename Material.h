@@ -1,6 +1,7 @@
 #pragma once
 
 #include<glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include<string>
 #include<set>
 
@@ -29,9 +30,10 @@ public:
 	~Material();
 
 	void loadTextures(const char* filepath);
+	void uploadData(Shader& shader);
 
 	void setAttributes(glm::vec3 Ka, glm::vec3 Kd, glm::vec3 Ks, float shininess);
-	void setTextures(const char* map_ka, const char* map_kd, const char* map_ks);
+	void setTextureNames(const char* map_ka, const char* map_kd, const char* map_ks);
 
 	// Get Shader, preventing change of Shader Name
 	std::string getShaderName() const;

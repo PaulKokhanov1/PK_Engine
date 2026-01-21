@@ -67,35 +67,7 @@ MeshComponent::MeshComponent(const char* filename)
 
 	// Handle duplciation of vertices if resued attributes mixed with seperate attributes
 	// Ex; vertex {pos1, norm1, tex1} then later vertex {pos1, norm2, tex1} need to duplicate so ebo doesn't reuse old vertex
-	std::unordered_map<VertexKey, long> newVertexIndex;
-
-	// Handling only position, normal and tex Coords
-	// Also assuming each face will have a position, a normal AND a texCoord assigned, maybe handle this after you finish implementation
-	for (int i = 0; i < mesh.NF(); ++i) {
-		auto f = mesh.F(i);
-		auto fn = mesh.FN(i);
-		auto ft = mesh.FT(i);
-		for (int j = 0; j < 3; ++j) {
-			// Using the indices are the faces to make a vertex Key so no need to worry that tex coord is 2D
-			VertexKey key = VertexKey{ f.v[j], fn.v[j], ft.v[j]};
-
-			if (newVertexIndex.find(key) == newVertexIndex.end()) {
-				// Create new Vertex
-				newVertexIndex[key] = vertices.size();
-
-				// Add it to vertices
-				glm::vec3 pos = glm::vec3(mesh.V(f.v[j]).x, mesh.V(f.v[j]).y, mesh.V(f.v[j]).z);
-				glm::vec3 norm = glm::vec3(mesh.VN(fn.v[j]).x, mesh.VN(fn.v[j]).y, mesh.VN(fn.v[j]).z);
-				glm::vec2 tex = glm::vec2(mesh.VT(ft.v[j]).x, mesh.VT(ft.v[j]).y);
-
-				vertices.push_back(VERTEX{ pos, norm, tex });
-			}
-
-			// Add either old or new vertex index to EBO, always pushing back because each face vertex needs to be represented in our EBO
-			indices.push_back(newVertexIndex[key]);
-		}
-
-	}
+	buildVertices(mesh);
 
 	/*std::cout << "\n[MeshComponent] Dumping VertexKey - NewIndex map:\n";
 	for (const auto& entry : newVertexIndex) {
@@ -107,61 +79,14 @@ MeshComponent::MeshComponent(const char* filename)
 			<< ") - newVertexIndex = " << newIndex << "\n";
 	}*/
 
-	// Handle creating submeshes
-	uint32_t idxOffset = 0;
-	for (int i = 0; i < mesh.NM(); ++i) {
-
-		// Create new submesh
-		SubMesh subMesh;
-
-		subMesh.indexStart = idxOffset;
-
-		idxOffset += (mesh.GetMaterialFaceCount(i) * 3);
-		subMesh.indexCount = mesh.GetMaterialFaceCount(i) * 3;
-
-		// Set material for Submesh
-			
-		// Get Material properties, assuming 1 material per obj AT THE MOMENT and 1 material per each face
-		glm::vec3 ka = glm::vec3{ mesh.M(i).Ka[0], mesh.M(i).Ka[1], mesh.M(i).Ka[2] };
-		glm::vec3 kd = glm::vec3{ mesh.M(i).Kd[0], mesh.M(i).Kd[1], mesh.M(i).Kd[2] };
-		glm::vec3 ks = glm::vec3{ mesh.M(i).Ks[0], mesh.M(i).Ks[1], mesh.M(i).Ks[2] };
-		const char* map_ka = mesh.M(i).map_Ka;
-		const char* map_kd = mesh.M(i).map_Kd;
-		const char* map_ks = mesh.M(i).map_Ks;
-
-		// Send to material
-		subMesh.material.setAttributes(ka, kd, ks, 100.0f);
-
-		// Set and Load texture(s) in material
-		subMesh.material.setTextures(map_ka, map_kd, map_ks);
-		subMesh.material.loadTextures(filepath.c_str());
-
-		submeshes.push_back(subMesh);
-	}
+	buildSubMeshes(mesh);
 
 	std::cout << "\n[MeshComponent] Final mesh:\n";
 	std::cout << "  Unique vertices created: " << vertices.size() << "\n";
 	std::cout << "  Indices:                 " << indices.size() << "\n";
 
-
-	// Center object using its bounding box, because not all obj files are centered around origin
-	mesh.ComputeBoundingBox();
-	cyVec3f minBoundcy = mesh.GetBoundMin();
-	cyVec3f maxBoundcy = mesh.GetBoundMax();
-	cyVec3f center = (minBoundcy + maxBoundcy) * 0.5f;	// Division is heavy so instead multiply
-	cyVec3f size = maxBoundcy - minBoundcy;
-
-	if (size.Length() == 0.0f) {
-		LogMeshWarn("Warning: Zero-size bounding box — skipping normalization.");
-		return;
-	}
-
-	float scaleFactor = 1.0f / size.Length();
-
-	glm::vec3 centerGLM(center.x, center.y, center.z);
-	for (auto& v : vertices) {
-		v.position = (v.position - centerGLM) * scaleFactor;
-	}
+	// Center Mesh using Bounding Box
+	centerMesh(mesh);
 
 	// Initialize remaining member variables
 	this->meshName = filename;
@@ -217,6 +142,96 @@ void MeshComponent::setTransform(Transform transform)
 	trans = glm::translate(trans, transform.translation);
 	rot = glm::mat4_cast(transform.rotation);
 	sca = glm::scale(sca, transform.scale);
+}
+
+void MeshComponent::buildVertices(cyTriMesh& mesh)
+{
+	std::unordered_map<VertexKey, long> newVertexIndex;
+
+	// Handling only position, normal and tex Coords
+	// Also assuming each face will have a position, a normal AND a texCoord assigned, maybe handle this after you finish implementation
+	for (int i = 0; i < mesh.NF(); ++i) {
+		auto f = mesh.F(i);
+		auto fn = mesh.FN(i);
+		auto ft = mesh.FT(i);
+		for (int j = 0; j < 3; ++j) {
+			// Using the indices are the faces to make a vertex Key so no need to worry that tex coord is 2D
+			VertexKey key = VertexKey{ f.v[j], fn.v[j], ft.v[j] };
+
+			if (newVertexIndex.find(key) == newVertexIndex.end()) {
+				// Create new Vertex
+				newVertexIndex[key] = vertices.size();
+
+				// Add it to vertices
+				glm::vec3 pos = glm::vec3(mesh.V(f.v[j]).x, mesh.V(f.v[j]).y, mesh.V(f.v[j]).z);
+				glm::vec3 norm = glm::vec3(mesh.VN(fn.v[j]).x, mesh.VN(fn.v[j]).y, mesh.VN(fn.v[j]).z);
+				glm::vec2 tex = glm::vec2(mesh.VT(ft.v[j]).x, mesh.VT(ft.v[j]).y);
+
+				vertices.push_back(VERTEX{ pos, norm, tex });
+			}
+
+			// Add either old or new vertex index to EBO, always pushing back because each face vertex needs to be represented in our EBO
+			indices.push_back(newVertexIndex[key]);
+		}
+
+	}
+}
+
+void MeshComponent::buildSubMeshes(cyTriMesh& mesh)
+{
+	// Handle creating submeshes
+	uint32_t idxOffset = 0;
+	for (int i = 0; i < mesh.NM(); ++i) {
+
+		// Create new submesh
+		SubMesh subMesh;
+
+		subMesh.indexStart = idxOffset;
+
+		idxOffset += (mesh.GetMaterialFaceCount(i) * 3);
+		subMesh.indexCount = mesh.GetMaterialFaceCount(i) * 3;
+
+		// Set material for Submesh
+
+		// Get Material properties, assuming 1 material per obj AT THE MOMENT and 1 material per each face
+		glm::vec3 ka = glm::vec3{ mesh.M(i).Ka[0], mesh.M(i).Ka[1], mesh.M(i).Ka[2] };
+		glm::vec3 kd = glm::vec3{ mesh.M(i).Kd[0], mesh.M(i).Kd[1], mesh.M(i).Kd[2] };
+		glm::vec3 ks = glm::vec3{ mesh.M(i).Ks[0], mesh.M(i).Ks[1], mesh.M(i).Ks[2] };
+		const char* map_ka = mesh.M(i).map_Ka;
+		const char* map_kd = mesh.M(i).map_Kd;
+		const char* map_ks = mesh.M(i).map_Ks;
+
+		// Send to material
+		subMesh.material.setAttributes(ka, kd, ks, 100.0f);
+
+		// Set and Load texture(s) in material
+		subMesh.material.setTextureNames(map_ka, map_kd, map_ks);
+		subMesh.material.loadTextures(filepath.c_str());
+
+		submeshes.push_back(subMesh);
+	}
+}
+
+void MeshComponent::centerMesh(cyTriMesh& mesh)
+{
+	// Center object using its bounding box, because not all obj files are centered around origin
+	mesh.ComputeBoundingBox();
+	cyVec3f minBoundcy = mesh.GetBoundMin();
+	cyVec3f maxBoundcy = mesh.GetBoundMax();
+	cyVec3f center = (minBoundcy + maxBoundcy) * 0.5f;	// Division is heavy so instead multiply
+	cyVec3f size = maxBoundcy - minBoundcy;
+
+	if (size.Length() == 0.0f) {
+		LogMeshWarn("Warning: Zero-size bounding box — skipping normalization.");
+		return;
+	}
+
+	float scaleFactor = 1.0f / size.Length();
+
+	glm::vec3 centerGLM(center.x, center.y, center.z);
+	for (auto& v : vertices) {
+		v.position = (v.position - centerGLM) * scaleFactor;
+	}
 }
 
 void MeshComponent::CreateMeshObject()

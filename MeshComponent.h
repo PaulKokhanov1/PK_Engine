@@ -48,6 +48,11 @@ public:
 
 private:
 
+	// Reading OBJ support methods
+	void buildVertices(cyTriMesh& mesh);
+	void buildSubMeshes(cyTriMesh& mesh);
+	void centerMesh(cyTriMesh& mesh);
+
 	// Instantiate VAO, VBO and EBO
 	void CreateMeshObject();
 

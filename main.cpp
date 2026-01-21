@@ -53,8 +53,8 @@ int main() {
 	std::vector<VERTEX> verts(vertices, vertices + sizeof(vertices) / sizeof(VERTEX));
 	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
 	MeshComponent triangle(name, verts, ind);
-	MeshComponent teapot("OBJ/teapot/teapot.obj");
-	//MeshComponent yoda("OBJ/yoda/yoda.obj");
+	//MeshComponent teapot("OBJ/teapot/teapot.obj");
+	MeshComponent yoda("OBJ/yoda/yoda.obj");
 
 	// Rotate Yoda
 	// Define the rotation angle (90 degrees) and axis (Y-axis)
@@ -68,7 +68,7 @@ int main() {
 		rotation_quat,
 		glm::vec3(1.0f, 1.0f, 1.0f)
 	};
-	//yoda.setTransform(t);
+	yoda.setTransform(t);
 
 	
 	// STRESS TEST OBJ READER
@@ -96,7 +96,7 @@ int main() {
 
 	// Create Scene
 	Scene basic;
-	basic.AddMesh(&teapot);
+	basic.AddMesh(&yoda);
 	basic.Addlight(&light);
 	basic.setCamera(std::make_unique<Camera>(engineConfig::DEFAULT_HEIGHT, engineConfig::DEFAULT_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f), 45.0f, 0.1f, 100.0f));
 

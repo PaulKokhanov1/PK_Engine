@@ -26,15 +26,15 @@ uniform vec3 Ks;
 uniform float shininess;
 
 // Texture Units
-uniform sampler2D texDiff;
-uniform sampler2D texAmb;
-uniform sampler2D texSpec;
+uniform sampler2D texDiffuse;
+uniform sampler2D texAmbient;
+uniform sampler2D texSpecular;
 
 
 vec4 pointLight()
 {	
 
-	vec3 ambient =  texture(texAmb, texCoord).rgb * Ka * lightKa;
+	vec3 ambient =  texture(texAmbient, texCoord).rgb * Ka * lightKa;
 
 	// Find light direction to current position
 	vec3 lightDir = normalize(lightPosView - crntPosView);
@@ -42,13 +42,13 @@ vec4 pointLight()
 	// Calculate diffuse shading
 	vec3 normal = normalize(Normal);
 	float diffuseAmount = max(dot(normal, lightDir), 0.0f);
-	vec3 diffuse = texture(texDiff, texCoord).rgb * lightKd * (lightColor * Kd * diffuseAmount);
+	vec3 diffuse = texture(texDiffuse, texCoord).rgb * lightKd * (lightColor * Kd * diffuseAmount);
 
 	// Calculate Specular lighting
 	vec3 viewDir = normalize(-crntPosView);
 	vec3 halfVector = normalize(lightDir + viewDir); 
 	float specAmount = pow(max(dot(normal, halfVector), 0.0), shininess);
-	vec3 specular = texture(texSpec, texCoord).r * lightKs * (lightColor * Kd * specAmount);
+	vec3 specular = texture(texSpecular, texCoord).r * lightKs * (lightColor * Ks * specAmount);
 
 	return vec4(diffuse + ambient + specular, 1.0);
 }

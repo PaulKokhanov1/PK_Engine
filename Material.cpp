@@ -13,8 +13,7 @@ Material::Material(std::string shaderName) :
 {}
 
 Material::~Material()
-{
-}
+{}
 
 void Material::setAttributes(glm::vec3 Ka, glm::vec3 Kd, glm::vec3 Ks, float shininess)
 {
@@ -53,7 +52,6 @@ void Material::loadTextures(const char* filepath)
 	// Each material holds 1 type of texture
 
 	// Load Diffuse texture
-	
 	if (map_ka != "") loadedDiffuseTexture = new Texture((filepath + map_kd).c_str(), "Diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE);
 
 	// Load Ambient texture
@@ -63,7 +61,31 @@ void Material::loadTextures(const char* filepath)
 	if (map_ks != "") loadedSpecularTexture = new Texture((filepath + map_ks).c_str(), "Specular", 2, GL_RED, GL_UNSIGNED_BYTE);
 }
 
-void Material::setTextures(const char* map_ka, const char* map_kd, const char* map_ks)
+void Material::uploadData(Shader& shader)
+{
+	glUniform3fv(shader.getUniformLocation("Ka"), 1, glm::value_ptr(ambient));
+	glUniform3fv(shader.getUniformLocation("Kd"), 1, glm::value_ptr(diffuse));
+	glUniform3fv(shader.getUniformLocation("Ks"), 1, glm::value_ptr(specular));
+	glUniform1f(shader.getUniformLocation("shininess"), shininess);
+
+	// Upload textures to Vertex Shader, assuming one sampler type per shader
+
+	if (loadedDiffuseTexture) {
+		loadedDiffuseTexture->sendUniformToShader(shader, "texDiffuse");
+		loadedDiffuseTexture->Bind();
+	}
+	if (loadedAmbientTexture) {
+		loadedAmbientTexture->sendUniformToShader(shader, "texAmbient");
+		loadedAmbientTexture->Bind();
+
+	}
+	if (loadedSpecularTexture) {
+		loadedSpecularTexture->sendUniformToShader(shader, "texSpecular");
+		loadedSpecularTexture->Bind();
+	}
+}
+
+void Material::setTextureNames(const char* map_ka, const char* map_kd, const char* map_ks)
 {
 	if (map_ka) this->map_ka = map_ka;
 	if (map_kd) this->map_kd = map_kd;

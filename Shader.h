@@ -8,6 +8,7 @@
 #include<sstream>
 #include<iostream>
 #include<cerrno>
+#include<unordered_map>
 
 #include"ShaderCommon.h"
 #include"ShaderException.h"
@@ -39,12 +40,17 @@ public:
 	const char* getVertexFile();
 	const char* getFragmentFile();
 
+	unsigned int getUniformLocation(const std::string& name);
+
 
 private:
 	
 	// Used for "hot-reload" of shader's via F6
 	const char* vertexFile;
 	const char* fragmentFile;
+
+	// cache shader uniform location
+	std::unordered_map<std::string, int> shaderUniformLocations;
 	
 };
 

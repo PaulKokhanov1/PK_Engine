@@ -155,3 +155,20 @@ const char* Shader::getFragmentFile()
 	return fragmentFile;
 }
 
+unsigned int Shader::getUniformLocation(const std::string& name)
+{
+	if (shaderUniformLocations.find(name) != shaderUniformLocations.end()) {
+		return shaderUniformLocations[name];
+	}
+
+	int location = glGetUniformLocation(ID, name.c_str());
+
+	if (location == -1) {
+		std::cerr << "Warning: uniform: " << name << " not found!" << std::endl;
+	}
+
+	shaderUniformLocations[name] = location;
+
+	return location;
+}
+
