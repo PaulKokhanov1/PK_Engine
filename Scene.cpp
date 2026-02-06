@@ -101,6 +101,7 @@ void Scene::setQuadController(std::unique_ptr<QuadController> qC)
 Camera& Scene::getCamera()
 {
 	// As we hold a unique ptr to camera, when scene is destroyed any objects holding a reference to this camera will no longer be able to access it
+	// Though this may cause undefined behavior if this camera doesn't outlive the objects calling getCamera()
 	return *camera;
 }
 

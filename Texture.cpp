@@ -64,6 +64,8 @@ Texture::Texture(GLenum format, GLenum pixelType, unsigned int width, unsigned i
 	glBindTexture(GL_TEXTURE_2D, texID);
 
 	// Set texture parameters so we use bi-linear interpolation
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// To avoid "dancing pixels"
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	// To avoid "dancing pixels"
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 

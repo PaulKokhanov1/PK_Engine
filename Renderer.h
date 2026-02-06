@@ -19,12 +19,24 @@ public:
 	~Renderer();
 
 	void Clear();
+	void CollectionPass(Scene* scene);
+	void DrawPass(Scene* scene, shared_ptr<InputManager> inputManager, float dt);
+	void PostProcessPass(Scene* scene);
 	void RenderFrame(Scene* scene, shared_ptr<InputManager> inputManager, float dt);
 	void EndFrame();
 
 	void createFBO();
 
 private:
+
+	struct RenderItem {
+		SubMesh* subMeshRef;
+		MeshComponent* meshRef;
+		glm::mat4 modelMatrix;
+
+		RenderItem(MeshComponent* mID, SubMesh* sID, glm::mat4 mM) : meshRef(mID), subMeshRef(sID), modelMatrix(mM) {}
+	};
+	unordered_map<Shader*, vector<RenderItem>> shaderBucket;
 
 	Window& window;
 	ShaderManager& shaderManager;
