@@ -10,7 +10,7 @@ void Camera::updateViewProjection()
 	projection = getProjectionMatrix();
 }
 
-void Camera::sendToShader(Shader& shader)
+void Camera::sendViewAndProjToShader(Shader& shader)
 {
 	// Ensure uniform location exists for View and Projection
 	GLint viewMatrixLocation = glGetUniformLocation(shader.ID, "viewMatrix");
@@ -25,9 +25,21 @@ void Camera::sendToShader(Shader& shader)
 		return;
 	}
 
+
 	// Exports View and Projection matrix
 	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+void Camera::sendCamDistanceScaleToShader(Shader& shader)
+{
+	GLint camDistanceScaleLocation = glGetUniformLocation(shader.ID, "camDistanceScale");
+	if (camDistanceScaleLocation == -1) {
+		LogCameraWarn("Uniform camDistanceScale not found in shader.");
+		return;
+	}
+
+	glUniform1f(camDistanceScaleLocation, getDistanceScale());
 }
 
 void Camera::updateInputs(InputManager& input, float dt)
@@ -135,6 +147,13 @@ void Camera::setClipPlanes(float nearP, float farP)
 {
 	nearPlane = nearP;
 	farPlane = farP;
+	projectionDirty = true;
+}
+
+void Camera::setScreenDimensions(int w, int h)
+{
+	width = w;
+	height = h;
 	projectionDirty = true;
 }
 

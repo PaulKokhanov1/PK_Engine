@@ -59,6 +59,10 @@ void Scene::update(InputManager& input, float deltaTime)
 
 		}
 
+	} else if (input.isKeyHeld(GLFW_KEY_LEFT_ALT)) {
+		// Handle moving quad on which scene is rendered to
+		if (quadController) quadController->update(input, deltaTime);
+
 	} else {
 		// Handle looking around and movement, only if user is not holding down CTRL
 		if (camera) camera->updateInputs(input, deltaTime);
@@ -83,6 +87,15 @@ void Scene::setCamera(std::unique_ptr<Camera> camera)
 	}
 
 	this->camera = std::move(camera);
+}
+
+void Scene::setQuadController(std::unique_ptr<QuadController> qC)
+{
+	if (qC == nullptr) {
+		std::cerr << "[Scene] : Current quad Mesh being set it null" << std::endl;
+		return;
+	}
+	this->quadController = std::move(qC);
 }
 
 Camera& Scene::getCamera()

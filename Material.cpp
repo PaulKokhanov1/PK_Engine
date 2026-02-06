@@ -71,16 +71,16 @@ void Material::uploadData(Shader& shader)
 	// Upload textures to Vertex Shader, assuming one sampler type per shader
 
 	if (loadedDiffuseTexture) {
-		loadedDiffuseTexture->sendUniformToShader(shader, "texDiffuse");
+		loadedDiffuseTexture->sendUniformToShader(shader, "texDiffuse", 0);
 		loadedDiffuseTexture->Bind();
 	}
 	if (loadedAmbientTexture) {
-		loadedAmbientTexture->sendUniformToShader(shader, "texAmbient");
+		loadedAmbientTexture->sendUniformToShader(shader, "texAmbient", 1);
 		loadedAmbientTexture->Bind();
 
 	}
 	if (loadedSpecularTexture) {
-		loadedSpecularTexture->sendUniformToShader(shader, "texSpecular");
+		loadedSpecularTexture->sendUniformToShader(shader, "texSpecular",2);
 		loadedSpecularTexture->Bind();
 	}
 }

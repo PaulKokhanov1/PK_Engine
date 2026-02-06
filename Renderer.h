@@ -10,6 +10,7 @@
 #include "Window.h"
 #include"ShaderManager.h"
 #include"GLDebug.h"
+#include"FBO.h"
 
 class Renderer
 {
@@ -17,14 +18,18 @@ public:
 	Renderer(Window& win, ShaderManager& sm);
 	~Renderer();
 
-	void BeginFrame();
-	void RenderFrame(Scene* scene, InputManager* inputManagers, float dt);
+	void Clear();
+	void RenderFrame(Scene* scene, shared_ptr<InputManager> inputManager, float dt);
 	void EndFrame();
+
+	void createFBO();
 
 private:
 
 	Window& window;
 	ShaderManager& shaderManager;
+	unique_ptr<FBO> RenderToTextureFBO;
+	MeshComponent* renderToTextureMesh;
 };
 
 

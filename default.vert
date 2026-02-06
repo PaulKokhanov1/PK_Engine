@@ -20,12 +20,13 @@ out vec2 texCoord;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
+uniform float camDistanceScale;
 uniform vec3 lightPosWorld;
 
 void main()
 {
    	// Calculates current fragment position in world space
-	vec3 crntPos = vec3(modelMatrix * vec4(aPos, 1.0f));
+	vec3 crntPos = vec3(modelMatrix * camDistanceScale * vec4(aPos, 1.0f));
 	// Outputs the positions/coordinates of all vertices
 	gl_Position = projectionMatrix * viewMatrix * vec4(crntPos, 1.0);
 

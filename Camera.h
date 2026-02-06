@@ -45,7 +45,9 @@ public:
 	// Updates the camera matrix to the Vertex Shader
 	void updateViewProjection();
 	// Exports View and Projection Matrix to a shader
-	void sendToShader(Shader& shader);
+	void sendViewAndProjToShader(Shader& shader);
+	// Exports camera distance relative to point where orthographic projection was enabled (CHANGE THIS LATER)
+	void sendCamDistanceScaleToShader(Shader& shader);
 	// Handles camera inputs
 	void updateInputs(InputManager& input, float dt);
 
@@ -60,6 +62,7 @@ public:
 	// Setters
 	void setFOV(float newFOV);
 	void setClipPlanes(float nearP, float farP);
+	void setScreenDimensions(int w, int h);
 
 
 private:

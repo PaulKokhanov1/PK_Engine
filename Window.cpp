@@ -32,6 +32,8 @@ bool Window::initialize()
 	glViewport(0, 0, windowWidth, windowHeight);
 	enableDepthTest();
 
+	glfwSetWindowUserPointer(window, this);
+
 	return true;
 }
 
@@ -68,9 +70,62 @@ void Window::enableDepthTest()
 	glEnable(GL_DEPTH_TEST);
 }
 
+void Window::registerCallbacks()
+{
+	glfwSetWindowSizeCallback(window, window_size_callback);
+	glfwSetCursorPosCallback(window, cursor_position_callback);
+	glfwSetKeyCallback(window, key_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
+}
+
+void Window::window_size_callback(GLFWwindow* window, int width, int height)
+{
+	// Get curreent instance of window and handle resize
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	win->onResize(width, height);
+}
+
+void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (!win) return;
+	win->cursorPosCallbackDispatcher.notifyListeners(xpos, ypos);
+}
+
+void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (!win) return;
+	win->keyCallbackDispatcher.notifyListeners(key, scancode, action, mods);
+
+}
+
+void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (!win) return;
+	win->mouseButtonCallbackDispatcher.notifyListeners(button, action, mods);
+
+}
+
 GLFWwindow* Window::getGLFWwindow()
 {
 	return window;
+}
+
+pair<int, int> Window::getWindowDimensions()
+{
+	return { windowWidth, windowHeight };
+}
+
+void Window::onResize(int width, int height)
+{
+
+	windowWidth = width;
+	windowHeight = height;
+
+	glViewport(0, 0, width, height);
+	needsResize = true;
 }
 
 

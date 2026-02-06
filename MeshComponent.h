@@ -41,10 +41,16 @@ public:
 	// Getters and Setters
 
 	std::string getMeshName() const;
-	glm::mat4 getModelMatrix() const;
 	std::vector<SubMesh>& getSubMeshes();	// By reference because we'd want to edit the material information
 
 	void setTransform(Transform transform);
+
+	// Used to create Model Matrix
+	glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::mat4 computeModelMatrix();
+
 
 private:
 
@@ -62,11 +68,6 @@ private:
 	VAO vao;
 	VBO vbo; // currently only storing position
 	EBO ebo;
-
-	// Used to create Model Matrix
-	glm::mat4 trans = glm::mat4(1.0f);
-	glm::mat4 rot = glm::mat4(1.0f);
-	glm::mat4 sca = glm::mat4(1.0f);
 
 	// Hold all submeshes that may have seperate textures/materials, store object for better locality rather than pointers
 	std::vector<SubMesh> submeshes;

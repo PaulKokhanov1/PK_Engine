@@ -29,18 +29,21 @@ private:
 	double lastMousePosX, lastMousePosY;
 	double deltaMousePosX, deltaMousePosY;	// +ve means moved right or down
 
-	// Setup key and mouse callbacks, will update internal sets
-	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-	static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
-	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-
-
 public:
 	InputManager(GLFWwindow* window);
 	~InputManager();
 
-	void registerCallbacks();
 	void clearInputFrameStates();
+
+	// Setup key and mouse callbacks, will update internal sets
+	void handleKeyCallback(int key, int scancode, int action, int mods);
+	void handleCursorPosCallback(double xpos, double ypos);
+	void handleMouseButtonCallback(int button, int action, int mods);
+
+	// Stored token's for EventListeners, used for deregistering
+	size_t keyListenerToken;
+	size_t cursorPosListenerToken;
+	size_t mouseButtonListenerToken;
 
 	// System loop
 	void update(float deltaTime);

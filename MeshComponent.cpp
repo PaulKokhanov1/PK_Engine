@@ -100,6 +100,15 @@ MeshComponent::MeshComponent(std::string name, std::vector<VERTEX>& vertices, st
 		LogMeshError("Empty vertices or indices for mesh: " + name);
 	}
 
+	// Build Sub Mesh Manually
+	// Create new submesh
+	SubMesh subMesh;
+
+	subMesh.indexStart = 0;
+	subMesh.indexCount = indices.size();
+
+	submeshes.push_back(subMesh);
+
 	CreateMeshObject();
 }
 
@@ -126,8 +135,16 @@ std::string MeshComponent::getMeshName() const
 }
 
 // Manually creating model matrix at the moment
-glm::mat4 MeshComponent::getModelMatrix() const
+glm::mat4 MeshComponent::computeModelMatrix()
 {
+	glm::mat4 trans = glm::mat4(1.0f);
+	glm::mat4 rot = glm::mat4(1.0f);
+	glm::mat4 sca = glm::mat4(1.0f);
+
+	trans = glm::translate(trans, translation);
+	rot = glm::mat4_cast(rotation);
+	sca = glm::scale(sca, scale);
+
 	// Must return in order: translation * rotation * scale
 	return trans * rot * sca;
 }
@@ -139,9 +156,9 @@ std::vector<SubMesh>& MeshComponent::getSubMeshes()
 
 void MeshComponent::setTransform(Transform transform)
 {
-	trans = glm::translate(trans, transform.translation);
-	rot = glm::mat4_cast(transform.rotation);
-	sca = glm::scale(sca, transform.scale);
+	translation = transform.translation;
+	rotation = transform.rotation;
+	scale = transform.scale;
 }
 
 void MeshComponent::buildVertices(cyTriMesh& mesh)

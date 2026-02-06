@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Light.h"
 #include "SceneException.h"
+#include "QuadController.h"
 
 class Scene
 {
@@ -18,6 +19,9 @@ public:
 
 	// Collections of pointers to meshes used in this scene
 	std::set<MeshComponent*> meshes;
+
+	// Used for controlling position ofva pre-processed texture quad
+	std::unique_ptr <QuadController> quadController;
 
 	// Collections of pointers to lights in used in this scene
 	std::vector<Light*> lights;
@@ -37,6 +41,7 @@ public:
 	// Getters and Setters
 
 	void setCamera(std::unique_ptr<Camera> camera);
+	void setQuadController(std::unique_ptr<QuadController> qC);
 	Camera& getCamera();
 
 private:

@@ -141,6 +141,8 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="EBO.cpp" />
+    <ClCompile Include="EventDispatcher.cpp" />
+    <ClCompile Include="FBO.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -149,6 +151,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MeshComponent.cpp" />
+    <ClCompile Include="QuadController.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneException.cpp" />
@@ -169,6 +172,8 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="EBO.h" />
     <ClInclude Include="EngineConfig.h" />
+    <ClInclude Include="EventDispatcher.h" />
+    <ClInclude Include="FBO.h" />
     <ClInclude Include="GLDebug.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Light.h" />
@@ -185,6 +190,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="MathCommon.h" />
     <ClInclude Include="MeshComponent.h" />
+    <ClInclude Include="QuadController.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneException.h" />
@@ -203,6 +209,8 @@
   <ItemGroup>
     <None Include="default.frag" />
     <None Include="default.vert" />
+    <None Include="framebuffer.frag" />
+    <None Include="framebuffer.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
