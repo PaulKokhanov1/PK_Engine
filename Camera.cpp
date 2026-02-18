@@ -42,6 +42,18 @@ void Camera::sendCamDistanceScaleToShader(Shader& shader)
 	glUniform1f(camDistanceScaleLocation, getDistanceScale());
 }
 
+void Camera::sendCamPositionWorldSpaceToShader(Shader& shader)
+{
+	GLint camPosWorldLocation = glGetUniformLocation(shader.ID, "camPosWorld");
+	if (camPosWorldLocation == -1) {
+		LogCameraWarn("Uniform camPosWorld not found in shader.");
+		return;
+	}
+
+	// Exports View and Projection matrix
+	glUniform3fv(camPosWorldLocation, 1, glm::value_ptr(Position));
+}
+
 void Camera::updateInputs(InputManager& input, float dt)
 {
 	// Handle keyboard inputs

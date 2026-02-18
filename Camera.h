@@ -48,6 +48,8 @@ public:
 	void sendViewAndProjToShader(Shader& shader);
 	// Exports camera distance relative to point where orthographic projection was enabled (CHANGE THIS LATER)
 	void sendCamDistanceScaleToShader(Shader& shader);
+	// Exports Camera World Space Pos to a shader
+	void sendCamPositionWorldSpaceToShader(Shader& shader);
 	// Handles camera inputs
 	void updateInputs(InputManager& input, float dt);
 

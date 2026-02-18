@@ -34,6 +34,7 @@ public:
 
 	void setAttributes(glm::vec3 Ka, glm::vec3 Kd, glm::vec3 Ks, float shininess);
 	void setTextureNames(const char* map_ka, const char* map_kd, const char* map_ks);
+	void setShaderName(std::string shaderName);
 
 	// Get Shader, preventing change of Shader Name
 	std::string getShaderName() const;

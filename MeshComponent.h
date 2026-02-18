@@ -30,7 +30,7 @@ class MeshComponent
 {
 public:
 	// Create obj from .obj file
-	MeshComponent(const char* filename);
+	MeshComponent(const char* filename, bool centerTheMesh = true);
 	// Create obj manually
 	MeshComponent(std::string name, std::vector<VERTEX>& vertices, std::vector<GLuint>& indices);
 	~MeshComponent();
@@ -42,6 +42,8 @@ public:
 
 	std::string getMeshName() const;
 	std::vector<SubMesh>& getSubMeshes();	// By reference because we'd want to edit the material information
+	std::vector<VERTEX> getVertices();
+	std::vector<GLuint> getIndices();
 
 	void setTransform(Transform transform);
 
@@ -62,6 +64,9 @@ private:
 	// Instantiate VAO, VBO and EBO
 	void CreateMeshObject();
 
+	// Debug method
+	void debugMeshInfo(cyTriMesh& mesh);
+
 	std::string meshName;
 	std::vector<VERTEX> vertices;	// All vertices, MeshGeometry then takes specific index range from it
 	std::vector<GLuint> indices;
@@ -77,6 +82,8 @@ private:
 
 	// Function used for finding folder path of related OBJ, MTL and PNG files related to mess
 	std::string removeLastWord(std::string filename);
+
+	const unsigned MISSING_INDEX = std::numeric_limits<unsigned>::max();
 
 };
 

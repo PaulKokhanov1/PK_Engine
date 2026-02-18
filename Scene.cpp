@@ -98,11 +98,40 @@ void Scene::setQuadController(std::unique_ptr<QuadController> qC)
 	this->quadController = std::move(qC);
 }
 
+void Scene::setCubeMap(std::unique_ptr<CubeMap> cM)
+{
+	if (cM == nullptr) {
+		std::cerr << "[Scene] : Current cube map being set it null" << std::endl;
+		return;
+	}
+	this->cubeMap = std::move(cM);
+}
+
 Camera& Scene::getCamera()
 {
 	// As we hold a unique ptr to camera, when scene is destroyed any objects holding a reference to this camera will no longer be able to access it
 	// Though this may cause undefined behavior if this camera doesn't outlive the objects calling getCamera()
 	return *camera;
+}
+
+QuadController& Scene::getQuadController()
+{
+	return *quadController;
+}
+
+CubeMap& Scene::getCubeMap()
+{
+	return *cubeMap;
+}
+
+std::vector<Light*> Scene::getLights()
+{
+	return lights;
+}
+
+std::set<MeshComponent*> Scene::getMeshes()
+{
+	return meshes;
 }
 
 

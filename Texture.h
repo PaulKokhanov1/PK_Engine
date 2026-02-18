@@ -1,6 +1,7 @@
 #pragma once
 
 #include<glad/glad.h>
+#include <array>
 
 #include"ShaderManager.h"
 #include"lodepng.h"
@@ -9,8 +10,10 @@
 class Texture
 {
 public:
-	Texture(const char* filename, const char* texType, GLenum slot, GLenum format, GLenum pixelType);
-	Texture(GLenum format, GLenum pixelType, unsigned int width, unsigned int height);	// Used for framebuffer Color attachment
+	Texture(const char* filename, const char* texType, GLenum slot, GLenum format, GLenum pixelType, GLenum texTarget = GL_TEXTURE_2D);
+	Texture(GLenum format, GLenum pixelType, unsigned int width, unsigned int height, GLenum texTarget = GL_TEXTURE_2D);	// Used for framebuffer Color attachment
+	Texture(std::array<std::string, 6> paths, const char* texType, GLenum texTarget, GLenum slot, GLenum format, GLenum pixelType); // Used for Cube Map Environment texture
+	Texture(unsigned char* color_data, const char* texType, GLuint slot); // Used for simple 1x1 color textures
 	~Texture();
 
 	// Sends texture unit to shader
@@ -30,6 +33,8 @@ private:
 	GLuint texID;
 	// Texture type;
 	const char* type;
+	// Texture Target
+	GLenum texTarget = GL_TEXTURE_2D;
 	// Texture unit
 	GLuint unit = 0;
 

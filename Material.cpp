@@ -91,3 +91,8 @@ void Material::setTextureNames(const char* map_ka, const char* map_kd, const cha
 	if (map_kd) this->map_kd = map_kd;
 	if (map_ks) this->map_ks = map_ks;
 }
+
+void Material::setShaderName(std::string shaderName)
+{
+	this->shaderName = shaderName;
+}

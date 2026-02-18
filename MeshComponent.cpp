@@ -1,8 +1,6 @@
 #include"MeshComponent.h"
 
-
-// ADD REMAINING PARTS OF POSSIBLE OBJ FILE COMPOENENTS, ex: textures
-MeshComponent::MeshComponent(const char* filename)
+MeshComponent::MeshComponent(const char* filename, bool centerTheMesh)
 {
 	// Using Cem Yuksel's obj file parsing
 	cyTriMesh mesh;
@@ -17,67 +15,15 @@ MeshComponent::MeshComponent(const char* filename)
 	filepath = removeLastWord(filename);
 	cout << "FILEPATH: " << filepath << endl;
 
-	std::cout << "Loaded OBJ: " << filename <<std::endl;
-	std::cout << "Vertices: " << mesh.NV() << "\n";
-	std::cout << "Normals:  " << mesh.NVN() << "\n";
-	std::cout << "Tex Coords:  " << mesh.NVT() << "\n";
-	std::cout << "Faces:    " << mesh.NF() << "\n";
-	std::cout << "Materials:    " << mesh.NM() << "\n";
-	std::cout << "Material Index:    " << mesh.GetMaterialIndex(3) << "\n";
-	std::cout << "Faces for material 0:		" << mesh.GetMaterialFaceCount(0) << "\n";
-
 	 //Compute Normals if no normals are specified
 	if (mesh.NVN() == 0) {
 		LogMeshInfo("No normals found - computing per-vertex normals.");
 		mesh.ComputeNormals();
 	}
 
-
-	for (int i = 0; i < std::min(5, (int) mesh.NV()); ++i) {
-		auto v = mesh.V(i);
-		auto n = mesh.VN(i);
-		auto t = mesh.VT(i);
-		std::cout << "Vertex " << i << ": Pos("
-			<< v.x << ", " << v.y << ", " << v.z << ")  "
-			<< "Norm("
-			<< n.x << ", " << n.y << ", " << n.z << ")  "
-			<< "Tex("
-			<< t.x << ", " << t.y << ", " << t.z << ")\n";
-	}
-
-	for (int i = 0; i < std::min(3, (int)mesh.NF()); ++i) {
-		auto f = mesh.F(i);
-		std::cout << "Face " << i << ": "
-			<< f.v[0] << ", "
-			<< f.v[1] << ", "
-			<< f.v[2] << "\n";
-	}
-
-	for (int i = 0; i < std::min(5, (int)mesh.NF()); ++i) {
-		auto f = mesh.F(i);
-		auto fn = mesh.FN(i);
-		auto ft = mesh.FT(i);
-		std::cout << "Face " << i << " position indices:  "
-			<< f.v[0] << "," << f.v[1] << "," << f.v[2]
-			<< "  | normal indices: "
-			<< fn.v[0] << "," << fn.v[1] << "," << fn.v[2] << 
-			"  | texture indices: "
-			<< ft.v[0] << "," << ft.v[1] << "," << ft.v[2] << "\n";
-	}
-
 	// Handle duplciation of vertices if resued attributes mixed with seperate attributes
 	// Ex; vertex {pos1, norm1, tex1} then later vertex {pos1, norm2, tex1} need to duplicate so ebo doesn't reuse old vertex
 	buildVertices(mesh);
-
-	/*std::cout << "\n[MeshComponent] Dumping VertexKey - NewIndex map:\n";
-	for (const auto& entry : newVertexIndex) {
-		const VertexKey& key = entry.first;
-		uint32_t newIndex = entry.second;
-
-		std::cout << "  Key(pos=" << key.pos
-			<< ", norm=" << key.normal
-			<< ") - newVertexIndex = " << newIndex << "\n";
-	}*/
 
 	buildSubMeshes(mesh);
 
@@ -86,7 +32,7 @@ MeshComponent::MeshComponent(const char* filename)
 	std::cout << "  Indices:                 " << indices.size() << "\n";
 
 	// Center Mesh using Bounding Box
-	centerMesh(mesh);
+	if (centerTheMesh) centerMesh(mesh);
 
 	// Initialize remaining member variables
 	this->meshName = filename;
@@ -154,6 +100,16 @@ std::vector<SubMesh>& MeshComponent::getSubMeshes()
 	return submeshes;
 }
 
+std::vector<VERTEX> MeshComponent::getVertices()
+{
+	return vertices;
+}
+
+std::vector<GLuint> MeshComponent::getIndices()
+{
+	return indices;
+}
+
 void MeshComponent::setTransform(Transform transform)
 {
 	translation = transform.translation;
@@ -164,13 +120,15 @@ void MeshComponent::setTransform(Transform transform)
 void MeshComponent::buildVertices(cyTriMesh& mesh)
 {
 	std::unordered_map<VertexKey, long> newVertexIndex;
+	bool hasUV = mesh.NVT();
 
 	// Handling only position, normal and tex Coords
 	// Also assuming each face will have a position, a normal AND a texCoord assigned, maybe handle this after you finish implementation
 	for (int i = 0; i < mesh.NF(); ++i) {
-		auto f = mesh.F(i);
-		auto fn = mesh.FN(i);
-		auto ft = mesh.FT(i);
+		cyTriMesh::TriFace f = mesh.F(i);
+		cyTriMesh::TriFace fn = mesh.FN(i);
+		auto ft = !hasUV ? cyTriMesh::TriFace{MISSING_INDEX,MISSING_INDEX,MISSING_INDEX} : mesh.FT(i);
+
 		for (int j = 0; j < 3; ++j) {
 			// Using the indices are the faces to make a vertex Key so no need to worry that tex coord is 2D
 			VertexKey key = VertexKey{ f.v[j], fn.v[j], ft.v[j] };
@@ -182,7 +140,7 @@ void MeshComponent::buildVertices(cyTriMesh& mesh)
 				// Add it to vertices
 				glm::vec3 pos = glm::vec3(mesh.V(f.v[j]).x, mesh.V(f.v[j]).y, mesh.V(f.v[j]).z);
 				glm::vec3 norm = glm::vec3(mesh.VN(fn.v[j]).x, mesh.VN(fn.v[j]).y, mesh.VN(fn.v[j]).z);
-				glm::vec2 tex = glm::vec2(mesh.VT(ft.v[j]).x, mesh.VT(ft.v[j]).y);
+				glm::vec2 tex = (ft.v[j] != MISSING_INDEX && ft.v[j] < mesh.NVT()) ? glm::vec2(mesh.VT(ft.v[j]).x, mesh.VT(ft.v[j]).y) : glm::vec2(0.0f);
 
 				vertices.push_back(VERTEX{ pos, norm, tex });
 			}
@@ -191,12 +149,27 @@ void MeshComponent::buildVertices(cyTriMesh& mesh)
 			indices.push_back(newVertexIndex[key]);
 		}
 
+
+
 	}
 }
 
 void MeshComponent::buildSubMeshes(cyTriMesh& mesh)
 {
 	// Handle creating submeshes
+
+	// if no materials, create subMesh manually
+	if (!mesh.NM()) {
+		// Create new submesh
+		SubMesh subMesh;
+
+		subMesh.indexStart = 0;
+		subMesh.indexCount = indices.size();
+
+		submeshes.push_back(subMesh);
+		return;
+	}
+
 	uint32_t idxOffset = 0;
 	for (int i = 0; i < mesh.NM(); ++i) {
 
@@ -269,6 +242,49 @@ void MeshComponent::CreateMeshObject()
 	vao.Unbind();
 	vbo.Unbind();
 	ebo.Unbind();
+}
+
+void MeshComponent::debugMeshInfo(cyTriMesh& mesh)
+{
+
+	std::cout << "Vertices: " << mesh.NV() << "\n";
+	std::cout << "Normals:  " << mesh.NVN() << "\n";
+	std::cout << "Tex Coords:  " << mesh.NVT() << "\n";
+	std::cout << "Faces:    " << mesh.NF() << "\n";
+	std::cout << "Materials:    " << mesh.NM() << "\n";
+
+
+	for (int i = 0; i < std::min(5, (int) mesh.NV()); ++i) {
+		auto v = mesh.V(i);
+		auto n = mesh.VN(i);
+		auto t = mesh.VT(i);
+		std::cout << "Vertex " << i << ": Pos("
+			<< v.x << ", " << v.y << ", " << v.z << ")  "
+			<< "Norm("
+			<< n.x << ", " << n.y << ", " << n.z << ")  "
+			<< "Tex("
+			<< t.x << ", " << t.y << ", " << t.z << ")\n";
+	}
+
+	for (int i = 0; i < std::min(3, (int)mesh.NF()); ++i) {
+		auto f = mesh.F(i);
+		std::cout << "Face " << i << ": "
+			<< f.v[0] << ", "
+			<< f.v[1] << ", "
+			<< f.v[2] << "\n";
+	}
+
+	for (int i = 0; i < std::min(5, (int)mesh.NF()); ++i) {
+		auto f = mesh.F(i);
+		auto fn = mesh.FN(i);
+		auto ft = mesh.FT(i);
+		std::cout << "Face " << i << " position indices:  "
+			<< f.v[0] << "," << f.v[1] << "," << f.v[2]
+			<< "  | normal indices: "
+			<< fn.v[0] << "," << fn.v[1] << "," << fn.v[2] <<
+			"  | texture indices: "
+			<< ft.v[0] << "," << ft.v[1] << "," << ft.v[2] << "\n";
+	}
 }
 
 std::string MeshComponent::removeLastWord(std::string filename)

@@ -21,11 +21,14 @@ public:
 	void Clear();
 	void CollectionPass(Scene* scene);
 	void DrawPass(Scene* scene, shared_ptr<InputManager> inputManager, float dt);
+	void EnvMapPass(Scene* scene);
 	void PostProcessPass(Scene* scene);
 	void RenderFrame(Scene* scene, shared_ptr<InputManager> inputManager, float dt);
+	void RenderFrameRenderToTexture(Scene* scene, shared_ptr<InputManager> inputManager, float dt);
 	void EndFrame();
 
 	void createFBO();
+	void createEnvMapBackgroundObject();
 
 private:
 
@@ -42,6 +45,8 @@ private:
 	ShaderManager& shaderManager;
 	unique_ptr<FBO> RenderToTextureFBO;
 	MeshComponent* renderToTextureMesh;
+	MeshComponent* cubeMapMesh;
+
 };
 
 

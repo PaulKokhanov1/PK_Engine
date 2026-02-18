@@ -11,6 +11,8 @@
 #include"Camera.h"
 #include"Light.h"
 #include "SceneException.h"
+#include "CubeMap.h"
+#include "TextureManager.h"
 
 int main() {
 
@@ -44,6 +46,7 @@ int main() {
 	);
 
 	ShaderManager shaderManager;
+	TextureManager textureManager;
 	Renderer renderer(window, shaderManager);
 
 
@@ -68,8 +71,9 @@ int main() {
 	std::string name = "rectangle";
 	std::vector<VERTEX> verts(vertices, vertices + sizeof(vertices) / sizeof(VERTEX));
 	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
-	MeshComponent rectangle(name, verts, ind);
-	MeshComponent teapot("OBJ/teapot_white/teapot.obj");
+	MeshComponent rectangle(name, verts, ind);	
+	MeshComponent sphere("OBJ/sphere/sphere.obj");
+	//MeshComponent teapot("OBJ/teapot_white/teapot.obj");
 	//MeshComponent yoda("OBJ/yoda/yoda.obj");
 
 	// Rotate Yoda
@@ -85,7 +89,7 @@ int main() {
 		glm::vec3(2.0f, 2.0f, 2.0f)
 	};
 	//yoda.setTransform(t);
-	teapot.setTransform(t);
+	//teapot.setTransform(t);
 
 	// Transform rectangle
 	Transform tR = {
@@ -113,18 +117,31 @@ int main() {
 	light.diffuse = glm::vec3(1.0f); // darken diffuse light a bit
 	light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 
+
+	// TEMPORARY CUBEMAP paths, MUST initialize array in proper order, +X, -X, +Y, -Y, +Z, -Z
+	std::array<std::string, 6> paths = {
+		"envMaps/cubemap/cubemap_posx.png",
+		"envMaps/cubemap/cubemap_negx.png",
+		"envMaps/cubemap/cubemap_posy.png",
+		"envMaps/cubemap/cubemap_negy.png",
+		"envMaps/cubemap/cubemap_posz.png",
+		"envMaps/cubemap/cubemap_negz.png",
+	};
+
 	//------------------------------------------------------------------------------------------------------------
 	
 	// load default vertex shader and fragement shader into shaderManager
 	shaderManager.load("default", "default.vert", "default.frag");
 	shaderManager.load("framebuffer", "framebuffer.vert", "framebuffer.frag");
+	shaderManager.load("skybox", "skybox.vert", "skybox.frag");
 
 	// Create Scene
 	Scene basic;
-	basic.AddMesh(&teapot);
+	basic.AddMesh(&sphere);
 	basic.Addlight(&light);
 	basic.setCamera(std::make_unique<Camera>(engineConfig::DEFAULT_HEIGHT, engineConfig::DEFAULT_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f), 45.0f, 0.1f, 100.0f));
 	basic.setQuadController(std::make_unique<QuadController>(&rectangle));
+	basic.setCubeMap(std::make_unique<CubeMap>(paths));
 
 	// Validate Scene, Return early if scene's are not created properly
 	try {
