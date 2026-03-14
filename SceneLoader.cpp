@@ -55,7 +55,7 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 	//yoda.setTransform(t);
 	//teapot.setTransform(t);
 
-	// TEMPORARY LIGHTS
+	// TEMPORARY LIGHTS, POINT LIGHT
 	std::unique_ptr<Light> light = std::make_unique<Light>();
 	light->color = glm::vec3(1.0f, 1.0f, 1.0f);
 	light->position = glm::vec3(3, 0, 3);

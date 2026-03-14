@@ -24,7 +24,7 @@ struct Light
 	glm::vec3 diffuse;
 	glm::vec3 specular;
 
-	float envLightIntensity;
+	float envLightIntensity;	// This should probably not be in the Light class
 
 	float yaw = -90.0f;
 	float pitch = 0.0f;
@@ -35,6 +35,8 @@ struct Light
 	// SpotLight Specific
 	float innerCone;
 	float outerCone;
+
+	Light() {}
 
 	Light(
 		LightType type, glm::vec3 col, glm::vec3 amb, glm::vec3 diff, glm::vec3 spec, 
