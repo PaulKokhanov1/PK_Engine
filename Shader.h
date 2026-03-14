@@ -1,7 +1,8 @@
-#ifndef SHADER_H
-#define SHADER_H
+#pragma once
 
 #include<glad/glad.h>
+#include <glm/fwd.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include<string>
 #include<vector>
 #include<fstream>
@@ -13,6 +14,8 @@
 #include"ShaderCommon.h"
 #include"ShaderException.h"
 #include"GLDebug.h"
+
+
 
 std::string get_file_contents(const char* filename);
 
@@ -40,8 +43,18 @@ public:
 	const char* getVertexFile();
 	const char* getFragmentFile();
 
-	unsigned int getUniformLocation(const std::string& name);
+	int getUniformLocation(const std::string& name) const;
 
+	// Setting Uniforms
+	void setUniform1i(const std::string& name, int val);
+	void setUniform1f(const std::string& name, float val);
+
+	void setUniform2fv(const std::string& name, const glm::vec2& val);
+	void setUniform3fv(const std::string& name, const glm::vec3& val);
+	void setUniform4fv(const std::string& name, const glm::vec4& val);
+
+	void setUniformMat3fv(const std::string& name, const glm::mat3& matrix);
+	void setUniformMat4fv(const std::string& name, const glm::mat4& matrix);
 
 private:
 	
@@ -50,9 +63,7 @@ private:
 	const char* fragmentFile;
 
 	// cache shader uniform location
-	std::unordered_map<std::string, int> shaderUniformLocations;
+	mutable std::unordered_map<std::string, int> shaderUniformLocations;
 	
 };
-
-#endif
 

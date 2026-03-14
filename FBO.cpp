@@ -1,6 +1,6 @@
 #include "FBO.h"
 
-FBO::FBO(unsigned int tH, unsigned int tW, unsigned int wH, unsigned int wW): textureHeight(tH), textureWidth(tW), windowHeight(wH), windowWidth(wW)
+FBO::FBO(unsigned int tW, unsigned int tH, unsigned int wW, unsigned int wH): textureHeight(tH), textureWidth(tW), windowHeight(wH), windowWidth(wW)
 {
 	ID = 0;
 }
@@ -12,6 +12,8 @@ FBO::~FBO()
 
 void FBO::Construct()
 {
+	TextureManager* texManager = Application::Get().getTextureManager();
+
 	// Grab Previous FrameBuffer 
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &origFB);
 
@@ -19,7 +21,11 @@ void FBO::Construct()
 	glBindFramebuffer(GL_FRAMEBUFFER, ID);
 
 	// Create colorAttachment Texture
-	colorAttachment = new Texture(GL_RGB, GL_UNSIGNED_BYTE, textureWidth, textureHeight);
+	TextureDescriptor renderTextureTex;
+	renderTextureTex.width = textureWidth;
+	renderTextureTex.height = textureHeight;
+	renderTextureTex.format = GL_RGB;
+	colorAttachment = texManager->loadRenderedTexture(renderTextureTex, textureWidth, textureHeight, "RenderTexture", GL_TEXTURE_2D, GL_RGB, GL_UNSIGNED_BYTE);
 
 	// Create Depth Buffer
 	glGenRenderbuffers(1, &depthBuffer);
@@ -43,6 +49,13 @@ void FBO::Construct()
 	// Unbind to orginal framebuffer
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, origFB);
 
+}
+
+void FBO::sendUniformToShader(Shader& shader, const char* uniform)
+{
+	TextureManager* texManager = Application::Get().getTextureManager();
+
+	colorAttachment->sendUniformToShader(shader, uniform, texManager->texTypeToUnit[colorAttachment->getType()]);
 }
 
 void FBO::Bind()

@@ -1,5 +1,4 @@
-#ifndef SHADER_COMMON_H
-#define SHADER_COMMON_H
+#pragma once
 
 #include<string>
 
@@ -19,6 +18,4 @@ inline std::string errorTypeToString(errorType e) {
 	}
 }
 
-
-#endif // !SHADER_COMMON_H
 

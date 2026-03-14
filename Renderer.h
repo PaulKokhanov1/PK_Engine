@@ -1,33 +1,38 @@
-#ifndef RENDERER_CLASS_H
-#define RENDERER_CLASS_H
+#pragma once
 
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
 #include"LogRenderer.h"
+#include "EngineConfig.h"
 #include "Scene.h"
 #include "Window.h"
 #include"ShaderManager.h"
 #include"GLDebug.h"
 #include"FBO.h"
+#include"Application.h"
 
 class Renderer
 {
 public:
-	Renderer(Window& win, ShaderManager& sm);
+	Renderer(Window& win);
 	~Renderer();
 
 	void Clear();
 	void CollectionPass(Scene* scene);
-	void DrawPass(Scene* scene, shared_ptr<InputManager> inputManager, float dt);
+	void ReflectionPass(Scene* scene, float dt);
+	void DrawPass(Scene* scene, float dt);
 	void EnvMapPass(Scene* scene);
+	void RenderToTexturePass(Scene* scene, float dt); // Used Explicity for Project 5
 	void PostProcessPass(Scene* scene);
-	void RenderFrame(Scene* scene, shared_ptr<InputManager> inputManager, float dt);
-	void RenderFrameRenderToTexture(Scene* scene, shared_ptr<InputManager> inputManager, float dt);
+	void RenderFrame(Scene* scene, float dt);
+	void RenderFrameRenderToTexture(Scene* scene, float dt);
+	void DrawPlaneWithShader(Scene* scene);
 	void EndFrame();
 
 	void createFBO();
+	void createReflectionFBO();
 	void createEnvMapBackgroundObject();
 
 private:
@@ -39,17 +44,13 @@ private:
 
 		RenderItem(MeshComponent* mID, SubMesh* sID, glm::mat4 mM) : meshRef(mID), subMeshRef(sID), modelMatrix(mM) {}
 	};
-	unordered_map<Shader*, vector<RenderItem>> shaderBucket;
+	std::unordered_map<Shader*, std::vector<RenderItem>> shaderBucket;
 
 	Window& window;
-	ShaderManager& shaderManager;
-	unique_ptr<FBO> RenderToTextureFBO;
+	std::unique_ptr<FBO> RenderToTextureFBO;
+	std::unique_ptr<FBO> ReflectionFBO;
 	MeshComponent* renderToTextureMesh;
-	MeshComponent* cubeMapMesh;
-
+	std::unique_ptr<MeshComponent> cubeMapMesh;
 };
-
-
-#endif // !RENDERER_CLASS_H
 
 

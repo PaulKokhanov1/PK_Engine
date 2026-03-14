@@ -10,76 +10,86 @@ void Camera::updateViewProjection()
 	projection = getProjectionMatrix();
 }
 
-void Camera::sendViewAndProjToShader(Shader& shader)
+void Camera::calcMirroredViewMatrix(glm::vec3 mirrorNormal, glm::vec3 mirrorPos)
 {
-	// Ensure uniform location exists for View and Projection
-	GLint viewMatrixLocation = glGetUniformLocation(shader.ID, "viewMatrix");
-	if (viewMatrixLocation == -1) {
-		LogCameraWarn("Uniform viewMatrix not found in shader.");
-		return;
-	}	
-	
-	GLint projectionMatrixLocation = glGetUniformLocation(shader.ID, "projectionMatrix");
-	if (projectionMatrixLocation == -1) {
-		LogCameraWarn("Uniform projectionMatrix not found in shader.");
-		return;
-	}
+	// Need "Position", "Orientation", "Up", plane "Normal", and "distance d" of plane
+	glm::vec3 N = glm::normalize(mirrorNormal);
+	glm::vec3 F = glm::normalize(Orientation);
+	glm::vec3 U = glm::normalize(Up);
+
+	// Calculate mirrored Eye Position
+	glm::vec3 eyeVector = Position - mirrorPos; // Vector from camera Position to point on plane, arrow should be towards camera pos
+	float dist = glm::dot(eyeVector, N); // Get the dist from mirrorPos along its normal, so project vectro onto normal of mirror
+	mirroredPosition = Position - 2.0f * dist * N; // Then move eye/camera position 2 * dust in opposite direction of normal (to opposite side of plane)
 
 
-	// Exports View and Projection matrix
-	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
+	// Calculate new oritentation/looking direction
+	float distCamDir = glm::dot(F, N); // Create direction of where camera is looking, then find dist along mirror normal
+	glm::vec3 mirroredForward = F - 2.0f * (distCamDir)*N; // Calculate resulting vector after moving down along normal of mirror plane, multiply by 2 because vector is MAGNITUDE & Direction, so we move it downwards then we subtract from original direction to get resulting vector
+
+	// Now reflect Up vector, same process as above
+	float distUpDir = glm::dot(U, N);
+	glm::vec3 mirroredUpVec = U - 2.0f * (distUpDir) * N;
+
+	mirroredView = glm::lookAt(mirroredPosition, mirroredPosition + mirroredForward, mirroredUpVec);
 }
 
-void Camera::sendCamDistanceScaleToShader(Shader& shader)
+void Camera::sendViewAndProjToShader(Shader& shader)
 {
-	GLint camDistanceScaleLocation = glGetUniformLocation(shader.ID, "camDistanceScale");
-	if (camDistanceScaleLocation == -1) {
-		LogCameraWarn("Uniform camDistanceScale not found in shader.");
-		return;
-	}
+	shader.setUniformMat4fv("viewMatrix", view);
+	shader.setUniformMat4fv("projectionMatrix", projection);
+}
 
-	glUniform1f(camDistanceScaleLocation, getDistanceScale());
+void Camera::sendMirroredViewAndProjToShader(Shader& shader)
+{
+	shader.setUniformMat4fv("viewMatrix", mirroredView);
+	shader.setUniformMat4fv("projectionMatrix", projection);
+}
+
+void Camera::sendMirroredViewToShader(Shader& shader)
+{
+	shader.setUniformMat4fv("reflectionViewMatrix", mirroredView);
+}
+
+void Camera::sendInverseProjViewToShader(Shader& shader)
+{
+	shader.setUniformMat4fv("invProjView", glm::inverse(projection * view));
 }
 
 void Camera::sendCamPositionWorldSpaceToShader(Shader& shader)
 {
-	GLint camPosWorldLocation = glGetUniformLocation(shader.ID, "camPosWorld");
-	if (camPosWorldLocation == -1) {
-		LogCameraWarn("Uniform camPosWorld not found in shader.");
-		return;
-	}
-
-	// Exports View and Projection matrix
-	glUniform3fv(camPosWorldLocation, 1, glm::value_ptr(Position));
+	shader.setUniform3fv("camPosWorld", Position);
 }
 
-void Camera::updateInputs(InputManager& input, float dt)
+void Camera::updateInputs(float dt)
 {
+
+	InputManager* input = Application::Get().getInputManager();
+
 	// Handle keyboard inputs
-	if (input.isKeyHeld(GLFW_KEY_W)) Position += speed * Orientation * dt;
-	if (input.isKeyHeld(GLFW_KEY_S)) Position -= speed * Orientation * dt;
-	if (input.isKeyHeld(GLFW_KEY_A)) Position -= glm::normalize(glm::cross(Orientation, Up)) * speed * dt;
-	if (input.isKeyHeld(GLFW_KEY_D)) Position += glm::normalize(glm::cross(Orientation, Up)) * speed * dt;
+	if (input->isKeyHeld(GLFW_KEY_W)) Position += speed * Orientation * dt;
+	if (input->isKeyHeld(GLFW_KEY_S)) Position -= speed * Orientation * dt;
+	if (input->isKeyHeld(GLFW_KEY_A)) Position -= glm::normalize(glm::cross(Orientation, Up)) * speed * dt;
+	if (input->isKeyHeld(GLFW_KEY_D)) Position += glm::normalize(glm::cross(Orientation, Up)) * speed * dt;
 
 	// Switch between perspective and orthogonal transformation
-	if (input.isKeyPressed(GLFW_KEY_P)) {
+	if (input->isKeyPressed(GLFW_KEY_P)) {
 		isPerspective = !isPerspective;
 		if (!isPerspective) {
-			referenceDistance = glm::length(Position);
+			orthoSize = glm::length(Position) * tanf(glm::radians(FOV) / 2);
 		}
 		projectionDirty = true;
 	}
 
 
 	// Right mouse button and drag -> adjust camera angles
-	if (input.isMouseButtonHeld(GLFW_MOUSE_BUTTON_RIGHT)) {
+	if (input->isMouseButtonHeld(GLFW_MOUSE_BUTTON_RIGHT)) {
 
 		// Hide cursor
-		input.setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		input->setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-		yaw += sensitivity * input.getDeltaMouseX();
-		pitch += sensitivity * input.getDeltaMouseY();
+		yaw += sensitivity * input->getDeltaMouseX();
+		pitch += sensitivity * input->getDeltaMouseY();
 
 		pitch = glm::clamp(pitch, -89.0f, 89.0f);
 
@@ -92,21 +102,26 @@ void Camera::updateInputs(InputManager& input, float dt)
 		Orientation = glm::normalize(Orientation);
 
 	}
-	else if (input.isMouseButtonReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
+	else if (input->isMouseButtonReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
 
 		// Unhides cursor since camera is not looking around anymore
-		input.setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		input->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 
 	// Left mouse button and drag -> adjust camera distance
-	if (input.isMouseButtonHeld(GLFW_MOUSE_BUTTON_LEFT)) {
+	if (input->isMouseButtonHeld(GLFW_MOUSE_BUTTON_LEFT)) {
 
-		Position += (speed  / 10.f) * (float)input.getDeltaMouseY() * Orientation;
+		if (isPerspective) Position += (speed  / 10.f) * (float)input->getDeltaMouseY() * Orientation;
+		else {
+			orthoSize *= (1 + zoomFactor * (float)input->getDeltaMouseY());
+			orthoSize = glm::clamp(orthoSize, 0.01f, 100.0f);
+			recomputeProjection();
+		}
 	}
-	else if (input.isMouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
+	else if (input->isMouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
 
 		// Unhides cursor since camera is not looking around anymore
-		input.setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		input->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 }
 
@@ -141,7 +156,7 @@ float Camera::getDistanceScale() const
 	if (distance <= 1e-6f) {
 		return 1.0f;
 	}
-	return isPerspective ? 1 : (referenceDistance / distance);
+	return isPerspective ? 1 : (distance);
 }
 
 inline float Camera::getAspectRatio() const
@@ -178,7 +193,7 @@ void Camera::recomputeProjection() const
 	}
 
 	// Multiply by aspectRatio to have equal proportions
-	float halfHeight = referenceDistance * tanf(glm::radians(FOV) / 2);
+	float halfHeight = orthoSize;
 	float halfWidth = halfHeight * getAspectRatio(); 
 
 	projection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, nearPlane, farPlane);

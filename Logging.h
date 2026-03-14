@@ -1,10 +1,7 @@
-#ifndef LOGGING_CLASS_H
-#define LOGGING_CLASS_H
+#pragma once
 
 #include <iostream>
 #include <string>
-
-using namespace std;
 
 enum class LogLevel
 {
@@ -16,6 +13,5 @@ enum class LogLevel
 
 };
 
-void Log(LogLevel type, const string& msg);
+void Log(LogLevel type, const std::string& msg);
 
-#endif // !LOGGING_CLASS_H

@@ -6,17 +6,25 @@ CubeMap::CubeMap(std::array<std::string,6> paths)
 		cubeMapImgPaths[i] = paths[i];
 	}
 
-	cubeMapTexture = std::make_unique<Texture>(paths, "CubeMap", GL_TEXTURE_CUBE_MAP, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+	// Each material holds 1 type of texture
+	TextureManager* texManager = Application::Get().getTextureManager();
 
+	// prior to load cubemap does not know with and height, so store as 0
+	TextureDescriptor cubeMapTex;
+	cubeMapTex.path = paths[0] + paths[1] + paths[2] + paths[3] + paths[4] + paths[5];
+	cubeMapTex.format = GL_RGBA;
+	cubeMapTexture = texManager->loadCubeMap(cubeMapTex, paths, "CubeMap", GL_TEXTURE_CUBE_MAP, GL_RGBA, GL_UNSIGNED_BYTE);
 }
 
 CubeMap::~CubeMap()
 {
 }
 
-void CubeMap::sendUniformToShader(Shader& shader, const char* uniform, GLuint unit)
+void CubeMap::sendUniformToShader(Shader& shader, const char* uniform)
 {
-	cubeMapTexture->sendUniformToShader(shader, uniform, unit);
+	TextureManager* texManager = Application::Get().getTextureManager();
+
+	cubeMapTexture->sendUniformToShader(shader, uniform, texManager->texTypeToUnit[cubeMapTexture->getType()]);
 }
 
 void CubeMap::Bind()

@@ -70,6 +70,12 @@
     <Filter Include="Source Files\ThirdParty">
       <UniqueIdentifier>{be41abe5-15fa-458f-b01e-fd4fa9c3e615}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Loading">
+      <UniqueIdentifier>{66b6fd58-281f-491b-9e11-91d95d9cc1b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Loading">
+      <UniqueIdentifier>{283d98a0-042f-4b83-b038-007bf40176cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -151,6 +157,18 @@
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
     <ClCompile Include="TextureManager.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Mirror.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneLoader.cpp">
+      <Filter>Source Files\Loading</Filter>
+    </ClCompile>
+    <ClCompile Include="LightController.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -278,6 +296,24 @@
     <ClInclude Include="TextureManager.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDescriptor.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Mirror.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneLoader.h">
+      <Filter>Header Files\Loading</Filter>
+    </ClInclude>
+    <ClInclude Include="LightController.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="LogTextureManager.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="default.vert">
@@ -296,6 +332,12 @@
       <Filter>Resource Files\Shaders</Filter>
     </None>
     <None Include="skybox.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="planeReflection.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="planeReflection.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

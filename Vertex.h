@@ -1,5 +1,5 @@
-#ifndef VERTEX_H
-#define VERTEX_H
+#pragma once
+
 
 #include<glm/glm.hpp>
 #include<glm/gtc/matrix_transform.hpp>
@@ -12,5 +12,4 @@ struct VERTEX
 	glm::vec2 texCoord;
 
 };
-#endif // !VERTEX_H
 

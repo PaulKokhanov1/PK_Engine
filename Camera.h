@@ -1,6 +1,4 @@
-#ifndef CAMERA_CLASS_H
-#define CAMERA_CLASS_H
-
+#pragma once
 
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
@@ -14,6 +12,7 @@
 #include"LogCamera.h"
 #include"EngineConfig.h"
 #include"Shader.h"
+#include"Application.h"
 #include"InputManager.h"
 
 class Camera
@@ -22,6 +21,7 @@ public:
 
 	// Transformation Matrices for Vertex Shader
 	glm::mat4 view = glm::mat4(1.0f);
+	glm::mat4 mirroredView = glm::mat4(1.0f);
 	mutable glm::mat4 projection = glm::mat4(1.0f);
 	mutable bool projectionDirty = true; // Avoid recomputing projection every frame, mutuable to be editable inside a const function
 
@@ -44,14 +44,20 @@ public:
 
 	// Updates the camera matrix to the Vertex Shader
 	void updateViewProjection();
+	// Calculate Mirrored View Matrix for computing reflections on a plane given by its Normal and center pos
+	void calcMirroredViewMatrix(glm::vec3 mirrorNormal, glm::vec3 mirrorPos);
 	// Exports View and Projection Matrix to a shader
-	void sendViewAndProjToShader(Shader& shader);
-	// Exports camera distance relative to point where orthographic projection was enabled (CHANGE THIS LATER)
-	void sendCamDistanceScaleToShader(Shader& shader);
+	void sendViewAndProjToShader(Shader& shader);	
+	// Exports MIRROED View and Projection Matrix to a shader
+	void sendMirroredViewAndProjToShader(Shader& shader);
+	// Export Mirrored View to a shader
+	void sendMirroredViewToShader(Shader& shader);
+	// Export Inverse Projection View Matrix
+	void sendInverseProjViewToShader(Shader& shader);
 	// Exports Camera World Space Pos to a shader
-	void sendCamPositionWorldSpaceToShader(Shader& shader);
+	void sendCamPositionWorldSpaceToShader(Shader& shader);	
 	// Handles camera inputs
-	void updateInputs(InputManager& input, float dt);
+	void updateInputs(float dt);
 
 	// Getters
 	const glm::vec3& getPosition() const;
@@ -70,15 +76,16 @@ public:
 private:
 	// Stores the main vectors of the camera
 	glm::vec3 Position;
+	glm::vec3 mirroredPosition;
 	glm::vec3 Orientation = glm::vec3(0.0f, 0.0f, -1.0f);	// Direction of Camera
 	glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	// Orthographic and perspective projection toggle
 	bool isPerspective = true;
-	float referenceDistance = 0.0f;
+	float orthoSize = 0.0f;
+	float zoomFactor = 0.2f;
 
 	void recomputeProjection() const;
 
 };
 
-#endif // !CAMERA_CLASS_H

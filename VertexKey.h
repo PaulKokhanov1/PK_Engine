@@ -1,5 +1,5 @@
-#ifndef VERTEXKEY_H
-#define VERTEXKEY_H
+#pragma once
+
 
 #include <cstddef>
 #include <functional>
@@ -41,5 +41,4 @@ namespace std {
         }
     };
 }
-#endif // !VERTEXKEY_H
 

@@ -7,8 +7,8 @@ layout (location = 1) in vec3 aNormal;
 // Texture Coordinates
 layout (location = 2) in vec2 aTex;
 
-// Texture Coordiantes for Fragement Shader
-out vec2 texCoord;
+// Sends Position in CVV/Clip space to FS
+out vec4 positionCVV;
 
 // Transformation Matrices
 uniform mat4 projectionMatrix;
@@ -18,9 +18,7 @@ uniform mat4 modelMatrix;
 void main()
 {
 	// Outputs the positions/coordinates of all vertices
-	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0f);
-
-	// Sending texture coordinates
-	texCoord = aTex;
+	positionCVV = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0f);
+	gl_Position = positionCVV;
 
 }

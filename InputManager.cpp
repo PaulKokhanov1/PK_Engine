@@ -18,7 +18,7 @@ void InputManager::handleKeyCallback(int key, int scancode, int action, int mods
 		keyHeld.erase(key);
 	}
 	else if (action != GLFW_REPEAT) {
-		LogInputManagerError("Unknown key action: " + to_string(action));
+		LogInputManagerError("Unknown key action: " + std::to_string(action));
 	}
 }
 

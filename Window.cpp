@@ -113,7 +113,7 @@ GLFWwindow* Window::getGLFWwindow()
 	return window;
 }
 
-pair<int, int> Window::getWindowDimensions()
+std::pair<int, int> Window::getWindowDimensions()
 {
 	return { windowWidth, windowHeight };
 }

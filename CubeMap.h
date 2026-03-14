@@ -2,8 +2,9 @@
 #include <algorithm>
 #include <array>
 
-#include "Texture.h"
-
+#include"Texture.h"
+#include"TextureManager.h"
+#include"Application.h"
 
 class CubeMap
 {
@@ -12,7 +13,8 @@ public:
 	~CubeMap();
 
 	// Send sub map texture unit to shader
-	void sendUniformToShader(Shader& shader, const char* uniform, GLuint unit);
+	void sendUniformToShader(Shader& shader, const char* uniform);
+
 	// Bind the cube map
 	void Bind();
 	// Unbinds cubeMap
@@ -22,5 +24,5 @@ public:
 
 private:
 	std::array<std::string, 6> cubeMapImgPaths;
-	std::unique_ptr<Texture> cubeMapTexture;
+	Texture* cubeMapTexture;
 };

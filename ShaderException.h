@@ -1,5 +1,4 @@
-#ifndef SHADER_EXCEPTION_CLASS_H
-#define SHADER_EXCEPTION_CLASS_H
+#pragma once
 
 #include<iostream>
 #include"ShaderCommon.h"
@@ -20,5 +19,3 @@ private:
 	const char* filePath;
 	
 };
-
-#endif

@@ -13,7 +13,7 @@ MeshComponent::MeshComponent(const char* filename, bool centerTheMesh)
 
 	// create filepath
 	filepath = removeLastWord(filename);
-	cout << "FILEPATH: " << filepath << endl;
+	std::cout << "FILEPATH: " << filepath << std::endl;
 
 	 //Compute Normals if no normals are specified
 	if (mesh.NVN() == 0) {
@@ -67,7 +67,7 @@ MeshComponent::~MeshComponent()
 
 }
 
-void MeshComponent::DrawSubMesh(SubMesh& s)
+void MeshComponent::DrawSubMesh(const SubMesh& s)
 {
 	vao.Bind();
 
@@ -100,16 +100,6 @@ std::vector<SubMesh>& MeshComponent::getSubMeshes()
 	return submeshes;
 }
 
-std::vector<VERTEX> MeshComponent::getVertices()
-{
-	return vertices;
-}
-
-std::vector<GLuint> MeshComponent::getIndices()
-{
-	return indices;
-}
-
 void MeshComponent::setTransform(Transform transform)
 {
 	translation = transform.translation;
@@ -122,6 +112,10 @@ void MeshComponent::buildVertices(cyTriMesh& mesh)
 	std::unordered_map<VertexKey, long> newVertexIndex;
 	bool hasUV = mesh.NVT();
 
+	// Reserve mem to avoid unecessary reallocations
+	vertices.reserve(mesh.NF() * 3);
+	indices.reserve(mesh.NF() * 3);
+
 	// Handling only position, normal and tex Coords
 	// Also assuming each face will have a position, a normal AND a texCoord assigned, maybe handle this after you finish implementation
 	for (int i = 0; i < mesh.NF(); ++i) {
@@ -133,7 +127,9 @@ void MeshComponent::buildVertices(cyTriMesh& mesh)
 			// Using the indices are the faces to make a vertex Key so no need to worry that tex coord is 2D
 			VertexKey key = VertexKey{ f.v[j], fn.v[j], ft.v[j] };
 
-			if (newVertexIndex.find(key) == newVertexIndex.end()) {
+			auto it = newVertexIndex.find(key);
+
+			if (it == newVertexIndex.end()) {
 				// Create new Vertex
 				newVertexIndex[key] = vertices.size();
 
@@ -166,6 +162,8 @@ void MeshComponent::buildSubMeshes(cyTriMesh& mesh)
 		subMesh.indexStart = 0;
 		subMesh.indexCount = indices.size();
 
+		subMesh.material.loadTextures();
+
 		submeshes.push_back(subMesh);
 		return;
 	}
@@ -194,9 +192,9 @@ void MeshComponent::buildSubMeshes(cyTriMesh& mesh)
 		// Send to material
 		subMesh.material.setAttributes(ka, kd, ks, 100.0f);
 
-		// Set and Load texture(s) in material
-		subMesh.material.setTextureNames(map_ka, map_kd, map_ks);
-		subMesh.material.loadTextures(filepath.c_str());
+		// Set texture(s) paths in material then load into Texture Manager
+		subMesh.material.setTexturePaths(filepath, map_ka, map_kd, map_ks);
+		subMesh.material.loadTextures();
 
 		submeshes.push_back(subMesh);
 	}

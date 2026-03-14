@@ -52,7 +52,7 @@ Texture::Texture(const char* filename, const char* texType, GLuint slot, GLenum 
 
 }
 
-Texture::Texture(GLenum format, GLenum pixelType, unsigned int width, unsigned int height, GLenum texTarget) : texTarget(texTarget), unit(0)
+Texture::Texture(unsigned int width, unsigned int height, const char* texType, GLenum slot, GLenum format, GLenum pixelType, GLenum texTarget) : texTarget(texTarget), unit(slot), type(texType)
 {
 	// Generate Texture
 	glGenTextures(1, &texID);
@@ -174,8 +174,8 @@ Texture::Texture(unsigned char* color_data, const char* texType, GLuint slot) : 
 		1,
 		1,
 		0,				// Border, just keep at ZERO
-		GL_UNSIGNED_BYTE,			// Format, i.e what color's img will support
-		GL_RGBA,		// Data type of format, i.e "each color is of what type?"
+		GL_RGBA,			// Format, i.e what color's img will support
+		GL_UNSIGNED_BYTE,		// Data type of format, i.e "each color is of what type?"
 		color_data
 	);
 
@@ -218,4 +218,9 @@ void Texture::Delete()
 GLuint Texture::getID()
 {
 	return texID;
+}
+
+const char* Texture::getType()
+{
+	return type;
 }

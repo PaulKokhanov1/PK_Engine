@@ -1,8 +1,8 @@
-#ifndef SHADERMANAGER_CLASS_H
-#define SHADERMANAGER_CLASS_H
+#pragma once
 
 #include"iostream"
 #include<unordered_map>
+
 #include"Shader.h"
 #include"LogShaderManager.h"
 
@@ -27,6 +27,4 @@ private:
 	std::unordered_map<std::string, std::unique_ptr<Shader>> shaderPrograms;
 };
 
-
-#endif
 

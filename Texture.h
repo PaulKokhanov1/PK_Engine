@@ -11,7 +11,7 @@ class Texture
 {
 public:
 	Texture(const char* filename, const char* texType, GLenum slot, GLenum format, GLenum pixelType, GLenum texTarget = GL_TEXTURE_2D);
-	Texture(GLenum format, GLenum pixelType, unsigned int width, unsigned int height, GLenum texTarget = GL_TEXTURE_2D);	// Used for framebuffer Color attachment
+	Texture(unsigned int width, unsigned int height, const char* texType, GLenum slot, GLenum format, GLenum pixelType, GLenum texTarget = GL_TEXTURE_2D);	// Used for framebuffer Color attachment
 	Texture(std::array<std::string, 6> paths, const char* texType, GLenum texTarget, GLenum slot, GLenum format, GLenum pixelType); // Used for Cube Map Environment texture
 	Texture(unsigned char* color_data, const char* texType, GLuint slot); // Used for simple 1x1 color textures
 	~Texture();
@@ -26,6 +26,7 @@ public:
 	void Delete();
 
 	GLuint getID();
+	const char* getType();
 
 private:
 
@@ -39,7 +40,7 @@ private:
 	GLuint unit = 0;
 
 	// Texture unit Mapping
-	unordered_map<GLuint, GLenum> texUnitMap = {
+	std::unordered_map<GLuint, GLenum> texUnitMap = {
 		{0, GL_TEXTURE0},
 		{1, GL_TEXTURE1},
 		{2, GL_TEXTURE2},

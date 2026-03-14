@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CubeMap.cpp" />
     <ClCompile Include="EBO.cpp" />
@@ -147,15 +148,18 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="LightController.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MeshComponent.cpp" />
+    <ClCompile Include="Mirror.cpp" />
     <ClCompile Include="QuadController.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneException.cpp" />
+    <ClCompile Include="SceneLoader.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderCommon.cpp" />
     <ClCompile Include="ShaderException.cpp" />
@@ -171,6 +175,7 @@
     <ClInclude Include="..\..\..\Downloads\cyCore.h" />
     <ClInclude Include="..\..\..\Downloads\cyTriMesh.h" />
     <ClInclude Include="..\..\..\Downloads\cyVector.h" />
+    <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CubeMap.h" />
     <ClInclude Include="EBO.h" />
@@ -180,6 +185,7 @@
     <ClInclude Include="GLDebug.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="LightController.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="LogCamera.h" />
     <ClInclude Include="Logging.h" />
@@ -189,19 +195,23 @@
     <ClInclude Include="LogRenderer.h" />
     <ClInclude Include="LogShaderManager.h" />
     <ClInclude Include="LogTexture.h" />
+    <ClInclude Include="LogTextureManager.h" />
     <ClInclude Include="LogWindow.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MathCommon.h" />
     <ClInclude Include="MeshComponent.h" />
+    <ClInclude Include="Mirror.h" />
     <ClInclude Include="QuadController.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneException.h" />
+    <ClInclude Include="SceneLoader.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderCommon.h" />
     <ClInclude Include="ShaderException.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureDescriptor.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="VAO.h" />
@@ -215,6 +225,8 @@
     <None Include="default.vert" />
     <None Include="framebuffer.frag" />
     <None Include="framebuffer.vert" />
+    <None Include="planeReflection.frag" />
+    <None Include="planeReflection.vert" />
     <None Include="skybox.frag" />
     <None Include="skybox.vert" />
   </ItemGroup>

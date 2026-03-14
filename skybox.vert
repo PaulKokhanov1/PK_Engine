@@ -9,6 +9,7 @@ out vec3 dir;
 // Transformation Matrices
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
+uniform mat4 invProjView;
 uniform vec3 camPosWorld;
 
 void main()
@@ -17,9 +18,8 @@ void main()
 	gl_Position = vec4(aPos, 1.0f);
 
 	// Convert Vertex pos to WS then compute direction from camera to vertex
-	mat4 InvProjView = inverse(projectionMatrix * viewMatrix);
 	vec4 clipPos = vec4(aPos, 1.0f);
-	vec4 WSPos4 = InvProjView * clipPos;
+	vec4 WSPos4 = invProjView * clipPos;
 	vec3 WSPos = vec3(WSPos4.xyz / WSPos4.w);
 	dir = normalize(WSPos - camPosWorld);
 

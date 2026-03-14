@@ -36,7 +36,7 @@ public:
 
 	// Getters and setters
 	GLFWwindow* getGLFWwindow();
-	pair<int, int> getWindowDimensions();
+	std::pair<int, int> getWindowDimensions();
 
 	void onResize(int width, int height);
 

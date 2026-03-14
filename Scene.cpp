@@ -6,11 +6,11 @@ Scene::Scene()
 
 Scene::~Scene()
 {
-	// Do Not delete meshes as Scene component does not own them
+	// Will clear memory of meshes as per RAII
 	meshes.clear();
 }
 
-void Scene::AddMesh(MeshComponent* mesh)
+void Scene::AddMesh(std::unique_ptr<MeshComponent> mesh)
 {
 	// Prevent adding empty mesh
 	if (!mesh) {
@@ -18,10 +18,10 @@ void Scene::AddMesh(MeshComponent* mesh)
 		return;
 	}
 
-	meshes.insert(mesh);
+	meshes.push_back(move(mesh));
 }
 
-void Scene::Addlight(Light* light)
+void Scene::Addlight(std::unique_ptr<Light> light)
 {
 	// Prevent adding empty light
 	if (!light) {
@@ -29,46 +29,28 @@ void Scene::Addlight(Light* light)
 		return;
 	}
 
-	lights.push_back(light);
+	lights.push_back(move(light));
 }
 
-void Scene::update(InputManager& input, float deltaTime)
+void Scene::update(float deltaTime)
 {
-	if (input.isKeyHeld(GLFW_KEY_LEFT_CONTROL)) {
+	InputManager* input = Application::Get().getInputManager();
+
+	if (input->isKeyHeld(GLFW_KEY_LEFT_CONTROL)) {
 		
-		// Adjust position of light around origin
-		if (input.isMouseButtonHeld(GLFW_MOUSE_BUTTON_LEFT)) {
+		if (lights.size()) lightController->update(deltaTime, lights);
 
-			// Currently we'll adjust each light in this way
-			for (auto& light : lights) {
-
-				light->yaw += lightMovementSensitivity * input.getDeltaMouseX();
-				light->pitch += lightMovementSensitivity * input.getDeltaMouseY();
-
-				float dirX = cos(glm::radians(light->yaw)) * cos(glm::radians(light->pitch));
-				float dirY = -sin(glm::radians(light->pitch));
-				float dirZ = sin(glm::radians(light->yaw)) * cos(glm::radians(light->pitch));
-
-
-				light->position.x = light->radius * dirX;
-				//light->position.y = light->radius * dirY;
-				light->position.z = light->radius * dirZ;
-
-
-			}
-
-		}
-
-	} else if (input.isKeyHeld(GLFW_KEY_LEFT_ALT)) {
+	} else if (input->isKeyHeld(GLFW_KEY_LEFT_ALT)) {
 		// Handle moving quad on which scene is rendered to
-		if (quadController) quadController->update(input, deltaTime);
+		if (quadController) quadController->update(deltaTime);
 
 	} else {
 		// Handle looking around and movement, only if user is not holding down CTRL
-		if (camera) camera->updateInputs(input, deltaTime);
+		if (camera) camera->updateInputs(deltaTime);
 	}
 
 	if (camera) camera->updateViewProjection();
+	if (camera && m_mirror) camera->calcMirroredViewMatrix(m_mirror->getNormal(), m_mirror->getPoint());
 
 }
 
@@ -77,6 +59,11 @@ void Scene::validate()
 	if (camera == nullptr) {
 		throw (SceneException("Current camera is not set!"));
 	}
+}
+
+void Scene::createMirrorObject(glm::vec3 pos)
+{
+	m_mirror = std::make_unique<Mirror>(pos);
 }
 
 void Scene::setCamera(std::unique_ptr<Camera> camera)
@@ -92,16 +79,25 @@ void Scene::setCamera(std::unique_ptr<Camera> camera)
 void Scene::setQuadController(std::unique_ptr<QuadController> qC)
 {
 	if (qC == nullptr) {
-		std::cerr << "[Scene] : Current quad Mesh being set it null" << std::endl;
+		std::cerr << "[Scene] : Current quad Mesh being set is null" << std::endl;
 		return;
 	}
 	this->quadController = std::move(qC);
 }
 
+void Scene::setLightController(std::unique_ptr<LightController> lC)
+{
+	if (lC == nullptr) {
+		std::cerr << "[Scene] : Light Controller being set is null" << std::endl;
+		return;
+	}
+	this->lightController = std::move(lC);
+}
+
 void Scene::setCubeMap(std::unique_ptr<CubeMap> cM)
 {
 	if (cM == nullptr) {
-		std::cerr << "[Scene] : Current cube map being set it null" << std::endl;
+		std::cerr << "[Scene] : Current cube map being set is null" << std::endl;
 		return;
 	}
 	this->cubeMap = std::move(cM);
@@ -119,17 +115,27 @@ QuadController& Scene::getQuadController()
 	return *quadController;
 }
 
+LightController& Scene::getLightController()
+{
+	return *lightController;
+}
+
 CubeMap& Scene::getCubeMap()
 {
 	return *cubeMap;
 }
 
-std::vector<Light*> Scene::getLights()
+Mirror& Scene::getMirror()
+{
+	return *m_mirror;
+}
+
+std::vector<std::unique_ptr<Light>>& Scene::getLights()
 {
 	return lights;
 }
 
-std::set<MeshComponent*> Scene::getMeshes()
+std::vector<std::unique_ptr<MeshComponent>>& Scene::getMeshes()
 {
 	return meshes;
 }

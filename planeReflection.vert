@@ -11,13 +11,14 @@ layout (location = 2) in vec2 aTex;
 out vec3 crntPosWrld;
 // Outputs normals in World Space for Fragment Shader
 out vec3 NormalWrld;
-// Texture Coordiantes for Fragement Shader
-out vec2 texCoord;
+// Used for storing projected reflection texture position
+out vec4 reflectionPosition;
 
 // Transformation Matrices
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
+uniform mat4 reflectionViewMatrix;
 uniform mat3 normalMatrix;
 
 void main()
@@ -30,7 +31,9 @@ void main()
 	// Sending transformed normals to be used as color data in World Space
 	NormalWrld = normalMatrix * aNormal;
 
-	// Sending texture coordinates
-	texCoord = aTex;
+	// Sending reflected texture positions
+	mat4 reflectProjectWorld = projectionMatrix * reflectionViewMatrix * modelMatrix;
+
+	reflectionPosition = reflectProjectWorld * vec4(aPos, 1.0f);
 
 }

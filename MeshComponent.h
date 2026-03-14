@@ -1,5 +1,5 @@
-#ifndef MESH_COMPONENT_CLASS_H
-#define MESH_COMPONENT_CLASS_H
+#pragma once
+
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
@@ -36,14 +36,12 @@ public:
 	~MeshComponent();
 
 	// Draw the object
-	void DrawSubMesh(SubMesh& s);
+	void DrawSubMesh(const SubMesh& s);
 
 	// Getters and Setters
 
 	std::string getMeshName() const;
 	std::vector<SubMesh>& getSubMeshes();	// By reference because we'd want to edit the material information
-	std::vector<VERTEX> getVertices();
-	std::vector<GLuint> getIndices();
 
 	void setTransform(Transform transform);
 
@@ -87,7 +85,3 @@ private:
 
 };
 
-#endif // !MESH_COMPONENT_CLASS_H
-
-
-#pragma once

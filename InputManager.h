@@ -1,8 +1,8 @@
-#ifndef INPUTMANAGER_CLASS_H
-#define INPUTMANAGER_CLASS_H
+#pragma once
 
 #include<unordered_set>
 #include<iostream>
+#include <glad/glad.h>
 #include<GLFW/glfw3.h>
 
 #include "LogInputManager.h"
@@ -71,6 +71,3 @@ public:
 	double getDeltaMouseY() const;
 
 };
-
-
-#endif // !INPUTMANAGER_CLASS_H

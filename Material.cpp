@@ -38,58 +38,69 @@ MaterialData Material::getAttributes()
 	};
 }
 
-TextureData Material::getTextures()
-{
-	return TextureData{
-		loadedDiffuseTexture,
-		loadedAmbientTexture,
-		loadedSpecularTexture
-	};
-}
-
-void Material::loadTextures(const char* filepath)
+void Material::loadTextures()
 {
 	// Each material holds 1 type of texture
+	TextureManager* texManager = Application::Get().getTextureManager();
 
+	// Loading textures, assuming one sampler type per shader, fallback to default texture, if no texture is specified and texture for that type is not already loaded
+	// Prior to load regular texture, it does not know with and height, so store as 0 (Refering to TextureDescriptor Parameters)
+	
 	// Load Diffuse texture
-	if (map_ka != "") loadedDiffuseTexture = new Texture((filepath + map_kd).c_str(), "Diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE);
+	TextureDescriptor diffTexDesc;
+	diffTexDesc.path = map_kd.c_str();
+	diffTexDesc.format = GL_RGBA;
+	if (!map_kd.empty()) loadedDiffuseTexture = texManager->load(diffTexDesc, map_kd.c_str(), "Diffuse", GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_2D);
+	else if (!loadedDiffuseTexture) loadedDiffuseTexture = texManager->getFallback("gray");
 
 	// Load Ambient texture
-	if (map_kd != "") loadedAmbientTexture = new Texture((filepath + map_ka).c_str(), "Ambient", 1, GL_RGBA, GL_UNSIGNED_BYTE);
+	TextureDescriptor ambTexDesc;
+	ambTexDesc.path = map_ka.c_str();
+	ambTexDesc.format = GL_RGBA;
+	if (!map_ka.empty())  loadedAmbientTexture = texManager->load(ambTexDesc, map_ka.c_str(), "Ambient", GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_2D);
+	else if (!loadedAmbientTexture) loadedAmbientTexture = texManager->getFallback("gray");
 
 	// Load Specular texture
-	if (map_ks != "") loadedSpecularTexture = new Texture((filepath + map_ks).c_str(), "Specular", 2, GL_RED, GL_UNSIGNED_BYTE);
+	TextureDescriptor specTexDesc;
+	specTexDesc.path = map_ks.c_str();
+	specTexDesc.format = GL_RGBA;
+	if (!map_ks.empty())  loadedSpecularTexture = texManager->load(specTexDesc, map_ks.c_str(), "Specular", GL_RED, GL_UNSIGNED_BYTE, GL_TEXTURE_2D);
+	else if (!loadedSpecularTexture) loadedSpecularTexture = texManager->getFallback("gray");
+
 }
 
 void Material::uploadData(Shader& shader)
 {
-	glUniform3fv(shader.getUniformLocation("Ka"), 1, glm::value_ptr(ambient));
-	glUniform3fv(shader.getUniformLocation("Kd"), 1, glm::value_ptr(diffuse));
-	glUniform3fv(shader.getUniformLocation("Ks"), 1, glm::value_ptr(specular));
-	glUniform1f(shader.getUniformLocation("shininess"), shininess);
+	shader.setUniform3fv("Ka", ambient);
+	shader.setUniform3fv("Kd", diffuse);
+	shader.setUniform3fv("Ks", specular);
+	shader.setUniform1f("shininess", shininess);
 
-	// Upload textures to Vertex Shader, assuming one sampler type per shader
+	// Upload textures to Vertex Shader
+	TextureManager* texManager = Application::Get().getTextureManager();
 
 	if (loadedDiffuseTexture) {
-		loadedDiffuseTexture->sendUniformToShader(shader, "texDiffuse", 0);
+		loadedDiffuseTexture->sendUniformToShader(shader, "texDiffuse", texManager->getUnitForType(loadedDiffuseTexture->getType())); // SHOULD BE AUTOMATICALLY USING APPROPRIATE TEX UNIT THROUGH TEXMANAGER NEED TO CHANGE THIS SO THAT IS WHAT HAPPENS
 		loadedDiffuseTexture->Bind();
 	}
-	if (loadedAmbientTexture) {
-		loadedAmbientTexture->sendUniformToShader(shader, "texAmbient", 1);
-		loadedAmbientTexture->Bind();
 
+	if (loadedAmbientTexture) {
+		loadedAmbientTexture->sendUniformToShader(shader, "texAmbient", texManager->getUnitForType(loadedAmbientTexture->getType()));
+		loadedAmbientTexture->Bind();
 	}
+
 	if (loadedSpecularTexture) {
-		loadedSpecularTexture->sendUniformToShader(shader, "texSpecular",2);
+		loadedSpecularTexture->sendUniformToShader(shader, "texSpecular", texManager->getUnitForType(loadedSpecularTexture->getType()));
 		loadedSpecularTexture->Bind();
 	}
+
 }
 
-void Material::setTextureNames(const char* map_ka, const char* map_kd, const char* map_ks)
+void Material::setTexturePaths(std::string filepath, const char* map_ka, const char* map_kd, const char* map_ks)
 {
-	if (map_ka) this->map_ka = map_ka;
-	if (map_kd) this->map_kd = map_kd;
-	if (map_ks) this->map_ks = map_ks;
+	if (map_ka) this->map_ka = filepath + map_ka;
+	if (map_kd) this->map_kd = filepath + map_kd;
+	if (map_ks) this->map_ks = filepath + map_ks;
 }
 
 void Material::setShaderName(std::string shaderName)

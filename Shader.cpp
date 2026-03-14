@@ -155,7 +155,7 @@ const char* Shader::getFragmentFile()
 	return fragmentFile;
 }
 
-unsigned int Shader::getUniformLocation(const std::string& name)
+int Shader::getUniformLocation(const std::string& name) const
 {
 	if (shaderUniformLocations.find(name) != shaderUniformLocations.end()) {
 		return shaderUniformLocations[name];
@@ -168,7 +168,48 @@ unsigned int Shader::getUniformLocation(const std::string& name)
 	}
 
 	shaderUniformLocations[name] = location;
-
 	return location;
+}
+
+void Shader::setUniform1i(const std::string& name, int val)
+{
+	GLint loc = getUniformLocation(name);
+	if (loc != -1) glUniform1i(loc, val);
+}
+
+void Shader::setUniform1f(const std::string& name, float val)
+{
+	GLint loc = getUniformLocation(name);
+	if (loc != -1) glUniform1f(loc, val);
+}
+
+void Shader::setUniform2fv(const std::string& name, const glm::vec2& val)
+{
+	GLint loc = getUniformLocation(name);
+	if (loc != -1) glUniform2fv(loc, 1, glm::value_ptr(val));
+}
+
+void Shader::setUniform3fv(const std::string& name, const glm::vec3& val)
+{
+	GLint loc = getUniformLocation(name);
+	if (loc != -1) glUniform3fv(loc, 1, glm::value_ptr(val));
+}
+
+void Shader::setUniform4fv(const std::string& name, const glm::vec4& val)
+{
+	GLint loc = getUniformLocation(name);
+	if (loc != -1) glUniform4fv(loc, 1, glm::value_ptr(val));
+}
+
+void Shader::setUniformMat3fv(const std::string& name, const glm::mat3& matrix)
+{
+	GLint loc = getUniformLocation(name);
+	if (loc != -1) glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Shader::setUniformMat4fv(const std::string& name, const glm::mat4& matrix)
+{
+	GLint loc = getUniformLocation(name);
+	if (loc != -1) glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
