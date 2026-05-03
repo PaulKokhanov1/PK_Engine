@@ -38,17 +38,17 @@ public:
 	// Draw the object
 	void DrawSubMesh(const SubMesh& s);
 
-	// Getters and Setters
-
-	std::string getMeshName() const;
-	std::vector<SubMesh>& getSubMeshes();	// By reference because we'd want to edit the material information
+	// Setters and Getters
 
 	void setTransform(Transform transform);
 
+	std::string getMeshName() const;
+	std::vector<SubMesh>& getSubMeshes();	// By reference because we'd want to edit the material information
+	Transform& getTransform();
+
+
 	// Used to create Model Matrix
-	glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-	glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
+	Transform transform;
 	glm::mat4 computeModelMatrix();
 
 

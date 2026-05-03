@@ -23,9 +23,9 @@ void QuadController::update(float deltaTime)
 		glm::quat qPitch = glm::angleAxis(pitch, constants::yAxis);
 		glm::quat qYaw = glm::angleAxis(yaw, constants::xAxis);
 
-		quad->rotation = qYaw * qPitch * quad->rotation;
+		quad->getTransform().rotation *= qYaw * qPitch;
 
-		quad->rotation = glm::normalize(quad->rotation);	// Prevent numerical drift
+		quad->getTransform().rotation = glm::normalize(quad->getTransform().rotation);	// Prevent numerical drift
 	}
 	else if (input->isMouseButtonReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
 
@@ -39,8 +39,8 @@ void QuadController::update(float deltaTime)
 		// Hide cursor
 		input->setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-		quad->scale += (float)input->getDeltaMouseY() * SCALE_SENSITIVITY;
-		quad->scale = max(quad->scale, SCALE_MINIMUM);	// Avoid zero or negatives
+		quad->getTransform().scale += (float)input->getDeltaMouseY() * SCALE_SENSITIVITY;
+		quad->getTransform().scale = max(quad->getTransform().scale, SCALE_MINIMUM);	// Avoid zero or negatives
 	}
 	else if (input->isMouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
 

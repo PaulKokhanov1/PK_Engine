@@ -39,6 +39,21 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 	//std::unique_ptr<MeshComponent> teapot = std::make_unique<MeshComponent>("OBJ/teapot/teapot.obj");
 	//MeshComponent teapot("OBJ/teapot_white/teapot.obj");
 	//std::unique_ptr<MeshComponent> yoda = std::make_unique<MeshComponent>("OBJ/yoda/yoda.obj");
+	std::unique_ptr<MeshComponent> planeMesh = std::make_unique<MeshComponent>("OBJ/plane/plane.obj");
+	// Transform plane mesh, ADD FUNCTIONALITY TO CHANGE TRANSFORM
+	Transform tR;
+	tR.translation = glm::vec3(0.0f, -0.18f, 0.0f);
+	tR.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+	tR.scale = glm::vec3(3.0f, 1.0f, 3.0f);
+	planeMesh->setTransform(tR);
+
+	// light Mesh
+	std::unique_ptr<MeshComponent> lightMesh = std::make_unique<MeshComponent>("OBJ/light/light.obj");
+	Transform tRLightMesh;
+	tRLightMesh.translation = glm::vec3(0.0f, 0.4f, 0.0f);
+	tRLightMesh.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+	tRLightMesh.scale = glm::vec3(0.25f, 0.25f, 0.25f);
+	lightMesh->setTransform(tRLightMesh);
 
 	// Rotate Yoda
 	// Define the rotation angle (90 degrees) and axis (Y-axis)
@@ -55,14 +70,43 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 	//yoda.setTransform(t);
 	//teapot.setTransform(t);
 
-	// TEMPORARY LIGHTS, POINT LIGHT
-	std::unique_ptr<Light> light = std::make_unique<Light>();
-	light->color = glm::vec3(1.0f, 1.0f, 1.0f);
-	light->position = glm::vec3(3, 0, 3);
-	light->ambient = glm::vec3(0.6f);
-	light->diffuse = glm::vec3(1.0f); // darken diffuse light a bit
-	light->specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	light->envLightIntensity = 0.8f;
+	// POINT LIGHT
+	std::unique_ptr<Light> lightPoint = std::make_unique<Light>();
+	lightPoint->lightType = LightType::POINT;
+	lightPoint->color = glm::vec3(1.0f, 1.0f, 1.0f);
+	lightPoint->position = glm::vec3(1, 0, 1);
+	lightPoint->ambient = glm::vec3(0.6f);
+	lightPoint->diffuse = glm::vec3(1.0f);
+	lightPoint->specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	lightPoint->envLightIntensity = 0.8f;
+	lightPoint->shouldShowMesh = true;
+	//lightPoint->lightMesh = std::move(lightMesh);
+
+	// DIRECTIONAL 
+	std::unique_ptr<Light> lightDirectional = std::make_unique<Light>();
+	lightDirectional->lightType = LightType::DIRECTIONAL;
+	lightDirectional->color = glm::vec3(1.0f, 1.0f, 1.0f);
+	lightDirectional->ambient = glm::vec3(0.6f);
+	lightDirectional->diffuse = glm::vec3(1.0f);
+	lightDirectional->specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	lightDirectional->direction = glm::vec3(-0.2f, -1.0f, -0.3f);
+	lightDirectional->envLightIntensity = 0.8f;
+	lightDirectional->shouldShowMesh = false;
+
+	// SPOT LIGHT 
+	std::unique_ptr<Light> lightSpot = std::make_unique<Light>();
+	lightSpot->lightType = LightType::SPOT;
+	lightSpot->color = glm::vec3(1.0f, 1.0f, 1.0f);
+	lightSpot->ambient = glm::vec3(0.9f);
+	lightSpot->diffuse = glm::vec3(1.0f);
+	lightSpot->specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	lightSpot->position = glm::vec3(0, 0.8f, 0);
+	lightSpot->direction = glm::vec3(0.0f, -1.0f, 0.0f);	// Add ability to move direction of directional light
+	lightSpot->envLightIntensity = 0.8f;
+	lightSpot->innerCone = glm::cos(glm::radians(12.5f));
+	lightSpot->outerCone = glm::cos(glm::radians(17.5f));
+	lightSpot->shouldShowMesh = true;
+	lightSpot->lightMesh = std::move(lightMesh);
 
 
 	// TEMPORARY CUBEMAP paths, MUST initialize array in proper order, +X, -X, +Y, -Y, +Z, -Z
@@ -80,8 +124,11 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 	// Create Scene
 	std::unique_ptr<Scene> basic = std::make_unique<Scene>();
 	basic->AddMesh(move(teapot));
+	basic->AddMesh(move(planeMesh));	// Comment This OUT when checking Project 6 (it overlaps the mirrored plane)
 	basic->createMirrorObject(glm::vec3(0.0f, -0.18f, 0.0f));
-	basic->Addlight(move(light));
+	//basic->Addlight(move(lightPoint));
+	//basic->Addlight(move(lightDirectional));
+	basic->Addlight(move(lightSpot));
 	basic->setCamera(std::make_unique<Camera>(engineConfig::DEFAULT_WIDTH, engineConfig::DEFAULT_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f), 45.0f, 0.1f, 100.0f));
 	basic->setQuadController(std::make_unique<QuadController>(move(rectangle)));
 	basic->setLightController(std::make_unique<LightController>());

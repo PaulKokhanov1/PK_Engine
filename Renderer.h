@@ -28,6 +28,7 @@ public:
 	void PostProcessPass(Scene* scene);
 	void RenderFrame(Scene* scene, float dt);
 	void RenderFrameRenderToTexture(Scene* scene, float dt);
+	void RenderFrameWithReflections(Scene* scene, float dt); // Used Explicity for Project 6
 	void DrawPlaneWithShader(Scene* scene);
 	void EndFrame();
 
@@ -36,6 +37,8 @@ public:
 	void createEnvMapBackgroundObject();
 
 private:
+	bool hasRenderedToTexture = false;
+
 
 	struct RenderItem {
 		SubMesh* subMeshRef;
@@ -51,6 +54,7 @@ private:
 	std::unique_ptr<FBO> ReflectionFBO;
 	MeshComponent* renderToTextureMesh;
 	std::unique_ptr<MeshComponent> cubeMapMesh;
+
 };
 
 

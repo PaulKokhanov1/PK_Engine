@@ -35,9 +35,25 @@ void Renderer::CollectionPass(Scene* scene)
 			shaderBucket[shader].emplace_back(mesh.get(), &subMesh, model);
 		}
 	}
+
+	// handle light objects aswell
+	for (auto& light : scene->getLights()) {
+		if (!light->lightMesh) continue;
+		if (!light->shouldShowMesh) continue;
+
+		// compute Model Matrix per mesh
+		glm::mat4 model = light->lightMesh->computeModelMatrix();
+
+		for (auto& subMesh : light->lightMesh->getSubMeshes()) {
+			// Create RenderItems and store by shader
+			Shader* shader = Application::Get().getShaderManager()->get(subMesh.material.getShaderName());
+			if (!shader) continue;
+
+			shaderBucket[shader].emplace_back(light->lightMesh.get(), &subMesh, model);
+		}
+	}
 }
 
-// TODO
 void Renderer::ReflectionPass(Scene* scene, float dt)
 {
 	// Reflection Render to Texture Pass, Only works for reflecting ONE object
@@ -65,12 +81,7 @@ void Renderer::ReflectionPass(Scene* scene, float dt)
 
 		// Upload light data to Vertex Shader, once per shader
 		for (auto& light : scene->getLights()) {
-			if (light->dirty) light->validate();
-			shader->setUniform3fv("lightPosWorld", light->position);
-			shader->setUniform3fv("lightColor", light->color);
-			shader->setUniform3fv("lightKa", light->ambient);
-			shader->setUniform3fv("lightKd", light->diffuse);
-			shader->setUniform3fv("lightKs", light->specular);
+			light->sendLightDataToShader(*shader);
 		}
 
 		// Iterate through all assciated subMeshes
@@ -116,13 +127,7 @@ void Renderer::DrawPass(Scene* scene, float dt)
 
 		// Upload light data to Vertex Shader, once per shader
 		for (auto& light : scene->getLights()) {
-			if (light->dirty) light->validate();
-			shader->setUniform3fv("lightPosWorld", light->position);
-			shader->setUniform3fv("lightColor", light->color);
-			shader->setUniform3fv("lightKa", light->ambient);
-			shader->setUniform3fv("lightKd", light->diffuse);
-			shader->setUniform3fv("lightKs", light->specular);
-			shader->setUniform1f("envLightIntensity", light->envLightIntensity);
+			light->sendLightDataToShader(*shader);
 		}
 
 
@@ -138,7 +143,6 @@ void Renderer::DrawPass(Scene* scene, float dt)
 			// Send normalMatrix used for env reflections and lights
 			glm::mat3 normalMatrix = glm::transpose(glm::inverse(renderItem.modelMatrix));
 			shader->setUniformMat3fv("normalMatrix", normalMatrix);
-
 
 			// Draw sub Mesh
 			renderItem.meshRef->DrawSubMesh(*renderItem.subMeshRef);
@@ -234,19 +238,13 @@ void Renderer::RenderFrame(Scene* scene, float dt)
 
 	Clear();
 	CollectionPass(scene);
-	ReflectionPass(scene, dt);
 
 	DrawPass(scene, dt);
-
-	// Draw Mirror Plane to with its own shader
-	DrawPlaneWithShader(scene);
 
 	// Removing overdraw when drawing background
 	glDepthMask(GL_FALSE);
 	EnvMapPass(scene);
 	glDepthMask(GL_TRUE);
-
-
 
 	GL_CHECK_ERROR();
 	EndFrame();
@@ -269,13 +267,50 @@ void Renderer::RenderFrameRenderToTexture(Scene* scene, float dt)
 
 	CollectionPass(scene);
 
-	// Runs ONCE atm
-	RenderToTexturePass(scene, dt);
+	// Runs ONCE atm, this is used in order to keep the teapot mapped to the quad's rotation and position,
+	// if you want to use projectiveTextureMapping then just remove the "runs once atm" code and just run RenderToTexturePass
+	if (!hasRenderedToTexture) {
+		RenderToTexturePass(scene, dt);
+		hasRenderedToTexture = true;
+	}
 
 	Clear(); // Needed here as RenderToTexturePass runs ONCE atm
 
 	// Post-Process Pass
 	PostProcessPass(scene);
+
+	// Removing overdraw when drawing background
+	glDepthMask(GL_FALSE);
+	EnvMapPass(scene);
+	glDepthMask(GL_TRUE);
+
+	GL_CHECK_ERROR();
+	EndFrame();
+}
+
+void Renderer::RenderFrameWithReflections(Scene* scene, float dt)
+{
+
+	// Handle all resizing
+	if (window.needsResize) {
+		auto [w, h] = window.getWindowDimensions();
+		createFBO();
+		scene->getCamera().setScreenDimensions(w, h);
+
+		window.needsResize = false;
+	}
+
+	// Handle scene updates 
+	scene->update(dt);
+
+	Clear();
+	CollectionPass(scene);
+	ReflectionPass(scene, dt);
+
+	DrawPass(scene, dt);
+
+	// Draw Mirror Plane to with its own shader
+	DrawPlaneWithShader(scene);
 
 	// Removing overdraw when drawing background
 	glDepthMask(GL_FALSE);

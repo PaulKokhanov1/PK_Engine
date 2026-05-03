@@ -20,5 +20,9 @@ private:
 
 	// Light movement sensitivity
 	float LIGHT_MOVEMENT_SENSITIVITY = 1.0f;
+	float LIGHT_MOVEMENT_SPEED = 1.0f;
+
+	glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 
 };

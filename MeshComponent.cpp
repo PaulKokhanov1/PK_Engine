@@ -30,6 +30,7 @@ MeshComponent::MeshComponent(const char* filename, bool centerTheMesh)
 	std::cout << "\n[MeshComponent] Final mesh:\n";
 	std::cout << "  Unique vertices created: " << vertices.size() << "\n";
 	std::cout << "  Indices:                 " << indices.size() << "\n";
+	std::cout << "  Number of SubMeshes:     " << submeshes.size() << "\n";
 
 	// Center Mesh using Bounding Box
 	if (centerTheMesh) centerMesh(mesh);
@@ -87,9 +88,9 @@ glm::mat4 MeshComponent::computeModelMatrix()
 	glm::mat4 rot = glm::mat4(1.0f);
 	glm::mat4 sca = glm::mat4(1.0f);
 
-	trans = glm::translate(trans, translation);
-	rot = glm::mat4_cast(rotation);
-	sca = glm::scale(sca, scale);
+	trans = glm::translate(trans, transform.translation);
+	rot = glm::mat4_cast(transform.rotation);
+	sca = glm::scale(sca, transform.scale);
 
 	// Must return in order: translation * rotation * scale
 	return trans * rot * sca;
@@ -100,11 +101,16 @@ std::vector<SubMesh>& MeshComponent::getSubMeshes()
 	return submeshes;
 }
 
+Transform& MeshComponent::getTransform()
+{
+	return transform;
+}
+
 void MeshComponent::setTransform(Transform transform)
 {
-	translation = transform.translation;
-	rotation = transform.rotation;
-	scale = transform.scale;
+	this->transform.translation = transform.translation;
+	this->transform.rotation = transform.rotation;
+	this->transform.scale = transform.scale;
 }
 
 void MeshComponent::buildVertices(cyTriMesh& mesh)
