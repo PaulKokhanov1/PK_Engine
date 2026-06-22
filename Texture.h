@@ -10,16 +10,18 @@
 class Texture
 {
 public:
-	Texture(const char* filename, const char* texType, GLenum slot, GLenum format, GLenum pixelType, GLenum texTarget = GL_TEXTURE_2D);
-	Texture(unsigned int width, unsigned int height, const char* texType, GLenum slot, GLenum format, GLenum pixelType, GLenum texTarget = GL_TEXTURE_2D);	// Used for framebuffer Color attachment
-	Texture(std::array<std::string, 6> paths, const char* texType, GLenum texTarget, GLenum slot, GLenum format, GLenum pixelType); // Used for Cube Map Environment texture
-	Texture(unsigned char* color_data, const char* texType, GLuint slot); // Used for simple 1x1 color textures
+	Texture();
 	~Texture();
 
-	// Sends texture unit to shader
-	void sendUniformToShader(Shader& shader, const char* uniform, GLuint unit);
+	// Different Texture loading options
+	void Load2D(const char* filename, GLenum format, GLenum pixelType, GLenum texTarget = GL_TEXTURE_2D);
+	void CreateRenderTarget(unsigned int width, unsigned int height, GLenum format, GLint internalFormat, GLenum pixelType, std::vector<std::pair<GLenum, GLint>> texParameters, GLenum texTarget = GL_TEXTURE_2D);
+	void LoadCubeMap(std::array<std::string, 6> paths, GLenum texTarget, GLenum format, GLenum pixelType);
+	void LoadDepthCubeMap(unsigned int width, unsigned int height,  GLenum format, GLint internalFormat, GLenum pixelType, std::vector<std::pair<GLenum, GLint>> texParameters, GLenum texTarget = GL_TEXTURE_CUBE_MAP);
+	void CreateFallback(unsigned char* color_data);
+
 	// Binds a texture
-	void Bind();
+	void Bind(uint32_t slot);
 	// Unbinds a texture
 	void Unbind();
 	// Deletes a texture
@@ -32,12 +34,8 @@ private:
 
 	// Number refering to texture
 	GLuint texID;
-	// Texture type;
-	const char* type;
 	// Texture Target
 	GLenum texTarget = GL_TEXTURE_2D;
-	// Texture unit
-	GLuint unit = 0;
 
 	// Texture unit Mapping
 	std::unordered_map<GLuint, GLenum> texUnitMap = {

@@ -21,84 +21,78 @@ void TextureManager::initFallback()
 	std::vector<unsigned char> black = { 0,0,0,255 };
 	std::vector<unsigned char> blue = { 0,0,255,255 };
 
-	TextureDescriptor whiteDesc(1, 1, GL_RGBA, "white");
-	TextureDescriptor grayDesc(1, 1, GL_RGBA, "gray");
-	TextureDescriptor blackDesc(1, 1, GL_RGBA, "black");
-	TextureDescriptor blueDesc(1, 1, GL_RGBA, "blue");
+	TextureDescriptor whiteDesc(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_2D, {}, "white");
+	TextureDescriptor grayDesc(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_2D, {}, "gray");
+	TextureDescriptor blackDesc(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_2D, {}, "black");
+	TextureDescriptor blueDesc(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_2D, {}, "blue");
 
 	if (texMap.find(whiteDesc) == texMap.end()) {
-		texMap[whiteDesc] = std::make_unique<Texture>(white.data(), "Fallback", texTypeToUnit["Fallback"]);
+		texMap[whiteDesc] = std::make_unique<Texture>();
+		texMap[whiteDesc]->CreateFallback(white.data());
 	}	
 	
 	if (texMap.find(grayDesc) == texMap.end()) {
-		texMap[grayDesc] = std::make_unique<Texture>(gray.data(), "Fallback", texTypeToUnit["Fallback"]);
+		texMap[grayDesc] = std::make_unique<Texture>();
+		texMap[grayDesc]->CreateFallback(gray.data());
 	}	
 	
 	if (texMap.find(blackDesc) == texMap.end()) {
-		texMap[blackDesc] = std::make_unique<Texture>(black.data(), "Fallback", texTypeToUnit["Fallback"]);
+		texMap[blackDesc] = std::make_unique<Texture>();
+		texMap[blackDesc]->CreateFallback(black.data());
 	}	
 	
 	if (texMap.find(blueDesc) == texMap.end()) {
-		texMap[blueDesc] = std::make_unique<Texture>(blue.data(), "Fallback", texTypeToUnit["Fallback"]);
+		texMap[blueDesc] = std::make_unique<Texture>();
+		texMap[blueDesc]->CreateFallback(blue.data());
 	}
 
 }
 
-Texture* TextureManager::load(TextureDescriptor texDesc, const char* filepath, const char* texType, GLenum format, GLenum pixelType, GLenum texTarget)
+Texture* TextureManager::load(const TextureDescriptor& texDesc)
 {
 	if (texMap.find(texDesc) != texMap.end()) {
 		return texMap[texDesc].get();
 	}
 
-	auto it = texTypeToUnit.find(texType);
-	if (it == texTypeToUnit.end()) {
-		LogTextureManagerError("Error finding texType: " + texType + " within texTypeToUnit Map");
-		return getFallback("white");
-	}
-
-	int unit = it->second;
-
-	texMap[texDesc] = std::make_unique<Texture>(filepath, texType, unit, format, pixelType, texTarget);
+	texMap[texDesc] = std::make_unique<Texture>();
+	texMap[texDesc]->Load2D(texDesc.path.c_str(), texDesc.format, texDesc.pixelType, texDesc.target);
 	return texMap[texDesc].get();
 }
 
-Texture* TextureManager::loadCubeMap(TextureDescriptor texDesc, std::array<std::string, 6> paths, const char* texType, GLenum texTarget, GLenum format, GLenum pixelType)
+Texture* TextureManager::loadCubeMap(const TextureDescriptor& texDesc, std::array<std::string, 6> paths)
 {
 	if (texMap.find(texDesc) != texMap.end()) {
 		return texMap[texDesc].get();
 	}
 
-	auto it = texTypeToUnit.find(texType);
-	if (it == texTypeToUnit.end()) {
-		LogTextureManagerError("Error finding texType: " + texType + " within texTypeToUnit Map");
-		return getFallback("white");
-	}
-
-	int unit = it->second;
-
-	texMap[texDesc] = std::make_unique<Texture>(paths, texType, texTarget, unit, format, pixelType);
+	texMap[texDesc] = std::make_unique<Texture>();
+	texMap[texDesc]->LoadCubeMap(paths, texDesc.target, texDesc.format, texDesc.pixelType);
 	return texMap[texDesc].get();
 }
 
-Texture* TextureManager::loadRenderedTexture(TextureDescriptor texDesc, unsigned int width, unsigned int height, const char* texType, GLenum texTarget, GLenum format, GLenum pixelType)
+Texture* TextureManager::loadRenderedTexture(const TextureDescriptor& texDesc)
 {
 	if (texMap.find(texDesc) != texMap.end()) {
 		return texMap[texDesc].get();
 	}
 
-	auto it = texTypeToUnit.find(texType);
-	if (it == texTypeToUnit.end()) {
-		LogTextureManagerError("Error finding texType: " + texType + " within texTypeToUnit Map");
-		return getFallback("white");
+	texMap[texDesc] = std::make_unique<Texture>();
+	switch (texDesc.target) {
+
+		case (GL_TEXTURE_2D):
+			texMap[texDesc]->CreateRenderTarget(texDesc.width, texDesc.height, texDesc.format, texDesc.internalFormat, texDesc.pixelType, texDesc.parameters, texDesc.target);
+
+			break;
+
+		case (GL_TEXTURE_CUBE_MAP):
+			texMap[texDesc]->LoadDepthCubeMap(texDesc.width, texDesc.height, texDesc.format, texDesc.internalFormat, texDesc.pixelType, texDesc.parameters, texDesc.target);
+			
+			break;
 	}
-
-	int unit = it->second;
-
-	texMap[texDesc] = std::make_unique<Texture>(width, height, texType, unit, format, pixelType, texTarget);
 	return texMap[texDesc].get();
 }
 
-Texture* TextureManager::getOrLoad(TextureDescriptor texDesc)
+Texture* TextureManager::getOrLoad(const TextureDescriptor& texDesc)
 {
 	if (texMap.find(texDesc) != texMap.end()) {
 		return texMap[texDesc].get();
@@ -106,13 +100,13 @@ Texture* TextureManager::getOrLoad(TextureDescriptor texDesc)
 
 	LogTextureManagerError("Cannot find Texture (" + texDesc.path + ") , attempting to create new texture with default parameters" );
 
-	return load(texDesc, texDesc.path.c_str());
+	return load(texDesc);
 
 }
 
 Texture* TextureManager::getFallback(std::string texture)
 {
-	TextureDescriptor desc(1, 1, GL_RGBA, texture);
+	TextureDescriptor desc(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_2D, {}, texture);
 
 	if (texMap.find(desc) == texMap.end()) {
 		LogTextureManagerError("Error finding Fallback Texture(" + texture + ")");
@@ -120,15 +114,4 @@ Texture* TextureManager::getFallback(std::string texture)
 	}
 
 	return texMap[desc].get();
-}
-
-int TextureManager::getUnitForType(std::string texType)
-{
-	auto it = texTypeToUnit.find(texType);
-	if (it == texTypeToUnit.end()) {
-		LogTextureManagerError("Error finding texType: " + texType + " within texTypeToUnit Map");
-		return 0; // Maybe return something else? Not sure if this is the best to return, dont want to return -1 as that will throw an error and crash program
-	}
-
-	return it->second;
 }

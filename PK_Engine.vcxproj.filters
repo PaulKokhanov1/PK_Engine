@@ -171,6 +171,9 @@
     <ClCompile Include="LightController.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>Source Files\Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EngineConfig.h">
@@ -314,6 +317,15 @@
     <ClInclude Include="LogTextureManager.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>Header Files\Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="FBODescriptor.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderBufferDescriptor.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="default.vert">
@@ -338,6 +350,24 @@
       <Filter>Resource Files\Shaders</Filter>
     </None>
     <None Include="planeReflection.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="shadowMap.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="shadowMap.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="debugShadowMap.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="debugShadowMap.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="shadowCubemap.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="shadowCubemap.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

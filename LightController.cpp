@@ -18,13 +18,17 @@ void LightController::update(float deltaTime, std::vector<std::unique_ptr<Light>
 	// Currently we'll adjust each light in this way
 	for (auto& light : lights) {
 
+		glm::vec3 originalPos = light->position;
+
 		// Maybe implement more intrakit movement later, maybe move position depending on Camera's orientation?
-		if (input->isKeyHeld(GLFW_KEY_W)) light->position.x += LIGHT_MOVEMENT_SPEED * deltaTime;
+		if (input->isKeyHeld(GLFW_KEY_W)) light->position.x += LIGHT_MOVEMENT_SPEED * deltaTime; 
 		if (input->isKeyHeld(GLFW_KEY_S)) light->position.x -= LIGHT_MOVEMENT_SPEED * deltaTime;
 		if (input->isKeyHeld(GLFW_KEY_C)) light->position.y += LIGHT_MOVEMENT_SPEED * deltaTime;
 		if (input->isKeyHeld(GLFW_KEY_Z)) light->position.y -= LIGHT_MOVEMENT_SPEED * deltaTime;
 		if (input->isKeyHeld(GLFW_KEY_A)) light->position.z += LIGHT_MOVEMENT_SPEED * deltaTime;
 		if (input->isKeyHeld(GLFW_KEY_D)) light->position.z -= LIGHT_MOVEMENT_SPEED * deltaTime;
+
+		if (originalPos != light->position) light->mShadowMatricesDirty = true;
 
 		// Set lightMesh position
 		if (light->lightMesh && light->shouldShowMesh) {
@@ -35,36 +39,18 @@ void LightController::update(float deltaTime, std::vector<std::unique_ptr<Light>
 
 		// Adjust position of light around origin
 		if (input->isMouseButtonHeld(GLFW_MOUSE_BUTTON_LEFT)) {
+			light->mShadowMatricesDirty = true;
 
-			light->yaw += LIGHT_MOVEMENT_SENSITIVITY * input->getDeltaMouseX();
-			light->pitch += LIGHT_MOVEMENT_SENSITIVITY * input->getDeltaMouseY();
+			float yaw = LIGHT_MOVEMENT_SENSITIVITY * input->getDeltaMouseX();
+			float pitch = LIGHT_MOVEMENT_SENSITIVITY * input->getDeltaMouseY();
 
-			float dirX = cos(glm::radians(light->yaw)) * cos(glm::radians(light->pitch));
-			float dirY = -sin(glm::radians(light->pitch));
-			float dirZ = sin(glm::radians(light->yaw)) * cos(glm::radians(light->pitch));
+			glm::quat qPitch = glm::angleAxis(glm::radians(pitch), constants::xAxis);
+			glm::quat qYaw = glm::angleAxis(glm::radians(yaw), constants::yAxis);
 
-			switch (light->lightType) {
-				case(LightType::POINT):
-					break;
+			light->rotation *= qYaw * qPitch;
+			light->rotation = glm::normalize(light->rotation);	// Prevent numerical drift
 
-				case(LightType::DIRECTIONAL):
-
-					light->direction.x = dirX;
-					light->direction.y = dirY;
-					light->direction.z = dirZ;
-
-					break;
-
-				case(LightType::SPOT):
-
-					light->direction.x = dirX;
-					light->direction.y = dirY;
-					light->direction.z = dirZ;
-
-					break;
-			}
-			light->direction = glm::normalize(light->direction);
-			glm::vec3 F = -light->direction;
+			glm::vec3 F = -(light->rotation * constants::default_forward);
 
 			// Build orthonormal basis
 			if (abs(glm::dot(worldUp, F) > 0.99f)) worldUp = glm::vec3(1.0f, 0.0f, 0.0f);	// So that R vector is not undefined

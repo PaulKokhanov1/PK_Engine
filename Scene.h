@@ -36,6 +36,8 @@ public:
 	void setQuadController(std::unique_ptr<QuadController> qC);
 	void setLightController(std::unique_ptr<LightController> qC);
 	void setCubeMap(std::unique_ptr<CubeMap> cM);
+	void setEnvLightIntensity(float envLightInt);
+
 	Camera& getCamera();
 	QuadController& getQuadController();
 	LightController& getLightController();
@@ -43,6 +45,8 @@ public:
 	Mirror& getMirror();
 	std::vector<std::unique_ptr<Light>>& getLights();
 	std::vector<std::unique_ptr<MeshComponent>>& getMeshes();
+	float getEnvLightIntensity() { return envLightIntensity; }
+
 
 private:
 
@@ -66,5 +70,8 @@ private:
 
 	// mirror for rendering reflections on it
 	std::unique_ptr<Mirror> m_mirror;
+
+	float envLightIntensity;	// This should probably be better abstracted but not sure how yet
+
 };
 

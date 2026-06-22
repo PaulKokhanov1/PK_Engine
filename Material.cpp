@@ -50,21 +50,27 @@ void Material::loadTextures()
 	TextureDescriptor diffTexDesc;
 	diffTexDesc.path = map_kd.c_str();
 	diffTexDesc.format = GL_RGBA;
-	if (!map_kd.empty()) loadedDiffuseTexture = texManager->load(diffTexDesc, map_kd.c_str(), "Diffuse", GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_2D);
+	diffTexDesc.target = GL_TEXTURE_2D;
+	diffTexDesc.pixelType = GL_UNSIGNED_BYTE;
+	if (!map_kd.empty()) loadedDiffuseTexture = texManager->load(diffTexDesc);
 	else if (!loadedDiffuseTexture) loadedDiffuseTexture = texManager->getFallback("gray");
 
 	// Load Ambient texture
 	TextureDescriptor ambTexDesc;
 	ambTexDesc.path = map_ka.c_str();
 	ambTexDesc.format = GL_RGBA;
-	if (!map_ka.empty())  loadedAmbientTexture = texManager->load(ambTexDesc, map_ka.c_str(), "Ambient", GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_2D);
+	ambTexDesc.target = GL_TEXTURE_2D;
+	ambTexDesc.pixelType = GL_UNSIGNED_BYTE;
+	if (!map_ka.empty())  loadedAmbientTexture = texManager->load(ambTexDesc);
 	else if (!loadedAmbientTexture) loadedAmbientTexture = texManager->getFallback("gray");
 
 	// Load Specular texture
 	TextureDescriptor specTexDesc;
 	specTexDesc.path = map_ks.c_str();
-	specTexDesc.format = GL_RGBA;
-	if (!map_ks.empty())  loadedSpecularTexture = texManager->load(specTexDesc, map_ks.c_str(), "Specular", GL_RED, GL_UNSIGNED_BYTE, GL_TEXTURE_2D);
+	specTexDesc.format = GL_RED;
+	specTexDesc.target = GL_TEXTURE_2D;
+	specTexDesc.pixelType = GL_UNSIGNED_BYTE;
+	if (!map_ks.empty())  loadedSpecularTexture = texManager->load(specTexDesc);
 	else if (!loadedSpecularTexture) loadedSpecularTexture = texManager->getFallback("gray");
 
 }
@@ -77,21 +83,20 @@ void Material::uploadData(Shader& shader)
 	shader.setUniform1f("shininess", shininess);
 
 	// Upload textures to Vertex Shader
-	TextureManager* texManager = Application::Get().getTextureManager();
 
 	if (loadedDiffuseTexture) {
-		loadedDiffuseTexture->sendUniformToShader(shader, "texDiffuse", texManager->getUnitForType(loadedDiffuseTexture->getType())); // SHOULD BE AUTOMATICALLY USING APPROPRIATE TEX UNIT THROUGH TEXMANAGER NEED TO CHANGE THIS SO THAT IS WHAT HAPPENS
-		loadedDiffuseTexture->Bind();
+		shader.setSampler("texDiffuse", textureSlots::DIFFUSE);
+		loadedDiffuseTexture->Bind(textureSlots::DIFFUSE);
 	}
 
 	if (loadedAmbientTexture) {
-		loadedAmbientTexture->sendUniformToShader(shader, "texAmbient", texManager->getUnitForType(loadedAmbientTexture->getType()));
-		loadedAmbientTexture->Bind();
+		shader.setSampler("texAmbient", textureSlots::AMBIENT);
+		loadedAmbientTexture->Bind(textureSlots::AMBIENT);
 	}
 
 	if (loadedSpecularTexture) {
-		loadedSpecularTexture->sendUniformToShader(shader, "texSpecular", texManager->getUnitForType(loadedSpecularTexture->getType()));
-		loadedSpecularTexture->Bind();
+		shader.setSampler("texSpecular", textureSlots::SPECULAR);
+		loadedSpecularTexture->Bind(textureSlots::SPECULAR);
 	}
 
 }

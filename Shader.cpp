@@ -171,6 +171,12 @@ int Shader::getUniformLocation(const std::string& name) const
 	return location;
 }
 
+void Shader::setSampler(const std::string& name, GLuint slot)
+{
+	GLint loc = getUniformLocation(name);
+	if (loc != -1) glUniform1i(loc, slot);
+}
+
 void Shader::setUniform1i(const std::string& name, int val)
 {
 	GLint loc = getUniformLocation(name);

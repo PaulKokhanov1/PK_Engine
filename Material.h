@@ -5,6 +5,7 @@
 #include<string>
 #include<set>
 
+#include"EngineConfig.h"
 #include"TextureManager.h"
 #include"Application.h"
 

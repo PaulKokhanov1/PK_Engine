@@ -7,6 +7,7 @@
 #include"Vertex.h"
 #include"Texture.h"
 #include"TextureManager.h"
+#include"FBODescriptor.h"
 #include"Application.h"
 
 
@@ -14,15 +15,13 @@ class FBO
 {
 public:
 	// Reference ID of the FrameBuffer
-	GLuint ID;
+	GLuint ID = 0;
 
 	FBO(unsigned int tW, unsigned int tH, unsigned int wW, unsigned int wH);
 	~FBO();
 
 	// Generates a Vertex Buffer Object and links it to vertices
-	void Construct();
-	// Sends texture unit to shader
-	void sendUniformToShader(Shader& shader, const char* uniform);
+	void Construct(const FBODescriptor& desc);
 	// Binds the VBO
 	void Bind();
 	// Unbinds the VBOz
@@ -31,13 +30,15 @@ public:
 	void Delete();
 
 	// Getters and Setters
-	Texture* getRenderedTexture();
+	Texture* getColorTexture();
+	Texture* getDepthTexture();
 
 private:
 
-	Texture* colorAttachment = nullptr;
+	Texture* colorTexture = nullptr;
+	Texture* depthTexture = nullptr;
 	GLint origFB;
-	GLuint depthBuffer;
+	GLuint depthBuffer = 0;
 	unsigned int textureWidth;
 	unsigned int textureHeight;
 	unsigned int windowWidth;

@@ -14,4 +14,6 @@ namespace constants {
 	constexpr glm::vec3 yAxis(1.0f, 0.0f, 0.0f);
 	constexpr glm::vec3 xAxis(0.0f, 1.0f, 0.0f);
 	constexpr glm::vec3 zAxis(0.0f, 0.0f, 1.0f);
+	constexpr glm::vec3 default_forward(0.0f, 0.0f, -1.0f);
+
 }

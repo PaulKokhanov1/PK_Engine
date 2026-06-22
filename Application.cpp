@@ -10,6 +10,7 @@
 #include "CubeMap.h"
 #include "TextureManager.h"
 #include "SceneLoader.h"
+#include <filesystem>
 
 Application* Application::s_Instance = nullptr;
 
@@ -26,6 +27,7 @@ Application::~Application()
 bool Application::Init()
 {
 	// Initialize Window, ShaderManager, InputManager and Renderer
+	std::cout << std::filesystem::current_path() << std::endl;
 
 	m_Window = std::make_unique<Window>(engineConfig::DEFAULT_HEIGHT, engineConfig::DEFAULT_WIDTH, "PK_Engine");
 	if (!m_Window->initialize()) {
@@ -67,6 +69,9 @@ bool Application::Init()
 	m_ShaderManager->load("framebuffer", "framebuffer.vert", "framebuffer.frag");
 	m_ShaderManager->load("skybox", "skybox.vert", "skybox.frag");
 	m_ShaderManager->load("planeReflection", "planeReflection.vert", "planeReflection.frag");
+	m_ShaderManager->load("shadowMap", "shadowMap.vert", "shadowMap.frag");
+	m_ShaderManager->load("shadowMapDebug", "debugShadowMap.vert", "debugShadowMap.frag");
+	m_ShaderManager->load("shadowCubemap", "shadowCubemap.vert", "shadowCubemap.frag");
 
 	// Scene Loader, create basic scene
 	SceneLoader loader;

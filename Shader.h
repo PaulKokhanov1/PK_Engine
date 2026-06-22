@@ -46,6 +46,8 @@ public:
 	int getUniformLocation(const std::string& name) const;
 
 	// Setting Uniforms
+	void setSampler(const std::string& name, GLuint slot);
+
 	void setUniform1i(const std::string& name, int val);
 	void setUniform1f(const std::string& name, float val);
 

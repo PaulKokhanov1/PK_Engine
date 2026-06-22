@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 
+#include"EngineConfig.h"
 #include"Texture.h"
 #include"TextureManager.h"
 #include"Application.h"
@@ -12,11 +13,8 @@ public:
 	CubeMap(std::array<std::string, 6> paths);
 	~CubeMap();
 
-	// Send sub map texture unit to shader
-	void sendUniformToShader(Shader& shader, const char* uniform);
-
 	// Bind the cube map
-	void Bind();
+	void Bind(uint32_t slot);
 	// Unbinds cubeMap
 	void Unbind();
 	// Deletes cubeMap

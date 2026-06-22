@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "SceneLoader.h"
+#include "Window.h"
 
 SceneLoader::SceneLoader()
 {
@@ -11,6 +12,7 @@ SceneLoader::~SceneLoader()
 
 std::unique_ptr<Scene> SceneLoader::createBasicScene()
 {
+	Window* win = Application::Get().getWindow();
 
 	// Tmporary for testing ---------------------------------------------------------------------------------------------------
 
@@ -35,8 +37,8 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
 	std::unique_ptr<MeshComponent> rectangle = std::make_unique<MeshComponent>(name, verts, ind);
 	//unique_ptr<MeshComponent> sphere = make_unique<MeshComponent>("OBJ/sphere/sphere.obj");
-	std::unique_ptr<MeshComponent> teapot = std::make_unique<MeshComponent>("OBJ/teapot_facing_up/teapot.obj");
-	//std::unique_ptr<MeshComponent> teapot = std::make_unique<MeshComponent>("OBJ/teapot/teapot.obj");
+	//std::unique_ptr<MeshComponent> teapot = std::make_unique<MeshComponent>("OBJ/teapot_facing_up/teapot.obj");
+	std::unique_ptr<MeshComponent> teapot = std::make_unique<MeshComponent>("OBJ/teapot/teapot.obj");
 	//MeshComponent teapot("OBJ/teapot_white/teapot.obj");
 	//std::unique_ptr<MeshComponent> yoda = std::make_unique<MeshComponent>("OBJ/yoda/yoda.obj");
 	std::unique_ptr<MeshComponent> planeMesh = std::make_unique<MeshComponent>("OBJ/plane/plane.obj");
@@ -46,14 +48,6 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 	tR.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	tR.scale = glm::vec3(3.0f, 1.0f, 3.0f);
 	planeMesh->setTransform(tR);
-
-	// light Mesh
-	std::unique_ptr<MeshComponent> lightMesh = std::make_unique<MeshComponent>("OBJ/light/light.obj");
-	Transform tRLightMesh;
-	tRLightMesh.translation = glm::vec3(0.0f, 0.4f, 0.0f);
-	tRLightMesh.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-	tRLightMesh.scale = glm::vec3(0.25f, 0.25f, 0.25f);
-	lightMesh->setTransform(tRLightMesh);
 
 	// Rotate Yoda
 	// Define the rotation angle (90 degrees) and axis (Y-axis)
@@ -65,48 +59,11 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 	Transform t = {
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		rotation_quat,
-		glm::vec3(2.0f, 2.0f, 2.0f)
+		glm::vec3(1.0f, 1.0f, 1.0f)
 	};
 	//yoda.setTransform(t);
-	//teapot.setTransform(t);
+	teapot->setTransform(t);
 
-	// POINT LIGHT
-	std::unique_ptr<Light> lightPoint = std::make_unique<Light>();
-	lightPoint->lightType = LightType::POINT;
-	lightPoint->color = glm::vec3(1.0f, 1.0f, 1.0f);
-	lightPoint->position = glm::vec3(1, 0, 1);
-	lightPoint->ambient = glm::vec3(0.6f);
-	lightPoint->diffuse = glm::vec3(1.0f);
-	lightPoint->specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	lightPoint->envLightIntensity = 0.8f;
-	lightPoint->shouldShowMesh = true;
-	//lightPoint->lightMesh = std::move(lightMesh);
-
-	// DIRECTIONAL 
-	std::unique_ptr<Light> lightDirectional = std::make_unique<Light>();
-	lightDirectional->lightType = LightType::DIRECTIONAL;
-	lightDirectional->color = glm::vec3(1.0f, 1.0f, 1.0f);
-	lightDirectional->ambient = glm::vec3(0.6f);
-	lightDirectional->diffuse = glm::vec3(1.0f);
-	lightDirectional->specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	lightDirectional->direction = glm::vec3(-0.2f, -1.0f, -0.3f);
-	lightDirectional->envLightIntensity = 0.8f;
-	lightDirectional->shouldShowMesh = false;
-
-	// SPOT LIGHT 
-	std::unique_ptr<Light> lightSpot = std::make_unique<Light>();
-	lightSpot->lightType = LightType::SPOT;
-	lightSpot->color = glm::vec3(1.0f, 1.0f, 1.0f);
-	lightSpot->ambient = glm::vec3(0.9f);
-	lightSpot->diffuse = glm::vec3(1.0f);
-	lightSpot->specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	lightSpot->position = glm::vec3(0, 0.8f, 0);
-	lightSpot->direction = glm::vec3(0.0f, -1.0f, 0.0f);	// Add ability to move direction of directional light
-	lightSpot->envLightIntensity = 0.8f;
-	lightSpot->innerCone = glm::cos(glm::radians(12.5f));
-	lightSpot->outerCone = glm::cos(glm::radians(17.5f));
-	lightSpot->shouldShowMesh = true;
-	lightSpot->lightMesh = std::move(lightMesh);
 
 
 	// TEMPORARY CUBEMAP paths, MUST initialize array in proper order, +X, -X, +Y, -Y, +Z, -Z
@@ -126,13 +83,12 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 	basic->AddMesh(move(teapot));
 	basic->AddMesh(move(planeMesh));	// Comment This OUT when checking Project 6 (it overlaps the mirrored plane)
 	basic->createMirrorObject(glm::vec3(0.0f, -0.18f, 0.0f));
-	//basic->Addlight(move(lightPoint));
-	//basic->Addlight(move(lightDirectional));
-	basic->Addlight(move(lightSpot));
+	basic->Addlight(move(createLight(LightType::DIRECTIONAL, win)));
 	basic->setCamera(std::make_unique<Camera>(engineConfig::DEFAULT_WIDTH, engineConfig::DEFAULT_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f), 45.0f, 0.1f, 100.0f));
 	basic->setQuadController(std::make_unique<QuadController>(move(rectangle)));
 	basic->setLightController(std::make_unique<LightController>());
 	basic->setCubeMap(std::make_unique<CubeMap>(paths));
+	basic->setEnvLightIntensity(0.8f);
 
 	// Validate Scene, Return early if scene's are not created properly
 	try {
@@ -144,4 +100,68 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 	}
 
 	return basic;
+}
+
+std::unique_ptr<Light> SceneLoader::createLight(LightType type, Window* win)
+{
+	// light Mesh
+	std::unique_ptr<MeshComponent> lightMesh = std::make_unique<MeshComponent>("OBJ/light/light.obj");
+	Transform tRLightMesh;
+	tRLightMesh.translation = glm::vec3(0.0f, 0.4f, 0.0f);
+	tRLightMesh.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+	tRLightMesh.scale = glm::vec3(0.25f, 0.25f, 0.25f);
+	lightMesh->setTransform(tRLightMesh);
+
+	// Shadow Map
+	auto [w, h] = win->getWindowDimensions();
+
+	std::unique_ptr<ShadowMap> shadowMap = std::make_unique<ShadowMap>(1024, 1024);
+
+	auto light = std::make_unique<Light>();
+
+	light->color = glm::vec3(1.0f);
+	light->diffuse = glm::vec3(1.0f);
+	light->specular = glm::vec3(1.0f);
+	light->lightMesh = std::move(lightMesh);
+	light->mShadowMap = std::move(shadowMap);
+
+	switch (type) {
+		case LightType::POINT:
+
+			// POINT LIGHT
+			light->lightType = LightType::POINT;
+			light->position = glm::vec3(1, 0, 1);
+			light->ambient = glm::vec3(0.6f);
+			light->shouldShowMesh = true;
+			light->mShadowMap->createDepthCubeMapFBO(w, h); // How high quality shadow res is depends on tex width & height (I think)
+			break;
+
+		case LightType::DIRECTIONAL:
+			// DIRECTIONAL 
+			light->lightType = LightType::DIRECTIONAL;
+			light->ambient = glm::vec3(0.6f);
+			light->shouldShowMesh = false;
+			light->mShadowMap->createDepthMapFBO(w, h);
+			break;
+
+		case LightType::SPOT:
+
+			// SPOT LIGHT 
+			light->lightType = LightType::SPOT;
+			light->ambient = glm::vec3(0.9f);
+			light->position = glm::vec3(0, 0.8f, 0);
+			light->innerCone = glm::cos(glm::radians(12.5f));
+			light->outerCone = glm::cos(glm::radians(17.5f));
+			light->shouldShowMesh = true;
+			light->mShadowMap->createDepthMapFBO(w, h);
+			break;
+
+		default:
+			std::cerr << "[SCENELOADER] Unknown light type" << std::endl;
+			return nullptr;
+
+	}
+
+	return light;
+
 }

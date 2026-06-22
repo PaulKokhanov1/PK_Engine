@@ -103,6 +103,16 @@ void Scene::setCubeMap(std::unique_ptr<CubeMap> cM)
 	this->cubeMap = std::move(cM);
 }
 
+void Scene::setEnvLightIntensity(float envLightInt)
+{
+	if (envLightInt < 0) {
+		std::cerr << "[Scene] : EnvLightIntensity Can't be set to less than 0" << std::endl;
+		return;
+	}
+
+	envLightIntensity = envLightInt;
+}
+
 Camera& Scene::getCamera()
 {
 	// As we hold a unique ptr to camera, when scene is destroyed any objects holding a reference to this camera will no longer be able to access it

@@ -1,7 +1,18 @@
 #include "Texture.h"
 
-Texture::Texture(const char* filename, const char* texType, GLuint slot, GLenum format, GLenum pixelType, GLenum texTarget) : texTarget(texTarget), type(texType), unit(slot)
+Texture::Texture() {}
+
+
+Texture::~Texture()
 {
+	Delete();
+}
+
+void Texture::Load2D(const char* filename, GLenum format, GLenum pixelType, GLenum texTarget)
+{
+
+	this->texTarget = texTarget;
+
 	// Take width, height of incoming img
 	unsigned int width, height;
 
@@ -11,14 +22,13 @@ Texture::Texture(const char* filename, const char* texType, GLuint slot, GLenum 
 
 	// Handle error
 	if (err) {
-		LogTextureError( "Decoder Error: " + lodepng_error_text(err));
+		LogTextureError("Decoder Error: " + lodepng_error_text(err));
 	}
 
 	// Generate Texture
 	glGenTextures(1, &texID);
 
-	glActiveTexture(texUnitMap[unit]); // texture unit
-	glBindTexture(texTarget, texID);	// binds texture to texture unit: slot
+	glBindTexture(texTarget, texID);	// binds texture
 
 	// Set texture parameters so we use bi-linear interpolation
 	glTexParameteri(texTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// To avoid "dancing pixels"
@@ -49,33 +59,30 @@ Texture::Texture(const char* filename, const char* texType, GLuint slot, GLenum 
 	if (error != GL_NO_ERROR) {
 		std::cerr << "[OpenGL] Error creating Texture (code " << error << ")\n";
 	}
-
 }
 
-Texture::Texture(unsigned int width, unsigned int height, const char* texType, GLenum slot, GLenum format, GLenum pixelType, GLenum texTarget) : texTarget(texTarget), unit(slot), type(texType)
+void Texture::CreateRenderTarget(unsigned int width, unsigned int height, GLenum format, GLint internalFormat, GLenum pixelType, std::vector<std::pair<GLenum, GLint>> texParameters, GLenum texTarget)
 {
+	this->texTarget = texTarget;
+
 	// Generate Texture
 	glGenTextures(1, &texID);
-	glActiveTexture(texUnitMap[unit]); // texture unit
 	glBindTexture(texTarget, texID);
 
-	// Set texture parameters so we use bi-linear interpolation
-	glTexParameteri(texTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// To avoid "dancing pixels"
-	glTexParameteri(texTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// How texture coordinates are handled outside of region 0,0 to 1,1
-	glTexParameteri(texTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(texTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	// Set Specifc texture parameters
+	for (auto& [pname, param] : texParameters) {
+		glTexParameteri(texTarget, pname, param);
+	}
 
 	// Assign img data to binded texture
 	glTexImage2D(
 		texTarget,			// typically will be GL_TEXTURE_2D, texture, but there are multiple 2D texture format's
 		0,					// Mipmap level, meaning highest resolution img
-		GL_RGBA8,			// Internal Format
+		internalFormat,			// Internal Format
 		width,
 		height,
 		0,				// Border, just keep at ZERO
-		GL_RGBA,			// Format, i.e what color's img will support
+		format,			// Format, i.e what color's img will support
 		pixelType,		// Data type of format, i.e "each color is of what type?"
 		0
 	);
@@ -86,14 +93,14 @@ Texture::Texture(unsigned int width, unsigned int height, const char* texType, G
 	}
 }
 
-Texture::Texture(std::array<std::string, 6> paths, const char* texType, GLenum texTarget, GLenum slot, GLenum format, GLenum pixelType) : texTarget(texTarget), type(texType), unit(slot)
+void Texture::LoadCubeMap(std::array<std::string, 6> paths, GLenum texTarget, GLenum format, GLenum pixelType)
 {
+	this->texTarget = texTarget;
 
 	// Generate Texture
 	glGenTextures(1, &texID);
 
-	glActiveTexture(texUnitMap[unit]); // texture unit
-	glBindTexture(texTarget, texID);	// binds texture to texture unit: slot
+	glBindTexture(texTarget, texID);	// binds texture
 
 	// Set texture parameters so we use bi-linear interpolation
 	glTexParameteri(texTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// To avoid "dancing pixels"
@@ -104,7 +111,7 @@ Texture::Texture(std::array<std::string, 6> paths, const char* texType, GLenum t
 	glTexParameteri(texTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(texTarget, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	
+
 	// Setup Img data for each side of cubemap
 
 	for (unsigned int i = 0; i < 6; ++i) {
@@ -150,13 +157,50 @@ Texture::Texture(std::array<std::string, 6> paths, const char* texType, GLenum t
 	}
 }
 
-Texture::Texture(unsigned char* color_data, const char* texType, GLuint slot) : type(texType), unit(slot)
+void Texture::LoadDepthCubeMap(unsigned int width, unsigned int height, GLenum format, GLint internalFormat, GLenum pixelType, std::vector<std::pair<GLenum, GLint>> texParameters, GLenum texTarget )
 {
+	this->texTarget = texTarget;
+
+	// Generate Texture
+	glGenTextures(1, &texID);
+	glBindTexture(texTarget, texID);
+
+	// Set Specifc texture parameters
+	for (auto& [pname, param] : texParameters) {
+		glTexParameteri(texTarget, pname, param);
+	}
+
+	for (unsigned int i = 0; i < 6; ++i) {
+
+		// Assign empty data to texture
+		glTexImage2D(
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,// MUST pass in cube map images appropriately, +X ->right, -X ->left, +Y -> top, -Y -> bot, +Z -> front, -Z -> back
+			0,					// Mipmap level, meaning highest resolution img
+			internalFormat,		// Internal Format
+			width,
+			height,
+			0,				// Border, just keep at ZERO
+			format,			// Format,
+			pixelType,		// Data type of format, Cube Map should be GL_UNSIGNED_BYTE in general
+			0
+		);
+
+
+	}
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR) {
+		std::cerr << "[OpenGL] Error creating Cube Map Depth Texture (code " << error << ")\n";
+	}
+}
+
+void Texture::CreateFallback(unsigned char* color_data)
+{
+
 	// Generate Texture
 	glGenTextures(1, &texID);
 
-	glActiveTexture(texUnitMap[unit]); // texture unit
-	glBindTexture(GL_TEXTURE_2D, texID);	// binds texture to texture unit: slot
+	glBindTexture(GL_TEXTURE_2D, texID);	// binds texture
 
 	// Set texture parameters so we use bi-linear interpolation
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -185,23 +229,9 @@ Texture::Texture(unsigned char* color_data, const char* texType, GLuint slot) : 
 	}
 }
 
-Texture::~Texture()
+void Texture::Bind(uint32_t slot)
 {
-	Delete();
-}
-
-void Texture::sendUniformToShader(Shader& shader, const char* uniform, GLuint unit)
-{
-	// Location of uniform
-	GLuint sampler = glGetUniformLocation(shader.ID, uniform);
-	shader.Activate();
-	// Set value of uniform
-	glUniform1i(sampler, unit);
-}
-
-void Texture::Bind()
-{
-	glActiveTexture(texUnitMap[unit]); // texture unit
+	glActiveTexture(GL_TEXTURE0 + slot); // texture unit
 	glBindTexture(texTarget, texID);
 }
 
@@ -218,9 +248,4 @@ void Texture::Delete()
 GLuint Texture::getID()
 {
 	return texID;
-}
-
-const char* Texture::getType()
-{
-	return type;
 }
