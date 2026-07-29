@@ -5,6 +5,7 @@
 #include<GLFW/glfw3.h>
 #include<string>
 #include<vector>
+#include "EngineConfig.h"
 
 class Renderer;
 class TextureManager;
@@ -33,14 +34,18 @@ public:
 
 private:
 
+	void InitializeRenderSettings(Project::ProjectNumber proj);
+
 	// Store all as unique_ptr rather than object to avoid immediate construction and 
 	// to allow for sole ownership
 	std::unique_ptr<Window> m_Window;	// Must initialize Window BEFORE Renderer as Renderer uses window as a referenced object
 	std::unique_ptr<ShaderManager> m_ShaderManager;
 	std::unique_ptr<TextureManager> m_TextureManager;
 	std::unique_ptr<Renderer> m_Renderer;
-	std::shared_ptr<InputManager> m_InputManager;
 	std::unique_ptr<Scene> m_Scene;
+
+	std::shared_ptr<InputManager> m_InputManager;
+
 
 	static Application* s_Instance;
 

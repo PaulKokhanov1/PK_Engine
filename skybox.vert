@@ -1,4 +1,4 @@
-#version 330 core
+#version 460 core
 
 // Positions/Coordinates in Clip space
 layout (location = 0) in vec3 aPos;

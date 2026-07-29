@@ -13,7 +13,6 @@ MeshComponent::MeshComponent(const char* filename, bool centerTheMesh)
 
 	// create filepath
 	filepath = removeLastWord(filename);
-	std::cout << "FILEPATH: " << filepath << std::endl;
 
 	 //Compute Normals if no normals are specified
 	if (mesh.NVN() == 0) {
@@ -26,11 +25,6 @@ MeshComponent::MeshComponent(const char* filename, bool centerTheMesh)
 	buildVertices(mesh);
 
 	buildSubMeshes(mesh);
-
-	std::cout << "\n[MeshComponent] Final mesh:\n";
-	std::cout << "  Unique vertices created: " << vertices.size() << "\n";
-	std::cout << "  Indices:                 " << indices.size() << "\n";
-	std::cout << "  Number of SubMeshes:     " << submeshes.size() << "\n";
 
 	// Center Mesh using Bounding Box
 	if (centerTheMesh) centerMesh(mesh);
@@ -68,11 +62,27 @@ MeshComponent::~MeshComponent()
 
 }
 
-void MeshComponent::DrawSubMesh(const SubMesh& s)
+void MeshComponent::DrawSubMesh(const SubMesh& s, const renderTypes::PrimitiveTopology topology)
 {
 	vao.Bind();
 
-	glDrawElements(GL_TRIANGLES, s.indexCount, GL_UNSIGNED_INT, (void*)(s.indexStart * sizeof(uint32_t)));
+	switch (topology)
+	{
+	case renderTypes::PrimitiveTopology::Triangles :
+		glDrawElements(GL_TRIANGLES, s.indexCount, GL_UNSIGNED_INT, (void*)(s.indexStart * sizeof(uint32_t)));
+		break;
+
+	case renderTypes::PrimitiveTopology::Patches : 
+		//glPatchParameteri(GL_PATCH_VERTICES, 3); // Triangles
+		glPatchParameteri(GL_PATCH_VERTICES, 4); // Quads
+		glDrawElements(GL_PATCHES, s.indexCount, GL_UNSIGNED_INT, (void*)(s.indexStart * sizeof(uint32_t)));
+		GL_CHECK_ERROR();
+
+		break;
+	default:
+		glDrawElements(GL_TRIANGLES, s.indexCount, GL_UNSIGNED_INT, (void*)(s.indexStart * sizeof(uint32_t)));
+		break;
+	}
 
 }
 
@@ -82,7 +92,7 @@ std::string MeshComponent::getMeshName() const
 }
 
 // Manually creating model matrix at the moment
-glm::mat4 MeshComponent::computeModelMatrix()
+void MeshComponent::computeModelMatrix()
 {
 	glm::mat4 trans = glm::mat4(1.0f);
 	glm::mat4 rot = glm::mat4(1.0f);
@@ -93,7 +103,18 @@ glm::mat4 MeshComponent::computeModelMatrix()
 	sca = glm::scale(sca, transform.scale);
 
 	// Must return in order: translation * rotation * scale
-	return trans * rot * sca;
+	cachedModelMatrix = trans * rot * sca;
+}
+
+glm::mat4 MeshComponent::getModelMatrix()
+{
+	if (!dirtyTransform)
+	{
+		return cachedModelMatrix;
+	}
+
+	computeModelMatrix();
+	return cachedModelMatrix;
 }
 
 std::vector<SubMesh>& MeshComponent::getSubMeshes()
@@ -150,9 +171,6 @@ void MeshComponent::buildVertices(cyTriMesh& mesh)
 			// Add either old or new vertex index to EBO, always pushing back because each face vertex needs to be represented in our EBO
 			indices.push_back(newVertexIndex[key]);
 		}
-
-
-
 	}
 }
 
@@ -194,12 +212,14 @@ void MeshComponent::buildSubMeshes(cyTriMesh& mesh)
 		const char* map_ka = mesh.M(i).map_Ka;
 		const char* map_kd = mesh.M(i).map_Kd;
 		const char* map_ks = mesh.M(i).map_Ks;
+		const char* map_norm = ""; // Currently no way of getting normal Maps from MTL file
+		const char* map_disp = mesh.M(i).map_disp;
 
 		// Send to material
 		subMesh.material.setAttributes(ka, kd, ks, 100.0f);
 
 		// Set texture(s) paths in material then load into Texture Manager
-		subMesh.material.setTexturePaths(filepath, map_ka, map_kd, map_ks);
+		subMesh.material.setTexturePaths(filepath, map_ka, map_kd, map_ks, map_norm, map_disp);
 		subMesh.material.loadTextures();
 
 		submeshes.push_back(subMesh);

@@ -13,7 +13,6 @@ void InputManager::handleKeyCallback(int key, int scancode, int action, int mods
 		keyHeld.insert(key);
 	}
 	else if (action == GLFW_RELEASE) {
-
 		keyReleasedThisFrame.insert(key);
 		keyHeld.erase(key);
 	}

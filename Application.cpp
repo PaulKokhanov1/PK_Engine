@@ -1,5 +1,4 @@
 #include "Application.h"
-#include"EngineConfig.h"
 #include"Window.h"
 #include"MeshComponent.h"
 #include"Vertex.h"
@@ -36,6 +35,10 @@ bool Application::Init()
 	}
 	m_Window->registerCallbacks();
 
+	// CHOOSE PROJECT HERE
+	Project::ProjectNumber proj = Project::ProjectNumber::PROJECT6;
+	InitializeRenderSettings(proj);
+
 	m_InputManager = std::make_shared<InputManager>(m_Window->getGLFWwindow());
 
 	// Lambda Function, basically just inlining a function to match the dispatcher's signature
@@ -65,16 +68,26 @@ bool Application::Init()
 	m_Renderer = std::make_unique<Renderer>(*m_Window);
 
 	// load default vertex shader and fragement shader into shaderManager
-	m_ShaderManager->load("default", "default.vert", "default.frag");
-	m_ShaderManager->load("framebuffer", "framebuffer.vert", "framebuffer.frag");
-	m_ShaderManager->load("skybox", "skybox.vert", "skybox.frag");
-	m_ShaderManager->load("planeReflection", "planeReflection.vert", "planeReflection.frag");
-	m_ShaderManager->load("shadowMap", "shadowMap.vert", "shadowMap.frag");
-	m_ShaderManager->load("shadowMapDebug", "debugShadowMap.vert", "debugShadowMap.frag");
-	m_ShaderManager->load("shadowCubemap", "shadowCubemap.vert", "shadowCubemap.frag");
+	if (renderSettings::USING_TESSELLATION) {
+		m_ShaderManager->load("default", "tess.vert", "tess.frag", "tess.geom", "tess.tesc", "tess.tese");
+		m_ShaderManager->load("lines", "lines.vert", "lines.frag", "lines.geom", "tess.tesc", "tess.tese");
+		m_ShaderManager->load("shadowMap", "shadowMapTess.vert", "shadowMapTess.frag", std::nullopt, "shadowMapTess.tesc", "shadowMapTess.tese");
+		m_ShaderManager->load("shadowCubemap", "shadowCubemapTess.vert", "shadowCubemapTess.frag", std::nullopt, "shadowCubemapTess.tesc", "shadowCubemapTess.tese");
+
+	}
+	else {
+		m_ShaderManager->load("default", "default.vert", "default.frag", std::nullopt, std::nullopt, std::nullopt);
+		m_ShaderManager->load("shadowMap", "shadowMap.vert", "shadowMap.frag", std::nullopt, std::nullopt, std::nullopt);
+		m_ShaderManager->load("shadowCubemap", "shadowCubemap.vert", "shadowCubemap.frag", std::nullopt, std::nullopt, std::nullopt);
+
+	}
+	m_ShaderManager->load("framebuffer", "framebuffer.vert", "framebuffer.frag", std::nullopt, std::nullopt, std::nullopt);
+	m_ShaderManager->load("skybox", "skybox.vert", "skybox.frag", std::nullopt, std::nullopt, std::nullopt);
+	m_ShaderManager->load("planeReflection", "planeReflection.vert", "planeReflection.frag", std::nullopt, std::nullopt, std::nullopt);
+	m_ShaderManager->load("shadowMapDebug", "debugShadowMap.vert", "debugShadowMap.frag", std::nullopt, std::nullopt, std::nullopt);
 
 	// Scene Loader, create basic scene
-	SceneLoader loader;
+	SceneLoader loader(proj);
 	m_Scene = loader.createBasicScene();
 
 	if (!m_Scene) return false;
@@ -114,9 +127,73 @@ void Application::handleInput()
 		glfwSetWindowShouldClose(m_Window->getGLFWwindow(), GLFW_TRUE);
 	}
 
+	// SHould put this in a "debug controller"
 	if (m_InputManager->isKeyPressed(GLFW_KEY_F6)) {
 		std::cout << "RELOAD SHADERS CALLED" << std::endl;
 		m_ShaderManager->reloadAll();
+	}
+
+	if (m_InputManager->isKeyPressed(GLFW_KEY_SPACE) && renderSettings::USING_TESSELLATION) {
+		renderSettings::DISPLAY_TRIANGULATION = !renderSettings::DISPLAY_TRIANGULATION;
+		std::cout << "TOGGLE TRIANGULATION DISPLAY TO " << renderSettings::DISPLAY_TRIANGULATION << std::endl;
+	}
+
+	if (m_InputManager->isKeyPressed(GLFW_KEY_RIGHT)) {
+		renderSettings::tessellationLevel++;
+	} else if (m_InputManager->isKeyPressed(GLFW_KEY_LEFT)) {
+		renderSettings::tessellationLevel--;
+	}	
+	
+	if (m_InputManager->isKeyPressed(GLFW_KEY_UP)) {
+		renderSettings::displacementScale += 0.01f;
+	} else if (m_InputManager->isKeyPressed(GLFW_KEY_DOWN)) {
+		renderSettings::displacementScale -= 0.01f;
+	}
+}
+
+
+void Application::InitializeRenderSettings(Project::ProjectNumber proj)
+{
+
+	switch (proj)
+	{
+	case Project::ProjectNumber::PROJECT5:
+
+		renderSettings::USING_ENV = true;
+		renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE = true;
+		renderSettings::USING_SHADOWS = false;
+		renderSettings::USING_TESSELLATION = false;
+		renderSettings::USING_NORMALMAPPING = false;
+		renderSettings::USING_REFLECTIONS = false;
+
+		break;
+	case Project::ProjectNumber::PROJECT6:
+		renderSettings::USING_ENV = true;
+		renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE = false;
+		renderSettings::USING_SHADOWS = false;
+		renderSettings::USING_TESSELLATION = false;
+		renderSettings::USING_NORMALMAPPING = false;
+		renderSettings::USING_REFLECTIONS = true;
+
+		break;
+	case Project::ProjectNumber::PROJECT7:
+		renderSettings::USING_ENV = true;
+		renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE = false;
+		renderSettings::USING_SHADOWS = true;
+		renderSettings::USING_TESSELLATION = false;
+		renderSettings::USING_NORMALMAPPING = false;
+		renderSettings::USING_REFLECTIONS = false;
+
+		break;
+	case Project::ProjectNumber::PROJECT8:
+		renderSettings::USING_ENV = true;
+		renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE = false;
+		renderSettings::USING_SHADOWS = true;
+		renderSettings::USING_TESSELLATION = true;
+		renderSettings::USING_NORMALMAPPING = true;
+		renderSettings::USING_REFLECTIONS = false;
+
+		break;
 	}
 }
 

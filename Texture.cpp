@@ -8,9 +8,8 @@ Texture::~Texture()
 	Delete();
 }
 
-void Texture::Load2D(const char* filename, GLenum format, GLenum pixelType, GLenum texTarget)
+void Texture::Load2D(const char* filename, GLenum format, GLint internalFormat, GLenum pixelType, GLenum texTarget)
 {
-
 	this->texTarget = texTarget;
 
 	// Take width, height of incoming img
@@ -42,7 +41,7 @@ void Texture::Load2D(const char* filename, GLenum format, GLenum pixelType, GLen
 	glTexImage2D(
 		texTarget,			// typically will be GL_TEXTURE_2D, texture, but there are multiple 2D texture format's
 		0,					// Mipmap level, meaning highest resolution img
-		GL_RGBA,			// Internal Format
+		internalFormat,			// Internal Format
 		width,
 		height,
 		0,				// Border, just keep at ZERO
@@ -61,7 +60,7 @@ void Texture::Load2D(const char* filename, GLenum format, GLenum pixelType, GLen
 	}
 }
 
-void Texture::CreateRenderTarget(unsigned int width, unsigned int height, GLenum format, GLint internalFormat, GLenum pixelType, std::vector<std::pair<GLenum, GLint>> texParameters, GLenum texTarget)
+void Texture::CreateRenderTarget(unsigned int width, unsigned int height, GLenum format, GLint internalFormat, GLenum pixelType, const std::vector<std::pair<GLenum, GLint>>& texParameters, GLenum texTarget)
 {
 	this->texTarget = texTarget;
 
@@ -93,7 +92,7 @@ void Texture::CreateRenderTarget(unsigned int width, unsigned int height, GLenum
 	}
 }
 
-void Texture::LoadCubeMap(std::array<std::string, 6> paths, GLenum texTarget, GLenum format, GLenum pixelType)
+void Texture::LoadCubeMap(const std::array<std::string, 6>& paths, GLenum texTarget, GLenum format, GLenum pixelType)
 {
 	this->texTarget = texTarget;
 
@@ -157,7 +156,7 @@ void Texture::LoadCubeMap(std::array<std::string, 6> paths, GLenum texTarget, GL
 	}
 }
 
-void Texture::LoadDepthCubeMap(unsigned int width, unsigned int height, GLenum format, GLint internalFormat, GLenum pixelType, std::vector<std::pair<GLenum, GLint>> texParameters, GLenum texTarget )
+void Texture::LoadDepthCubeMap(unsigned int width, unsigned int height, GLenum format, GLint internalFormat, GLenum pixelType, const std::vector<std::pair<GLenum, GLint>>& texParameters, GLenum texTarget )
 {
 	this->texTarget = texTarget;
 

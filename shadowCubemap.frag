@@ -1,4 +1,4 @@
-#version 330 core
+#version 460 core
 
 // Current fragment position in World Space
 in vec4 crntPosWrld;

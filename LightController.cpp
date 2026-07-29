@@ -33,6 +33,7 @@ void LightController::update(float deltaTime, std::vector<std::unique_ptr<Light>
 		// Set lightMesh position
 		if (light->lightMesh && light->shouldShowMesh) {
 			light->lightMesh->getTransform().translation = light->position;
+			light->lightMesh->dirtyTransform = true;
 		}
 
 		// Have to later change this switch statement to a better design, currently don't love the last min desicion making for sake of cache friendliness
@@ -63,6 +64,7 @@ void LightController::update(float deltaTime, std::vector<std::unique_ptr<Light>
 			// Set lightMesh direction
 			if (light->lightMesh && light->shouldShowMesh) {
 				light->lightMesh->getTransform().rotation = light->lightType == LightType::POINT ? glm::quat(1.0f, 0.0f, 0.0f, 0.0f) : rot;
+				light->lightMesh->dirtyTransform = true; // Not great to manually be doing this
 			}
 
 		}

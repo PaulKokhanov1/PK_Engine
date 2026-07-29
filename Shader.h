@@ -10,6 +10,7 @@
 #include<iostream>
 #include<cerrno>
 #include<unordered_map>
+#include <optional>
 
 #include"ShaderCommon.h"
 #include"ShaderException.h"
@@ -28,8 +29,10 @@ public:
 	// Default constructor
 	Shader();
 	// Constructor that build the Shader Program from 2 different shaders
-	Shader(const char* vertexFile, const char* fragmentFile);
+	Shader(const char* vertexFile, const char* fragmentFile, std::optional<const char*> geometryFile, std::optional<const char*> tcsFile, std::optional<const char*> tesFile);
 	~Shader();
+
+	GLuint compileShader(GLenum type, const char* filename, errorType err);
 
 	// Activates the Shader Program
 	void Activate();
@@ -42,6 +45,9 @@ public:
 
 	const char* getVertexFile();
 	const char* getFragmentFile();
+	std::optional<const char*> getGeometryFile();
+	std::optional<const char*> getTCSFile();
+	std::optional<const char*> getTESFile();
 
 	int getUniformLocation(const std::string& name) const;
 
@@ -63,6 +69,9 @@ private:
 	// Used for "hot-reload" of shader's via F6
 	const char* vertexFile;
 	const char* fragmentFile;
+	std::optional<const char*> geometryFile;
+	std::optional<const char*> tcsFile;
+	std::optional<const char*> tesFile;
 
 	// cache shader uniform location
 	mutable std::unordered_map<std::string, int> shaderUniformLocations;

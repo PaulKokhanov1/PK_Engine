@@ -154,6 +154,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MeshComponent.cpp" />
+    <ClCompile Include="MeshFactory.cpp" />
     <ClCompile Include="Mirror.cpp" />
     <ClCompile Include="QuadController.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="MathCommon.h" />
     <ClInclude Include="MeshComponent.h" />
+    <ClInclude Include="MeshFactory.h" />
     <ClInclude Include="Mirror.h" />
     <ClInclude Include="QuadController.h" />
     <ClInclude Include="RenderBufferDescriptor.h" />
@@ -231,14 +233,30 @@
     <None Include="default.vert" />
     <None Include="framebuffer.frag" />
     <None Include="framebuffer.vert" />
+    <None Include="lines.frag" />
+    <None Include="lines.geom" />
+    <None Include="lines.vert" />
     <None Include="planeReflection.frag" />
     <None Include="planeReflection.vert" />
     <None Include="shadowCubemap.frag" />
+    <None Include="shadowCubemapTess.frag" />
+    <None Include="shadowCubemapTess.tesc" />
+    <None Include="shadowCubemapTess.tese" />
     <None Include="shadowCubemap.vert" />
+    <None Include="shadowCubemapTess.vert" />
     <None Include="shadowMap.frag" />
     <None Include="shadowMap.vert" />
+    <None Include="ShadowMapTess.frag" />
+    <None Include="ShadowMapTess.tesc" />
+    <None Include="ShadowMapTess.tese" />
+    <None Include="ShadowMapTess.vert" />
     <None Include="skybox.frag" />
     <None Include="skybox.vert" />
+    <None Include="tess.frag" />
+    <None Include="tess.geom" />
+    <None Include="tess.tesc" />
+    <None Include="tess.tese" />
+    <None Include="tess.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

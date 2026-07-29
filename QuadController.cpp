@@ -26,6 +26,9 @@ void QuadController::update(float deltaTime)
 		quad->getTransform().rotation *= qYaw * qPitch;
 
 		quad->getTransform().rotation = glm::normalize(quad->getTransform().rotation);	// Prevent numerical drift
+
+		quad->dirtyTransform = true;
+
 	}
 	else if (input->isMouseButtonReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
 
@@ -41,6 +44,7 @@ void QuadController::update(float deltaTime)
 
 		quad->getTransform().scale += (float)input->getDeltaMouseY() * SCALE_SENSITIVITY;
 		quad->getTransform().scale = max(quad->getTransform().scale, SCALE_MINIMUM);	// Avoid zero or negatives
+		quad->dirtyTransform = true;
 	}
 	else if (input->isMouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
 

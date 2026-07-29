@@ -1,72 +1,19 @@
 #include "Scene.h"
 #include "SceneLoader.h"
+#include "MeshFactory.h"
 #include "Window.h"
 
-SceneLoader::SceneLoader()
-{
-}
-
-SceneLoader::~SceneLoader()
-{
-}
+SceneLoader::SceneLoader(Project::ProjectNumber project) : project(project){}
 
 std::unique_ptr<Scene> SceneLoader::createBasicScene()
 {
 	Window* win = Application::Get().getWindow();
+	std::unique_ptr<Scene> basic = std::make_unique<Scene>();
 
-	// Tmporary for testing ---------------------------------------------------------------------------------------------------
-
-	// Vertices coordinates for Rectangle
-	VERTEX vertices[] =
-	{ //               COORDINATES           /
-		VERTEX{glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f)},	// bottom left
-		VERTEX{glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)},	// bottom right
-		VERTEX{glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f)},	// top right
-		VERTEX{glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)},	// top left
-	};
-
-	// Indices for vertices order
-	GLuint indices[] =
-	{
-		0, 1, 2, // Lower left triangle
-		0, 3, 2, // upper right triangle
-	};
-
-	std::string name = "rectangle";
-	std::vector<VERTEX> verts(vertices, vertices + sizeof(vertices) / sizeof(VERTEX));
-	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
-	std::unique_ptr<MeshComponent> rectangle = std::make_unique<MeshComponent>(name, verts, ind);
-	//unique_ptr<MeshComponent> sphere = make_unique<MeshComponent>("OBJ/sphere/sphere.obj");
-	//std::unique_ptr<MeshComponent> teapot = std::make_unique<MeshComponent>("OBJ/teapot_facing_up/teapot.obj");
-	std::unique_ptr<MeshComponent> teapot = std::make_unique<MeshComponent>("OBJ/teapot/teapot.obj");
-	//MeshComponent teapot("OBJ/teapot_white/teapot.obj");
 	//std::unique_ptr<MeshComponent> yoda = std::make_unique<MeshComponent>("OBJ/yoda/yoda.obj");
-	std::unique_ptr<MeshComponent> planeMesh = std::make_unique<MeshComponent>("OBJ/plane/plane.obj");
-	// Transform plane mesh, ADD FUNCTIONALITY TO CHANGE TRANSFORM
-	Transform tR;
-	tR.translation = glm::vec3(0.0f, -0.18f, 0.0f);
-	tR.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-	tR.scale = glm::vec3(3.0f, 1.0f, 3.0f);
-	planeMesh->setTransform(tR);
-
-	// Rotate Yoda
-	// Define the rotation angle (90 degrees) and axis (Y-axis)
-	float angle_degrees = -90.0f;
-	glm::vec3 rotation_axis(1.0f, 0.0f, 0.0f); // Rotate around the Y-axis
-
-	// Create the quaternion
-	glm::quat rotation_quat = glm::angleAxis(glm::radians(angle_degrees), rotation_axis);
-	Transform t = {
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		rotation_quat,
-		glm::vec3(1.0f, 1.0f, 1.0f)
-	};
-	//yoda.setTransform(t);
-	teapot->setTransform(t);
 
 
-
-	// TEMPORARY CUBEMAP paths, MUST initialize array in proper order, +X, -X, +Y, -Y, +Z, -Z
+	// Enviornment CUBEMAP paths, MUST initialize array in proper order, +X, -X, +Y, -Y, +Z, -Z
 	std::array<std::string, 6> paths = {
 		"envMaps/cubemap/cubemap_posx.png",
 		"envMaps/cubemap/cubemap_negx.png",
@@ -76,16 +23,13 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 		"envMaps/cubemap/cubemap_negz.png",
 	};
 
-	//------------------------------------------------------------------------------------------------------------
-
 	// Create Scene
-	std::unique_ptr<Scene> basic = std::make_unique<Scene>();
-	basic->AddMesh(move(teapot));
-	basic->AddMesh(move(planeMesh));	// Comment This OUT when checking Project 6 (it overlaps the mirrored plane)
-	basic->createMirrorObject(glm::vec3(0.0f, -0.18f, 0.0f));
-	basic->Addlight(move(createLight(LightType::DIRECTIONAL, win)));
+
+	createProject(project, basic.get());
+
+	// CHANGE LIGHT HERE
+	basic->Addlight(move(createLight(LightType::POINT, win)));
 	basic->setCamera(std::make_unique<Camera>(engineConfig::DEFAULT_WIDTH, engineConfig::DEFAULT_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f), 45.0f, 0.1f, 100.0f));
-	basic->setQuadController(std::make_unique<QuadController>(move(rectangle)));
 	basic->setLightController(std::make_unique<LightController>());
 	basic->setCubeMap(std::make_unique<CubeMap>(paths));
 	basic->setEnvLightIntensity(0.8f);
@@ -151,7 +95,7 @@ std::unique_ptr<Light> SceneLoader::createLight(LightType type, Window* win)
 			light->ambient = glm::vec3(0.9f);
 			light->position = glm::vec3(0, 0.8f, 0);
 			light->innerCone = glm::cos(glm::radians(12.5f));
-			light->outerCone = glm::cos(glm::radians(17.5f));
+			light->outerCone = glm::cos(glm::radians(40.5f));
 			light->shouldShowMesh = true;
 			light->mShadowMap->createDepthMapFBO(w, h);
 			break;
@@ -164,4 +108,130 @@ std::unique_ptr<Light> SceneLoader::createLight(LightType type, Window* win)
 
 	return light;
 
+}
+
+void SceneLoader::createProject(Project::ProjectNumber proj, Scene* scene)
+{
+	// Vertices coordinates for Rectangle
+	VERTEX vertices[] =
+	{ //               COORDINATES           /
+		VERTEX{glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f)},	// bottom left
+		VERTEX{glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)},	// bottom right
+		VERTEX{glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f)},	// top right
+		VERTEX{glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)},	// top left
+	};
+
+	// Indices for vertices order
+	GLuint indices[] =
+	{
+		0, 1, 2, // Lower left triangle
+		0, 3, 2, // upper right triangle
+	};
+	std::string name = "rectangle";
+	std::vector<VERTEX> verts(vertices, vertices + sizeof(vertices) / sizeof(VERTEX));
+	std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
+	std::unique_ptr<MeshComponent> rectangle = std::make_unique<MeshComponent>(name, verts, ind);
+
+	std::unique_ptr<MeshComponent> teapot = std::make_unique<MeshComponent>("OBJ/teapot/teapot.obj");
+	std::unique_ptr<MeshComponent> teapot_facing_up = std::make_unique<MeshComponent>("OBJ/teapot_facing_up/teapot.obj");
+	std::unique_ptr<MeshComponent> planeMesh = std::make_unique<MeshComponent>("OBJ/plane/plane.obj");
+
+	std::unique_ptr<MeshComponent> planeMeshTriangles = std::make_unique<MeshComponent>("OBJ/plane/plane.obj");
+	std::unique_ptr<MeshFactory> meshFactory = std::make_unique<MeshFactory>();
+	std::unique_ptr<MeshComponent> planeMeshQuads = meshFactory.get()->CreateQuadGrid(1);
+
+	glm::quat rotation_quat = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	Transform tR;
+
+
+	switch (proj)
+	{
+	case Project::ProjectNumber::PROJECT5:
+
+		// Enable Env in EngineConfig.h
+
+		renderSettings::USING_ENV = true;
+		renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE = true;
+		renderSettings::USING_SHADOWS = false;
+		renderSettings::USING_TESSELLATION = false;
+		renderSettings::USING_NORMALMAPPING = false;
+		renderSettings::USING_REFLECTIONS = false;
+
+		tR.translation = glm::vec3(0.0f, 0.0f, 0.0f);
+		tR.rotation = rotation_quat;
+		tR.scale = glm::vec3(1.0f, 1.0f, 1.0f);
+
+		teapot->setTransform(tR);
+		scene->setQuadController(std::make_unique<QuadController>(move(rectangle)));
+		scene->AddMesh(move(teapot));
+
+		break;	
+	case Project::ProjectNumber::PROJECT6:
+
+		// Enable Reflections, Env in EngineConfig.h
+		// Choose any type of light source
+		renderSettings::USING_ENV = true;
+		renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE = false;
+		renderSettings::USING_SHADOWS = false;
+		renderSettings::USING_TESSELLATION = false;
+		renderSettings::USING_NORMALMAPPING = false;
+		renderSettings::USING_REFLECTIONS = true;
+
+		scene->AddMesh(move(teapot_facing_up));
+		scene->createMirrorObject(glm::vec3(0.0f, -0.18f, 0.0f));
+
+		break;	
+	case Project::ProjectNumber::PROJECT7:
+
+		// Enable Shadows, Env in EngineConfig.h
+		// Choose any type of light source
+		renderSettings::USING_ENV = true;
+		renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE = false;
+		renderSettings::USING_SHADOWS = true;
+		renderSettings::USING_TESSELLATION = false;
+		renderSettings::USING_NORMALMAPPING = false;
+		renderSettings::USING_REFLECTIONS = false;
+
+		tR.translation = glm::vec3(0.0f, -0.18f, 0.0f);
+		tR.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		tR.scale = glm::vec3(3.0f, 1.0f, 3.0f);
+		planeMesh->setTransform(tR);
+
+		tR.translation = glm::vec3(0.0f, 0.0f, 0.0f);
+		tR.rotation = rotation_quat;
+		tR.scale = glm::vec3(1.0f, 1.0f, 1.0f);
+		teapot->setTransform(tR);
+
+		scene->AddMesh(move(teapot));
+		scene->AddMesh(move(planeMesh));
+
+
+		break;	
+	case Project::ProjectNumber::PROJECT8:
+		// Enable Tessellation, Shadows, Normal Mapping, Env in EngineConfig.h
+		// Choose any type of light source
+		renderSettings::USING_ENV = true;
+		renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE = false;
+		renderSettings::USING_SHADOWS = true;
+		renderSettings::USING_TESSELLATION = true;
+		renderSettings::USING_NORMALMAPPING = true;
+		renderSettings::USING_REFLECTIONS = false;
+
+		// Change Normal & Displacement Maps here 
+		planeMeshQuads->getSubMeshes()[0].material.setNormalMapPath("normalMaps/broken_brick_wall_nor_gl_4k.png");
+		planeMeshTriangles->getSubMeshes()[0].material.setNormalMapPath("normalMaps/teapot_normal.png");
+		planeMeshTriangles->getSubMeshes()[0].material.setDisplacementMapPath("displacementMaps/teapot_disp.png");
+		planeMeshQuads->getSubMeshes()[0].material.setDisplacementMapPath("displacementMaps/broken_brick_wall_disp_4k.png");
+
+		// Transform plane mesh
+		tR.translation = glm::vec3(0.0f, -0.18f, 0.0f);
+		tR.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		tR.scale = glm::vec3(1.0f, 1.0f, 1.0f);
+		planeMeshQuads->setTransform(tR);
+		//planeMeshTriangles->setTransform(tRProject8);
+
+		 scene->AddMesh(move(planeMeshQuads));
+
+		break;
+	}
 }

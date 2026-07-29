@@ -36,7 +36,7 @@ public:
 	~MeshComponent();
 
 	// Draw the object
-	void DrawSubMesh(const SubMesh& s);
+	void DrawSubMesh(const SubMesh& s, const renderTypes::PrimitiveTopology topology = renderTypes::PrimitiveTopology::Triangles);
 
 	// Setters and Getters
 
@@ -49,7 +49,11 @@ public:
 
 	// Used to create Model Matrix
 	Transform transform;
-	glm::mat4 computeModelMatrix();
+	void computeModelMatrix();
+	glm::mat4 getModelMatrix();
+
+	glm::mat4 cachedModelMatrix;
+	bool dirtyTransform = true;
 
 
 private:

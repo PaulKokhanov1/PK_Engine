@@ -22,50 +22,41 @@ Shader::Shader()
 	ID = -1;
 	vertexFile = "";
 	fragmentFile = "";
+	geometryFile = "";
 }
 
-Shader::Shader(const char* vertexFile, const char* fragmentFile)
+Shader::Shader(const char* vertexFile, const char* fragmentFile, std::optional<const char*> geometryFile, std::optional<const char*> tcsFile, std::optional<const char*> tesFile)
 {
 	this->vertexFile = vertexFile;
 	this->fragmentFile = fragmentFile;
+	this->geometryFile = geometryFile;
+	this->tcsFile = tcsFile;
+	this->tesFile = tesFile;
 
-	std::string vertexCode = get_file_contents(vertexFile);
-	std::string fragmentCode = get_file_contents(fragmentFile);
-
-	const char* vertexSource = vertexCode.c_str();
-	const char* fragmentSource = fragmentCode.c_str();
-
-	// Create vertex shader obj, get ref and compile
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexSource, nullptr);
-	glCompileShader(vertexShader);
-
-	// Handle Compilation errors
-	if (checkCompileErrors(vertexShader, VERTEXSHADER)) {
-
-		glDeleteShader(vertexShader);
-		throw(ShaderException("Compiling shader failed", VERTEXSHADER, vertexFile));
-	}
-
-	// Create fragment shader obj, get ref and compile
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentSource, nullptr);
-	glCompileShader(fragmentShader);
-
-	// Handle Compilation errors
-	if (checkCompileErrors(fragmentShader, FRAGMENTSHADER)) {
-
-		glDeleteShader(fragmentShader);
-		throw(ShaderException("Compiling fragment failed", FRAGMENTSHADER, fragmentFile));
-	}
+	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexFile, VERTEXSHADER);
+	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentFile, FRAGMENTSHADER);
+	GLuint geometryShader = compileShader(GL_GEOMETRY_SHADER, geometryFile ? geometryFile.value() : "", GEOMETRYSHADER);
+	GLuint tcsShader = compileShader(GL_TESS_CONTROL_SHADER, tcsFile ? tcsFile.value() : "", TESSELLATIONCONTROLSHADER);
+	GLuint tesShader = compileShader(GL_TESS_EVALUATION_SHADER, tesFile ? tesFile.value() : "", TESSELLATIONEVALUTATIONSHADER);
 
 	// Create program
 	ID = glCreateProgram();
 
-	// Attach Shaders
 	glAttachShader(ID, vertexShader);
 	glAttachShader(ID, fragmentShader);
-	
+
+	if (geometryShader != 0)
+	{
+		glAttachShader(ID, geometryShader);
+	}
+
+	if (tcsShader != 0 && tesShader != 0)
+	{
+		glAttachShader(ID, tcsShader);
+		glAttachShader(ID, tesShader);
+	}
+
+
 	// Link shaders into program
 	glLinkProgram(ID);
 	// Check Link status
@@ -78,6 +69,9 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
 	// Delete unnecessary shader objects
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
+	if (geometryShader != 0) glDeleteShader(geometryShader);	// 0 is a sentinel value
+	if (tcsShader != 0) glDeleteShader(tcsShader);
+	if (tesShader != 0) glDeleteShader(tesShader);
 
 }
 
@@ -85,6 +79,31 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
 Shader::~Shader()
 {
 	Delete();
+}
+
+GLuint Shader::compileShader(GLenum type, const char* filename, errorType err)
+{
+	GLuint shader = 0;
+	if (filename != "") {
+		std::string code = get_file_contents(filename);
+		const char* source = code.c_str();
+
+		// Create geometry shader obj, get ref and compile
+
+		shader = glCreateShader(type);
+		glShaderSource(shader, 1, &source, nullptr);
+		glCompileShader(shader);
+
+		// Handle Compilation errors
+		if (checkCompileErrors(shader, err)) {
+
+			glDeleteShader(shader);
+			throw(ShaderException("Compiling shader failed", err, filename));
+		}
+
+	}
+	return shader;
+
 }
 
 void Shader::Activate()
@@ -101,7 +120,7 @@ bool Shader::checkCompileErrors(GLuint id, errorType type)
 {
 	GLint success = 0;
 
-	if (type == VERTEXSHADER || type == FRAGMENTSHADER) {
+	if (type == VERTEXSHADER || type == FRAGMENTSHADER || type == GEOMETRYSHADER || type == TESSELLATIONCONTROLSHADER || type == TESSELLATIONEVALUTATIONSHADER) {
 
 		glGetShaderiv(id, GL_COMPILE_STATUS, &success);
 		if (success == GL_FALSE) {
@@ -153,6 +172,21 @@ const char* Shader::getVertexFile()
 const char* Shader::getFragmentFile()
 {
 	return fragmentFile;
+}
+
+std::optional<const char*> Shader::getGeometryFile()
+{
+	return geometryFile;
+}
+
+std::optional<const char*> Shader::getTCSFile()
+{
+	return tcsFile;
+}
+
+std::optional<const char*> Shader::getTESFile()
+{
+	return tesFile;
 }
 
 int Shader::getUniformLocation(const std::string& name) const

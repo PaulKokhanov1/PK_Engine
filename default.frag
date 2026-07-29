@@ -4,13 +4,13 @@
 out vec4 FragColor;
 
 // Normals in World Space
-in vec3 NormalWrld;
+in vec3 Normal_WorldSpace;
 // Current fragment position in World Space
-in vec3 crntPosWrld;
+in vec3 crntPos_WorldSpace;
 // Texture Coordinates from Vertex Shader
 in vec2 texCoord;
 // Current position in light view space
-in vec4 lightView_Position;
+in vec4 lightView_Position_ClipSpace;
 
 // Camera Position World Space
 uniform vec3 camPosWorld;
@@ -49,20 +49,60 @@ uniform float shadowCubemapResolution;
 // Environment Lighting
 uniform float envLightIntensity;
 
+// Render Settings
+uniform bool shadowsEnabled;
+uniform bool reflectionsEnabled;
 
 
-vec4 pointLight()
-{	
-	vec3 lightVec = lightPosWorld - crntPosWrld;
+float shadowCalculationSampler2D()
+{
+	if (!shadowsEnabled) 
+	{
+		return 1.0f;
+	}
+	
+	vec3 lightVec = lightPosWorld - crntPos_WorldSpace;
 	// Find light direction to current position
 	vec3 lightDir = normalize(lightVec);
-	vec3 normal = normalize(NormalWrld);
+
+	// Calculate Shadows
+	float visibility = 0.0f;
+	vec3 lightCoords = lightView_Position_ClipSpace.xyz / lightView_Position_ClipSpace.w;
+	if (lightCoords.z <= 1.0f) 
+	{
+		lightCoords = (lightCoords + 1.0f) / 2.0f;
+		float currentDepth = lightCoords.z;
+		float bias = max(0.0008f * (1.0f - dot(Normal_WorldSpace, lightDir)), 0.0006f);
+
+		int sampleRadius = 1;
+		vec2 pixelSize = 1.0 / textureSize(shadowMap, 0);
+		for (int y = -sampleRadius; y <= sampleRadius; ++y) {
+			for (int x = -sampleRadius; x <= sampleRadius; ++x) {
+
+				visibility += texture( shadowMap, vec3 (lightCoords.xy + vec2(x, y) * pixelSize , currentDepth - bias) );
+			}
+		}
+		visibility /= pow((sampleRadius * 2 + 1), 2);
+	}
+	return visibility;
+}
+
+float shadowCalculationSamplerCube()
+{
+	if (!shadowsEnabled) 
+	{
+		return 0.0f;	// as currently we use (1.0f - shadow) in color adjusting
+	}
+
+	vec3 lightVec = lightPosWorld - crntPos_WorldSpace;
+	// Find light direction to current position
+	vec3 lightDir = normalize(lightVec);
 
 	// Shadows
 	vec3 fragmentToLight = -lightVec;
 	float currentDepth = length(fragmentToLight);
 	float shadow = 0.0f;
-	float bias = max(0.5f * (1.0f - dot(normal, lightDir)), 0.0005f);
+	float bias = max(0.5f * (1.0f - dot(Normal_WorldSpace, lightDir)), 0.0005f);
 	
 	// PCF for softer shadows
 	int sampleRadius = 1;
@@ -81,6 +121,19 @@ vec4 pointLight()
 	}
 	shadow /= pow((sampleRadius * 2 + 1), 3);
 
+	return shadow;
+
+}
+
+vec4 pointLight()
+{	
+	vec3 lightVec = lightPosWorld - crntPos_WorldSpace;
+	// Find light direction to current position
+	vec3 lightDir = normalize(lightVec);
+
+	// Shadows
+	float shadow = shadowCalculationSamplerCube();
+
 	// Inversely Quadratic formula to lower light intensity as we go further away from light source
 	float dist = length(lightVec);
 	float a = 0.7f;
@@ -90,13 +143,13 @@ vec4 pointLight()
 	vec3 ambient = texture(texAmbient, texCoord).rgb * Ka * lightKa;
 
 	// Calculate diffuse shading
-	float diffuseAmount = max(dot(normal, lightDir), 0.0f);
+	float diffuseAmount = max(dot(Normal_WorldSpace, lightDir), 0.0f);
 	vec3 diffuse = texture(texDiffuse, texCoord).rgb * lightKd * (lightColor * Kd * diffuseAmount * intensity * (1.0f - shadow));
 
 	// Calculate Specular lighting
-	vec3 viewDir = normalize(camPosWorld - crntPosWrld);  // View dir vector pointing at Camera
+	vec3 viewDir = normalize(camPosWorld - crntPos_WorldSpace);  // View dir vector pointing at Camera
 	vec3 halfVector = normalize(lightDir + viewDir); 
-	float specAmount = pow(max(dot(normal, halfVector), 0.0), shininess);
+	float specAmount = pow(max(dot(Normal_WorldSpace, halfVector), 0.0), shininess);
 	vec3 specular = texture(texSpecular, texCoord).r * lightKs * (lightColor * Ks * specAmount * intensity * (1.0f - shadow));
 
 	return vec4(diffuse + ambient + specular, 1.0);
@@ -107,39 +160,20 @@ vec4 directionalLight()
 	// Find direction TOWARDS light source
 	vec3 lightDir = normalize(-lightDirection);
 
-	vec3 normal = normalize(NormalWrld);
-
 	// Calculate Shadows
-	float visiblity = 0.0f;
-	vec3 lightCoords = lightView_Position.xyz / lightView_Position.w;
-	if (lightCoords.z <= 1.0f) 
-	{
-		lightCoords = (lightCoords + 1.0f) / 2.0f;
-		float currentDepth = lightCoords.z;
-		float bias = max(0.0008f * (1.0f - dot(normal, lightDir)), 0.0006f);
-
-		int sampleRadius = 1;
-		vec2 pixelSize = 1.0 / textureSize(shadowMap, 0);
-		for (int y = -sampleRadius; y <= sampleRadius; ++y) {
-			for (int x = -sampleRadius; x <= sampleRadius; ++x) {
-
-				visiblity += texture( shadowMap, vec3 (lightCoords.xy + vec2(x, y) * pixelSize , currentDepth - bias) );
-			}
-		}
-		visiblity /= pow((sampleRadius * 2 + 1), 2);
-	}
+	float visibility = shadowCalculationSampler2D();
 
 	vec3 ambient = texture(texAmbient, texCoord).rgb * Ka * lightKa;
 	
 	// Calculate diffuse shading
-	float diffuseAmount = max(dot(normal, lightDir), 0.0f);
-	vec3 diffuse = texture(texDiffuse, texCoord).rgb * lightKd * (lightColor * Kd * diffuseAmount * visiblity);
+	float diffuseAmount = max(dot(Normal_WorldSpace, lightDir), 0.0f);
+	vec3 diffuse = texture(texDiffuse, texCoord).rgb * lightKd * (lightColor * Kd * diffuseAmount * visibility);
 
 	// Calculate Specular lighting
-	vec3 viewDir = normalize(camPosWorld - crntPosWrld);  // View dir vector pointing at Camera
+	vec3 viewDir = normalize(camPosWorld - crntPos_WorldSpace);  // View dir vector pointing at Camera
 	vec3 halfVector = normalize(lightDir + viewDir); 
-	float specAmount = pow(max(dot(normal, halfVector), 0.0), shininess);
-	vec3 specular = texture(texSpecular, texCoord).r * lightKs * (lightColor * Ks * specAmount * visiblity);
+	float specAmount = pow(max(dot(Normal_WorldSpace, halfVector), 0.0), shininess);
+	vec3 specular = texture(texSpecular, texCoord).r * lightKs * (lightColor * Ks * specAmount * visibility);
 
 	return vec4(diffuse + ambient + specular, 1.0);
 }
@@ -147,15 +181,9 @@ vec4 directionalLight()
 vec4 spotLight()
 {	
 	// Calculate Shadows
-	vec3 lightCoords = lightView_Position.xyz / lightView_Position.w;
-	float visibility = 1.0f;
-	if (lightCoords.z <= 1.0f) 
-	{
-		lightCoords = (lightCoords + 1.0f) / 2.0f;
-		visibility = texture( shadowMap, lightCoords );
-	}
+	float visibility = shadowCalculationSampler2D();
 
-	vec3 lightVec = lightPosWorld - crntPosWrld;
+	vec3 lightVec = lightPosWorld - crntPos_WorldSpace;
 
 	vec3 ambient = texture(texAmbient, texCoord).rgb * Ka * lightKa;
 
@@ -167,14 +195,13 @@ vec4 spotLight()
 	float inten = clamp((angle - outerCone) / (innerCone - outerCone), 0.0f, 1.0f);
 	
 	// Calculate diffuse shading
-	vec3 normal = normalize(NormalWrld);
-	float diffuseAmount = max(dot(normal, lightDir), 0.0f);
+	float diffuseAmount = max(dot(Normal_WorldSpace, lightDir), 0.0f);
 	vec3 diffuse = texture(texDiffuse, texCoord).rgb * lightKd * (lightColor * Kd * diffuseAmount * inten * visibility);
 
 	// Calculate Specular lighting
-	vec3 viewDir = normalize(camPosWorld - crntPosWrld);  // View dir vector pointing at Camera
+	vec3 viewDir = normalize(camPosWorld - crntPos_WorldSpace);  // View dir vector pointing at Camera
 	vec3 halfVector = normalize(lightDir + viewDir); 
-	float specAmount = pow(max(dot(normal, halfVector), 0.0), shininess);
+	float specAmount = pow(max(dot(Normal_WorldSpace, halfVector), 0.0), shininess);
 	vec3 specular = texture(texSpecular, texCoord).r * lightKs * (lightColor * Ks * specAmount * inten * visibility);
 
 	return vec4(diffuse + ambient + specular, 1.0);
@@ -182,9 +209,8 @@ vec4 spotLight()
 
 vec4 envReflection()
 {
-	vec3 normal = normalize(NormalWrld);
-	vec3 w_o = normalize(camPosWorld - crntPosWrld);  // CubeMap sampled in World Space since its statically generated
-	vec3 w_r = reflect(-w_o , normal);	// direction towards light
+	vec3 w_o = normalize(camPosWorld - crntPos_WorldSpace);  // CubeMap sampled in World Space since its statically generated
+	vec3 w_r = reflect(-w_o , Normal_WorldSpace);	// direction towards light
 
 	vec3 envColor = texture(env, w_r).rgb;
 
@@ -193,22 +219,21 @@ vec4 envReflection()
 }
 
 vec4 normalLight() {
-	vec3 normal = normalize(NormalWrld);
-
 	// Change color of object depending on direction normal is pointing
-	return vec4(abs(normal), 1.0f);
+	return vec4(abs(Normal_WorldSpace), 1.0f);
 }
 
 void main()
 {
+	vec4 lightOutput;
 	if (lightType == 0) {
-		FragColor = pointLight();
+		lightOutput = pointLight();
 	} else if (lightType == 1) {
-		FragColor = directionalLight();
+		lightOutput = directionalLight();
 	} else if (lightType == 2) {
-		FragColor = spotLight();
+		lightOutput = spotLight();
 	}
-	//FragColor = envReflection();
-	// vec3 finalColor = pointLight().rgb + envReflection().rgb * 0.6;
-	//FragColor = vec4(finalColor,1.0);
+
+	if (reflectionsEnabled) FragColor = vec4(lightOutput.rgb + envReflection().rgb * 0.6, 1.0);
+	else FragColor = lightOutput;
 }

@@ -11,13 +11,13 @@ class ShaderManager
 {
 public:
 	ShaderManager();
-	~ShaderManager();
+	~ShaderManager() = default;
 
-	void load(std::string programName, const char* vertexShader, const char* fragmentShader);
-	bool remove(std::string programName);
-	bool bind(std::string programName);
+	void load(const std::string& programName, const char* vertexShader, const char* fragmentShader, std::optional<const char*> geometryShader, std::optional<const char*> tcsFile, std::optional<const char*> tesFile);
+	bool remove(const std::string& programName);
+	bool bind(const std::string& programName);
 
-	Shader* get(std::string programName);
+	Shader* get(const std::string& programName);
 
 	void reloadAll();
 

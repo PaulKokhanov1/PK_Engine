@@ -14,18 +14,16 @@ class TextureManager
 {
 public:
 	TextureManager();
-	~TextureManager();
+	~TextureManager() = default;
 
-	// Remove all texture pointers and free memory
-	void Shutdown();
 
 	// Create white, gray, black simple textures
 	void initFallback();
 	Texture* load(const TextureDescriptor& texDesc);
-	Texture* loadCubeMap(const TextureDescriptor& texDesc, std::array<std::string, 6> paths);
+	Texture* loadCubeMap(const TextureDescriptor& texDesc, const std::array<std::string, 6>& paths);
 	Texture* loadRenderedTexture(const TextureDescriptor& texDesc);
 	Texture* getOrLoad(const TextureDescriptor& texDesc);
-	Texture* getFallback(std::string texture);
+	Texture* getFallback(const std::string& texture);
 
 private:
 	std::unordered_map<TextureDescriptor, std::unique_ptr<Texture>> texMap;	// Unqiue Pointers for more controlled creation, storage and automatic deletion

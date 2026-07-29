@@ -4,15 +4,6 @@ TextureManager::TextureManager()
 {
 }
 
-TextureManager::~TextureManager()
-{
-	Shutdown();
-}
-
-void TextureManager::Shutdown()
-{
-	texMap.clear();
-}
 
 void TextureManager::initFallback()
 {
@@ -50,20 +41,22 @@ void TextureManager::initFallback()
 
 Texture* TextureManager::load(const TextureDescriptor& texDesc)
 {
-	if (texMap.find(texDesc) != texMap.end()) {
-		return texMap[texDesc].get();
-	}
+	auto it = texMap.find(texDesc);
+
+	if (it != texMap.end())
+		return it->second.get();
 
 	texMap[texDesc] = std::make_unique<Texture>();
-	texMap[texDesc]->Load2D(texDesc.path.c_str(), texDesc.format, texDesc.pixelType, texDesc.target);
+	texMap[texDesc]->Load2D(texDesc.path.c_str(), texDesc.format, texDesc.internalFormat, texDesc.pixelType, texDesc.target);
 	return texMap[texDesc].get();
 }
 
-Texture* TextureManager::loadCubeMap(const TextureDescriptor& texDesc, std::array<std::string, 6> paths)
+Texture* TextureManager::loadCubeMap(const TextureDescriptor& texDesc, const std::array<std::string, 6>& paths)
 {
-	if (texMap.find(texDesc) != texMap.end()) {
-		return texMap[texDesc].get();
-	}
+	auto it = texMap.find(texDesc);
+
+	if (it != texMap.end())
+		return it->second.get();
 
 	texMap[texDesc] = std::make_unique<Texture>();
 	texMap[texDesc]->LoadCubeMap(paths, texDesc.target, texDesc.format, texDesc.pixelType);
@@ -72,9 +65,10 @@ Texture* TextureManager::loadCubeMap(const TextureDescriptor& texDesc, std::arra
 
 Texture* TextureManager::loadRenderedTexture(const TextureDescriptor& texDesc)
 {
-	if (texMap.find(texDesc) != texMap.end()) {
-		return texMap[texDesc].get();
-	}
+	auto it = texMap.find(texDesc);
+
+	if (it != texMap.end())
+		return it->second.get();
 
 	texMap[texDesc] = std::make_unique<Texture>();
 	switch (texDesc.target) {
@@ -94,9 +88,10 @@ Texture* TextureManager::loadRenderedTexture(const TextureDescriptor& texDesc)
 
 Texture* TextureManager::getOrLoad(const TextureDescriptor& texDesc)
 {
-	if (texMap.find(texDesc) != texMap.end()) {
-		return texMap[texDesc].get();
-	}
+	auto it = texMap.find(texDesc);
+
+	if (it != texMap.end())
+		return it->second.get();
 
 	LogTextureManagerError("Cannot find Texture (" + texDesc.path + ") , attempting to create new texture with default parameters" );
 
@@ -104,14 +99,16 @@ Texture* TextureManager::getOrLoad(const TextureDescriptor& texDesc)
 
 }
 
-Texture* TextureManager::getFallback(std::string texture)
+Texture* TextureManager::getFallback(const std::string& texture)
 {
 	TextureDescriptor desc(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_2D, {}, texture);
 
-	if (texMap.find(desc) == texMap.end()) {
-		LogTextureManagerError("Error finding Fallback Texture(" + texture + ")");
-		return nullptr;
-	}
+	auto it = texMap.find(desc);
 
-	return texMap[desc].get();
+	if (it != texMap.end())
+		return it->second.get();
+
+	LogTextureManagerError("Error finding Fallback Texture(" + texture + ")");
+	return nullptr;
+
 }

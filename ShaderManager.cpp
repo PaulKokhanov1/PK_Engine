@@ -4,14 +4,10 @@ ShaderManager::ShaderManager()
 {
 }
 
-ShaderManager::~ShaderManager()
-{
-}
-
-void ShaderManager::load(std::string programName, const char* vertexShader, const char* fragmentShader)
+void ShaderManager::load(const std::string& programName, const char* vertexShader, const char* fragmentShader, std::optional<const char*> geometryShader, std::optional<const char*> tcsFile, std::optional<const char*> tesFile)
 {
 	try {
-		shaderPrograms[programName] = std::make_unique<Shader>(vertexShader, fragmentShader);
+		shaderPrograms[programName] = std::make_unique<Shader>(vertexShader, fragmentShader, geometryShader, tcsFile, tesFile);
 
 		if (!shaderPrograms[programName]->isValid()) {
 			LogShaderManagerError("Invalid shader created.");
@@ -24,9 +20,12 @@ void ShaderManager::load(std::string programName, const char* vertexShader, cons
 
 }
 
-bool ShaderManager::remove(std::string programName)
+bool ShaderManager::remove(const std::string& programName)
 {
-	if (shaderPrograms.find(programName) == shaderPrograms.end()) {
+	auto it = shaderPrograms.find(programName);
+
+	if (it == shaderPrograms.end())
+	{
 		LogShaderManagerError("Shader program '" + programName + "' not found.");
 		return false;
 	}
@@ -35,36 +34,42 @@ bool ShaderManager::remove(std::string programName)
 	return true;
 }
 
-bool ShaderManager::bind(std::string programName)
+bool ShaderManager::bind(const std::string& programName)
 {
-	if (shaderPrograms.find(programName) == shaderPrograms.end()) {
+	auto it = shaderPrograms.find(programName);
+
+	if (it == shaderPrograms.end())
+	{
 		LogShaderManagerError("Shader program '" + programName + "' not found.");
 		return false;
 	}
-	shaderPrograms[programName]->Activate();
+	it->second->Activate();
 	return true;
 }
 
-Shader* ShaderManager::get(std::string programName)
+Shader* ShaderManager::get(const std::string& programName)
 {
-	if (shaderPrograms.find(programName) == shaderPrograms.end()) {
+	auto it = shaderPrograms.find(programName);
+
+	if (it == shaderPrograms.end())
+	{
 		LogShaderManagerError("Shader program '" + programName + "' not found.");
 		return nullptr;
 	}
-	return shaderPrograms[programName].get();
+	return it->second.get();
 }
 
 void ShaderManager::reloadAll()
 {
 
 	// Iterate through all current shader's
-	for (auto& sh : shaderPrograms) {
+	for (auto& [name, shader] : shaderPrograms) {
 
 		// Create new shader, using same shader files as previous
 		try {
-			shaderPrograms[sh.first] = std::make_unique<Shader>(sh.second->getVertexFile(), sh.second->getFragmentFile());	// Keep same program name
+			shaderPrograms[name] = std::make_unique<Shader>(shader->getVertexFile(), shader->getFragmentFile(), shader->getGeometryFile(), shader->getTCSFile(), shader->getTESFile());	// Keep same program name
 
-			LogShaderManagerInfo("Success recompiling Shader: " + sh.first);
+			LogShaderManagerInfo("Success recompiling Shader: " + name);
 
 
 		}

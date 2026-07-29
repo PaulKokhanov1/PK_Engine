@@ -174,6 +174,9 @@
     <ClCompile Include="ShadowMap.cpp">
       <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="MeshFactory.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EngineConfig.h">
@@ -326,6 +329,9 @@
     <ClInclude Include="RenderBufferDescriptor.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="MeshFactory.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="default.vert">
@@ -368,6 +374,54 @@
       <Filter>Resource Files\Shaders</Filter>
     </None>
     <None Include="shadowCubemap.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="lines.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="lines.geom">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="lines.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="tess.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="tess.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="tess.tesc">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="tess.tese">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="tess.geom">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="ShadowMapTess.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="ShadowMapTess.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="ShadowMapTess.tesc">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="ShadowMapTess.tese">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="shadowCubemapTess.tesc">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="shadowCubemapTess.tese">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="shadowCubemapTess.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="shadowCubemapTess.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

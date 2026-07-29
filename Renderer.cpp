@@ -9,10 +9,6 @@ Renderer::Renderer(Window& win) : window(win)
 	createEnvMapBackgroundObject();
 }
 
-Renderer::~Renderer()
-{
-}
-
 void Renderer::Clear()
 {
 	// Background color, clear alpha channel so that rendered texture with object its placed on allows for mixing colors
@@ -21,20 +17,19 @@ void Renderer::Clear()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::CollectionPass(Scene* scene)
+void Renderer::BuildRenderQueue(Scene* scene)
 {
 	shaderBucket.clear();
 	for (auto& mesh : scene->getMeshes()) {
 
 		// compute Model Matrix per mesh
-		glm::mat4 model = mesh->computeModelMatrix();
+		glm::mat4 model = mesh->getModelMatrix();
 
 		for (auto& subMesh : mesh->getSubMeshes()) {
 			// Create RenderItems and store by shader
 			Shader* shader = shaderManager->get(subMesh.material.getShaderName());
 			if (!shader) continue;
-
-			shaderBucket[shader].emplace_back(mesh.get(), &subMesh, model, (RenderLayer::MAIN_PASS | RenderLayer::SHADOW_CASTER) );
+			shaderBucket[shader].renderItems.emplace_back(mesh.get(), &subMesh, model, (RenderLayer::MAIN_PASS | RenderLayer::SHADOW_CASTER) );
 		}
 	}
 
@@ -44,16 +39,21 @@ void Renderer::CollectionPass(Scene* scene)
 		if (!light->shouldShowMesh) continue;
 
 		// compute Model Matrix per mesh
-		glm::mat4 model = light->lightMesh->computeModelMatrix();
+		glm::mat4 model = light->lightMesh->getModelMatrix();
 
 		for (auto& subMesh : light->lightMesh->getSubMeshes()) {
 			// Create RenderItems and store by shader
 			Shader* shader = shaderManager->get(subMesh.material.getShaderName());
 			if (!shader) continue;
-
-			shaderBucket[shader].emplace_back(light->lightMesh.get(), &subMesh, model, (RenderLayer::MAIN_PASS) );
+			shaderBucket[shader].renderItems.emplace_back(light->lightMesh.get(), &subMesh, model, (RenderLayer::MAIN_PASS));
 		}
 	}
+
+	// Iterate through all assciated shaders and setup topology
+	for (auto& [shader, renderBatch] : shaderBucket) {
+		renderBatch.topology = getShaderTopology(shader);
+	}
+
 }
 
 void Renderer::ReflectionPass(Scene* scene, float dt)
@@ -64,7 +64,7 @@ void Renderer::ReflectionPass(Scene* scene, float dt)
 
 	Camera& cam = scene->getCamera();
 
-	for (auto& [shader, renderItems] : shaderBucket) {
+	for (auto& [shader, renderBatch] : shaderBucket) {
 
 		if (!shader) {
 			LogRendererWarn("Shader not found for " + shader->getVertexFile());
@@ -87,7 +87,7 @@ void Renderer::ReflectionPass(Scene* scene, float dt)
 		}
 
 		// Iterate through all assciated subMeshes
-		for (auto& renderItem : renderItems) {
+		for (auto& renderItem : renderBatch.renderItems) {
 
 			// Upload material data to Vertex Shader
 			renderItem.subMeshRef->material.uploadData(*shader);
@@ -95,8 +95,12 @@ void Renderer::ReflectionPass(Scene* scene, float dt)
 			// Send model to Vertex Shader
 			shader->setUniformMat4fv("modelMatrix", renderItem.modelMatrix);
 
+			// Send normalMatrix used for env reflections and lights
+			glm::mat3 normalMatrix = glm::transpose(glm::inverse(renderItem.modelMatrix));
+			shader->setUniformMat3fv("normalMatrix", normalMatrix);
+
 			// Draw sub Mesh
-			renderItem.meshRef->DrawSubMesh(*renderItem.subMeshRef);
+			renderItem.meshRef->DrawSubMesh(*renderItem.subMeshRef, renderBatch.topology);
 		}
 
 
@@ -121,8 +125,6 @@ void Renderer::ShadowPass(Scene* scene, float dt)
 
 				case ShadowMapType::DEPTH_CUBEMAP:
 					shadowCubemapShader->Activate();
-					GL_CHECK_ERROR();
-
 					RenderDepthCubemapShadow(scene, dt, light.get(), shadowCubemapShader);
 					break;
 			}
@@ -140,22 +142,29 @@ void Renderer::RenderDepthTextureShadow(Scene* scene, float dt, Light* light, Sh
 
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(1.1f, 4.0f);
-
 	// Upload light data to Vertex Shader, once per shader
 	shader->setUniformMat4fv("matrixShadow", light->getLightProjectionMatrix() * light->getLightViewMatrices()[0]);
 
+	UploadCameraData(shader, scene);
+	UploadRenderSettingsData(shader, scene);
 
-	for (auto& [_, renderItems] : shaderBucket) {
+	for (auto& [_, renderBatch] : shaderBucket) {
 
 		// Iterate through all assciated subMeshes
-		for (auto& renderItem : renderItems) {
+		for (auto& renderItem : renderBatch.renderItems) {
 			if (!(renderItem.renderLayer & RenderLayer::SHADOW_CASTER)) continue;	// Avoid light mesh being able to cast shadows
 
+			// Upload material data to Vertex Shader
+			renderItem.subMeshRef->material.uploadData(*shader);
 			// Send model to Vertex Shader
 			shader->setUniformMat4fv("modelMatrix", renderItem.modelMatrix);
 
+			// Send normalMatrix used for env reflections and lights
+			glm::mat3 normalMatrix = glm::transpose(glm::inverse(renderItem.modelMatrix));
+			shader->setUniformMat3fv("normalMatrix", normalMatrix);
+
 			// Draw sub Mesh
-			renderItem.meshRef->DrawSubMesh(*renderItem.subMeshRef);
+			renderItem.meshRef->DrawSubMesh(*renderItem.subMeshRef, renderBatch.topology);
 		}
 
 	}
@@ -172,13 +181,11 @@ void Renderer::RenderDepthCubemapShadow(Scene* scene, float dt, Light* light, Sh
 	light->mShadowMap->getShadowFBO().Bind();
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(2.5f, 4.0f);
-	GL_CHECK_ERROR();
 
 	for (int faceIndex = 0; faceIndex < 6; ++faceIndex) {
 
 		// Render to Texture Pass for Shadow Map
 		light->mShadowMap->attachFace(faceIndex);
-		GL_CHECK_ERROR();
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -187,34 +194,43 @@ void Renderer::RenderDepthCubemapShadow(Scene* scene, float dt, Light* light, Sh
 		light->sendLightFarPlaneToShader(*shader);
 		light->sendLightLightPosToShader(*shader);
 
+		UploadCameraData(shader, scene);
+		UploadRenderSettingsData(shader, scene);
 
-		for (auto& [_, renderItems] : shaderBucket) {
+
+		for (auto& [_, renderBatch] : shaderBucket) {
 
 			// Iterate through all assciated subMeshes
-			for (auto& renderItem : renderItems) {
+			for (auto& renderItem : renderBatch.renderItems) {
 				if (!(renderItem.renderLayer & RenderLayer::SHADOW_CASTER)) continue;	// Avoid light mesh being able to cast shadows
 
+				// Upload material data to Vertex Shader
+				renderItem.subMeshRef->material.uploadData(*shader);
 				// Send model to Vertex Shader
 				shader->setUniformMat4fv("modelMatrix", renderItem.modelMatrix);
 
+				// Send normalMatrix used for env reflections and lights
+				glm::mat3 normalMatrix = glm::transpose(glm::inverse(renderItem.modelMatrix));
+				shader->setUniformMat3fv("normalMatrix", normalMatrix);
+
 				// Draw sub Mesh
-				renderItem.meshRef->DrawSubMesh(*renderItem.subMeshRef);
+				renderItem.meshRef->DrawSubMesh(*renderItem.subMeshRef, renderBatch.topology);
+				GL_CHECK_ERROR();
+
 			}
 
 		}
-		GL_CHECK_ERROR();
 
 	}
 	glDisable(GL_POLYGON_OFFSET_FILL);
 	light->mShadowMap->getShadowFBO().Unbind();
-	GL_CHECK_ERROR();
 
 }
 
-void Renderer::DrawPass(Scene* scene, float dt)
+void Renderer::MainRenderPass(Scene* scene, float dt)
 {
 
-	for (auto& [shader, renderItems] : shaderBucket) {
+	for (auto& [shader, renderBatch] : shaderBucket) {
 
 		if (!shader) {
 			LogRendererWarn("Shader not found for " + shader->getVertexFile());
@@ -224,18 +240,24 @@ void Renderer::DrawPass(Scene* scene, float dt)
 		// Use appropriate shader's to draw object
 		shader->Activate();
 
+
 		UploadCameraData(shader, scene);
 		UploadEnvironmentData(shader, scene);
+		UploadRenderSettingsData(shader, scene);
 
 		// Upload light data to Vertex Shader, once per shader
 		for (auto& light : scene->getLights()) {
 			light->sendLightDataToShader(*shader);
-			if (light->mShadowMap) light->mShadowMap->sendShadowData(*shader);
-			light->sendShadowMatrices(*shader);
+
+			if (renderSettings::USING_SHADOWS) {
+				if (light->mShadowMap) light->mShadowMap->sendShadowData(*shader);
+				light->sendShadowMatrices(*shader);
+			}
 		}
 
+
 		// Iterate through all assciated subMeshes
-		for (auto& renderItem : renderItems) {
+		for (auto& renderItem : renderBatch.renderItems) {
 
 			// Upload material data to Vertex Shader
 			renderItem.subMeshRef->material.uploadData(*shader);
@@ -248,7 +270,52 @@ void Renderer::DrawPass(Scene* scene, float dt)
 			shader->setUniformMat3fv("normalMatrix", normalMatrix);
 
 			// Draw sub Mesh
-			renderItem.meshRef->DrawSubMesh(*renderItem.subMeshRef);
+			renderItem.meshRef->DrawSubMesh(*renderItem.subMeshRef, renderBatch.topology);
+
+		}
+
+	}
+}
+
+void Renderer::DrawTriangleLinesPass(Scene* scene, float dt)
+{
+	Shader* shader = shaderManager->get("lines");
+	shader->Activate();
+
+	for (auto& [_, renderBatch] : shaderBucket) {
+
+		// Use appropriate shader's to draw object
+
+		UploadCameraData(shader, scene);
+		UploadEnvironmentData(shader, scene);
+		UploadRenderSettingsData(shader, scene);
+
+		// Upload light data to Vertex Shader, once per shader
+		for (auto& light : scene->getLights()) {
+			light->sendLightDataToShader(*shader);
+
+			if (renderSettings::USING_SHADOWS) {
+				if (light->mShadowMap) light->mShadowMap->sendShadowData(*shader);
+				light->sendShadowMatrices(*shader);
+			}
+		}
+
+		// Iterate through all assciated subMeshes
+		for (auto& renderItem : renderBatch.renderItems) {
+
+			// Upload material data to Vertex Shader
+			renderItem.subMeshRef->material.uploadData(*shader);
+
+			// Send model to Vertex Shader
+			shader->setUniformMat4fv("modelMatrix", renderItem.modelMatrix);
+
+			// Send normalMatrix used for env reflections and lights
+			glm::mat3 normalMatrix = glm::transpose(glm::inverse(renderItem.modelMatrix));
+			shader->setUniformMat3fv("normalMatrix", normalMatrix);
+
+			// Draw sub Mesh
+			renderItem.meshRef->DrawSubMesh(*renderItem.subMeshRef, renderBatch.topology);
+
 		}
 
 	}
@@ -279,17 +346,17 @@ void Renderer::EnvMapPass(Scene* scene)
 
 	// Send clip space coords of Env Map Triangle to Vertex Shader
 	for (auto subMesh : cubeMapMesh->getSubMeshes()) {
-		cubeMapMesh->DrawSubMesh(subMesh);
+		cubeMapMesh->DrawSubMesh(subMesh, renderTypes::PrimitiveTopology::Triangles);
 	}
 }
 
-void Renderer::RenderToTexturePass(Scene* scene, float dt)
+void Renderer::OffscreenRenderPass(Scene* scene, float dt)
 {
 	// Render to Texture Pass
 	RenderToTextureFBO->Bind();
 	Clear();
 
-	DrawPass(scene, dt);
+	MainRenderPass(scene, dt);
 
 	RenderToTextureFBO->Unbind();
 }
@@ -318,11 +385,11 @@ void Renderer::PostProcessPass(Scene* scene)
 	UploadCameraData(curShader, scene);
 
 	// Send model to Vertex Shader
-	glm::mat4 model = scene->getQuadController().getMesh()->computeModelMatrix();
+	glm::mat4 model = scene->getQuadController().getMesh()->getModelMatrix();
 	curShader->setUniformMat4fv("modelMatrix", model);
 
 	for (auto subMesh : scene->getQuadController().getMesh()->getSubMeshes()) {
-		scene->getQuadController().getMesh()->DrawSubMesh(subMesh);
+		scene->getQuadController().getMesh()->DrawSubMesh(subMesh, renderTypes::PrimitiveTopology::Triangles);
 	}
 }
 
@@ -350,113 +417,61 @@ void Renderer::TempShadowMapRenderToQuadPass(Scene* scene)
 		UploadCameraData(curShader, scene);
 
 		// Send model to Vertex Shader
-		glm::mat4 model = scene->getQuadController().getMesh()->computeModelMatrix();
+		glm::mat4 model = scene->getQuadController().getMesh()->getModelMatrix();
 		curShader->setUniformMat4fv("modelMatrix", model);
 
 		for (auto subMesh : scene->getQuadController().getMesh()->getSubMeshes()) {
-			scene->getQuadController().getMesh()->DrawSubMesh(subMesh);
+			scene->getQuadController().getMesh()->DrawSubMesh(subMesh, renderTypes::PrimitiveTopology::Triangles);
 		}
 	}
 }
 
 void Renderer::RenderFrame(Scene* scene, float dt)
 {
-
-	// Handle all resizing
-	if (window.needsResize) {
-		auto [w, h] = window.getWindowDimensions();
-		createFBO();
-		scene->getCamera().setScreenDimensions(w, h);
-
-		window.needsResize = false;
-	}
-
-	// Handle scene updates 
-	scene->update(dt);
+	BeginFrame(scene, dt);
 
 	Clear();
-	CollectionPass(scene);
-
-	ShadowPass(scene, dt);
-
-
-	DrawPass(scene, dt);
-
-	// Removing overdraw when drawing background
-	glDepthMask(GL_FALSE);
-	EnvMapPass(scene);
-	glDepthMask(GL_TRUE);
-
-	GL_CHECK_ERROR();
-	EndFrame();
-}
-
-void Renderer::RenderFrameRenderToTexture(Scene* scene, float dt)
-{
-	
-	// Handle all resizing
-	if (window.needsResize) {
-		auto [w, h] = window.getWindowDimensions();
-		createFBO();
-		scene->getCamera().setScreenDimensions(w, h);
-
-		window.needsResize = false;
-	}
-
-	// Handle scene updates 
-	scene->update(dt);
-
-	CollectionPass(scene);
+	BuildRenderQueue(scene);
 
 	// Runs ONCE atm, this is used in order to keep the teapot mapped to the quad's rotation and position,
-	// if you want to use projectiveTextureMapping then just remove the "runs once atm" code and just run RenderToTexturePass
-	if (!hasRenderedToTexture) {
-		RenderToTexturePass(scene, dt);
+	// if you want to use projectiveTextureMapping then just remove the "runs once atm" code and just run OffscreenRenderPass
+	if (renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE && !hasRenderedToTexture) {
+		OffscreenRenderPass(scene, dt);
+		Clear();
 		hasRenderedToTexture = true;
 	}
 
-	Clear(); // Needed here as RenderToTexturePass runs ONCE atm
 
-	// Post-Process Pass
-	PostProcessPass(scene);
-
-	// Removing overdraw when drawing background
-	glDepthMask(GL_FALSE);
-	EnvMapPass(scene);
-	glDepthMask(GL_TRUE);
-
-	GL_CHECK_ERROR();
-	EndFrame();
-}
-
-void Renderer::RenderFrameWithReflections(Scene* scene, float dt)
-{
-
-	// Handle all resizing
-	if (window.needsResize) {
-		auto [w, h] = window.getWindowDimensions();
-		createFBO();
-		scene->getCamera().setScreenDimensions(w, h);
-
-		window.needsResize = false;
+	if (renderSettings::USING_REFLECTIONS) {
+		ReflectionPass(scene, dt);
 	}
 
-	// Handle scene updates 
-	scene->update(dt);
+	if (renderSettings::USING_SHADOWS) {
+		ShadowPass(scene, dt);
+	}
 
-	Clear();
-	CollectionPass(scene);
-	ReflectionPass(scene, dt);
+	if (!renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE)
+		MainRenderPass(scene, dt);
 
-	DrawPass(scene, dt);
+	if (renderSettings::USING_RENDER_TO_TEXTURE_SIMPLE) {
+		PostProcessPass(scene);
+	}
 
-	// Draw Mirror Plane to with its own shader
-	DrawPlaneWithShader(scene);
+	if (renderSettings::DISPLAY_TRIANGULATION) {
+		DrawTriangleLinesPass(scene, dt);
+	}
+
+	if (renderSettings::USING_REFLECTIONS) {
+		DrawPlaneWithShader(scene);
+	}
 
 	// Removing overdraw when drawing background
-	glDepthMask(GL_FALSE);
-	EnvMapPass(scene);
-	glDepthMask(GL_TRUE);
+	if (renderSettings::USING_ENV)
+	{
+		glDepthMask(GL_FALSE);
+		EnvMapPass(scene);
+		glDepthMask(GL_TRUE);
+	}
 
 	GL_CHECK_ERROR();
 	EndFrame();
@@ -484,6 +499,7 @@ void Renderer::DrawPlaneWithShader(Scene* scene)
 
 	// Upload Environment Data
 	UploadEnvironmentData(planeReflectionShader, scene);
+	UploadCameraData(planeReflectionShader, scene);
 	GL_CHECK_ERROR();
 
 
@@ -494,12 +510,12 @@ void Renderer::DrawPlaneWithShader(Scene* scene)
 	}
 
 	// Send model and its inverse to Vertex Shader
-	glm::mat4 model = scene->getMirror().getMirrorMesh().computeModelMatrix();
+	glm::mat4 model = scene->getMirror().getMirrorMesh().getModelMatrix();
 	planeReflectionShader->setUniformMat4fv("modelMatrix", model);
 	planeReflectionShader->setUniformMat3fv("normalMatrix", glm::transpose(glm::inverse(model)));
 
 	for (auto subMesh : scene->getMirror().getMirrorMesh().getSubMeshes()) {
-		scene->getMirror().getMirrorMesh().DrawSubMesh(subMesh);
+		scene->getMirror().getMirrorMesh().DrawSubMesh(subMesh, renderTypes::PrimitiveTopology::Triangles);
 	}
 }
 
@@ -611,4 +627,40 @@ void Renderer::UploadCameraData(Shader* shader, Scene* scene)
 	scene->getCamera().sendViewAndProjToShader(*shader);
 	scene->getCamera().sendMirroredViewToShader(*shader);
 	scene->getCamera().sendCamPositionWorldSpaceToShader(*shader);
+}
+
+void Renderer::UploadRenderSettingsData(Shader* shader, Scene* scene)
+{
+	shader->setUniform1i("shadowsEnabled", renderSettings::USING_SHADOWS);
+	shader->setUniform1i("reflectionsEnabled", renderSettings::USING_REFLECTIONS);
+	shader->setUniform1i("usingTessellation", renderSettings::USING_TESSELLATION);
+	shader->setUniform1f("tessellationLevel", renderSettings::tessellationLevel);
+	shader->setUniform1f("displacementScale", renderSettings::displacementScale);
+}
+
+void Renderer::BeginFrame(Scene* scene, float dt)
+{
+	// Handle all resizing
+	if (window.needsResize) {
+		auto [w, h] = window.getWindowDimensions();
+		createFBO();
+		scene->getCamera().setScreenDimensions(w, h);
+
+		window.needsResize = false;
+	}
+
+	// Handle scene updates 
+	scene->update(dt);
+}
+
+renderTypes::PrimitiveTopology Renderer::getShaderTopology(Shader* shader)
+{
+	if (!shader) {
+		LogRendererError("Shader is nullptr");
+		return renderTypes::PrimitiveTopology::Triangles;
+	}
+
+	// Currently just deciding between triangles and patches
+	if (shader->getTCSFile() && shader->getTESFile()) return renderTypes::PrimitiveTopology::Patches;
+	else return renderTypes::PrimitiveTopology::Triangles;
 }
