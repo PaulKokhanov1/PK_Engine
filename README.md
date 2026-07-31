@@ -192,7 +192,7 @@ All I really did here was lay out the architecture and plan for the future
 
 ### Project 2 — Mesh Loading & Camera System
 
-<!-- ADD: Screenshot of a loaded OBJ mesh rendering in the viewport -->
+<img width="371" height="382" alt="OBJ_loaded_using_points" src="https://github.com/user-attachments/assets/bf376d56-daa7-4460-90cf-157b1f389271" />
 
 * **OBJ file parsing** using cyTriMesh, with custom vertex deduplication logic to handle cases where the same position is shared with different normals/UVs across faces
 * **MeshComponent class** — Manages VAO/VBO/EBO construction from parsed OBJ data, handles the vertex key map for deduplication
@@ -218,7 +218,7 @@ A subtle but important lesson here was around the EBO unbinding order: the EBO m
 
 ### Project 4 — Texture System & Multi-Material Meshes
 
-<!-- ADD: Screenshot of textured teapot with diffuse, specular, and ambient maps applied -->
+<img width="455" height="460" alt="yoda_project_4" src="https://github.com/user-attachments/assets/7edeab85-af8c-465d-80bf-1e1a1a825393" />
 
 * **Submesh system** — OBJ files can define multiple materials per mesh. Each submesh holds an `indexStart`, `indexCount`, and its own `Material`, enabling per-section rendering
 * **Texture class** — Handles creation, binding, GPU upload, mipmap generation, and texture parameter configuration
