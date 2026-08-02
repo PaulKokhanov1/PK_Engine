@@ -1,4 +1,4 @@
-<img width="798" height="826" alt="Render_to_texture_proj_5" src="https://github.com/user-attachments/assets/8608c707-e71d-4ac4-bd6c-29030128b565" /># PK Engine — A Modern OpenGL Rendering Engine in C++
+# PK Engine — A Modern OpenGL Rendering Engine in C++
 
 > A hobby rasterization engine built with OpenGL. My focus is not only on learning the ins and outs of rendering, but also building an engine in a scalable and maintainable way — following and extending [Cem Yuksel's Interactive Computer Graphics](https://graphics.cs.utah.edu/courses/cs6610/) curriculum.
 
@@ -298,7 +298,13 @@ One thing I learned here: `glUniform1i(samplerUniform, unit)` doesn't *send* tex
 
 ### Project 6 — Environment Mapping & Reflections
 
-<!-- ADD: Screenshot of the sphere with cubemap reflections and skybox background -->
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/0f4ab791-39b9-4164-b34c-297f144350b7">
+  <br>
+  <em>Interactive demonstration showcasing dynamic environment mapping, planar reflections rendered via render-to-texture, and real-time point light illumination.</em>
+</p>
+
+---
 
 * **CubeMap class** — Loads 6 face textures, generates a `GL_TEXTURE_CUBE_MAP`, configures seamless cube map filtering and mipmapping
 * **Sky triangle** — A single full-screen triangle (covering the clip space completely) used as the skybox background. Vertices are specified in clip space; the fragment shader converts them to world-space directions via `inverse(viewProjection)` to sample the cubemap correctly
