@@ -230,6 +230,7 @@ A subtle but important lesson here was around the EBO unbinding order: the EBO m
 </td>
 </tr>
 </table>
+---
 
 * **Material class** — Holds ambient (Ka), diffuse (Kd), specular (Ks), and shininess parameters; owns shader association; handles uniform uploading
 * **Blinn-Phong shading in world space** — Diffuse, specular (half-vector method), and ambient components computed per-fragment in the fragment shader
@@ -284,6 +285,7 @@ One thing I learned here: `glUniform1i(samplerUniform, unit)` doesn't *send* tex
 <br>
 <em>Interactive demonstration of the reflection plane being rotated using <strong>ALT + Drag</strong>, dynamically updating the reflected scene in real time.</em>
 </p>
+---
 
 * **FBO class** — Abstracts framebuffer creation, configuration (color attachment, depth attachment, or depth-only for shadows), binding/unbinding, and resize handling
 * **FBODescriptor / TextureDescriptor / RenderBufferDescriptor** — Separate descriptor structs for clean FBO construction without entangling texture parameters with framebuffer configuration
@@ -378,9 +380,38 @@ This was the most technically demanding project. Three light types, three shadow
 
 ### Project 8 — Normal Mapping, Tessellation & Displacement
 
-<!-- ADD: Screenshot of plane with normal mapping — compare with and without TBN -->
-<!-- ADD: GIF showing tessellation level increasing with arrow keys -->
-<!-- ADD: GIF of displacement mapping deforming the mesh surface -->
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8e5a38d2-1c0e-4965-a1e5-d8a0255fbdb8">
+</p>
+
+<p align="center">
+  <strong>Normal Mapping</strong><br>
+  <em>Fine surface detail simulated using tangent-space normal maps without increasing mesh complexity.</em>
+</p>
+
+---
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4a1266c1-b50b-408b-8f2a-34bda38499f0">
+</p>
+
+<p align="center">
+  <strong>Dynamic Tessellation</strong><br>
+  <em>Tessellation levels adjusted in real time using the arrow keys, demonstrating adaptive subdivision.</em>
+</p>
+
+---
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f4fd1b60-337e-445a-9363-ee1b64cc0535">
+</p>
+
+<p align="center">
+  <strong>Tessellation + Shadows</strong><br>
+  <em>Tessellated geometry casting and receiving accurate shadows by including tessellation in the shadow rendering pass.</em>
+</p>
+
+---
 
 **Normal Mapping**
 * Normal maps are sampled in the fragment shader (after remapping from `[0,1]` to `[-1,1]` with `sampledNormal * 2.0 - 1.0`)
