@@ -192,7 +192,12 @@ All I really did here was lay out the architecture and plan for the future
 
 ### Project 2 — Mesh Loading & Camera System
 
-<img width="371" height="382" alt="OBJ_loaded_using_points" src="https://github.com/user-attachments/assets/bf376d56-daa7-4460-90cf-157b1f389271" />
+| OBJ Mesh Rendered as Points |
+|:---------------------------:|
+| <img src="https://github.com/user-attachments/assets/bf376d56-daa7-4460-90cf-157b1f389271" width="700"/> |
+| *Utah teapot loaded from an OBJ file and rendered using `GL_POINTS` to verify correct vertex parsing before introducing indexed triangle rendering.* |
+
+---
 
 * **OBJ file parsing** using cyTriMesh, with custom vertex deduplication logic to handle cases where the same position is shared with different normals/UVs across faces
 * **MeshComponent class** — Manages VAO/VBO/EBO construction from parsed OBJ data, handles the vertex key map for deduplication
@@ -205,7 +210,26 @@ A subtle but important lesson here was around the EBO unbinding order: the EBO m
 
 ### Project 3 — Blinn-Phong Shading
 
-<!-- ADD: Screenshot comparing flat shading vs Blinn-Phong shading -->
+<table align="center">
+<tr>
+<td align="center">
+<img src="https://github.com/user-attachments/assets/bbf20715-d474-4bc8-9dc4-a3d62024a484" width="400"><br>
+<em>Diffuse texture only</em>
+</td>
+
+<td align="center">
+<img src="https://github.com/user-attachments/assets/86508caa-b234-4d71-b011-d1c5b740ddba" width="400"><br>
+<em>Diffuse and ambient textures applied</em>
+</td>
+</tr>
+
+<tr>
+<td colspan="2" align="center">
+<img src="https://github.com/user-attachments/assets/838e5951-f5a3-4010-a285-8d0794e854b5" width="850"><br>
+<em>Complete material system demonstrating diffuse, ambient, and specular mapping.</em>
+</td>
+</tr>
+</table>
 
 * **Material class** — Holds ambient (Ka), diffuse (Kd), specular (Ks), and shininess parameters; owns shader association; handles uniform uploading
 * **Blinn-Phong shading in world space** — Diffuse, specular (half-vector method), and ambient components computed per-fragment in the fragment shader
