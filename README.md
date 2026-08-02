@@ -319,9 +319,36 @@ Here I realized that the cubemap filepaths MUST be passed in a proper order to t
 
 ### Project 7 — Shadow Mapping (Spot, Directional, Point)
 
-<!-- ADD: Screenshot showing hard shadows from a spot light -->
-<!-- ADD: Screenshot showing soft PCF shadows -->
-<!-- ADD: Screenshot showing point light cube shadow map -->
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/09b85fa8-cad9-46d9-b412-f3577cbb0203">
+  <br>
+  <em><strong>Spot Light Shadow Mapping</strong><br>
+  Shadows generated using spot light with no Percentage Closer Filtering (PCF).</em>
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/531cbc2c-a65b-4e67-98d5-7a1c244f00e9">
+  <br>
+  <em><strong>Directional Light Shadows + PCF</strong><br>
+  Shadow mapping with PCF to produce softer shadow edges.</em>
+</p>
+
+<p align="center">
+  <img src="YOUR_POINTLIGHT_SHADOW.gif">
+  <br>
+  <em><strong>Point Light Shadow Mapping</strong><br>
+  Omnidirectional shadows generated using a depth cubemap rendered from six light-space views.</em>
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/0e0a7720-26e1-443e-afbf-19b076f9b919">
+  <br>
+  <em><strong>Light-Space Depth Rendering</strong><br>
+  Visualization of the depth texture rendered from the light's perspective.</em>
+</p>
+
+
+---
 
 This was the most technically demanding project. Three light types, three shadow strategies.
 
