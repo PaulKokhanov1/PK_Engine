@@ -242,7 +242,23 @@ A subtle but important lesson here was around the EBO unbinding order: the EBO m
 
 ### Project 4 — Texture System & Multi-Material Meshes
 
-<img width="455" height="460" alt="yoda_project_4" src="https://github.com/user-attachments/assets/7edeab85-af8c-465d-80bf-1e1a1a825393" />
+<table align="center">
+  <tr>
+    <td align="center" width="50%">
+      <img src="https://github.com/user-attachments/assets/7edeab85-af8c-465d-80bf-1e1a1a825393" width="425"><br>
+      <em>Yoda mesh loaded from an OBJ/MTL pair demonstrating multiple materials assigned to individual submeshes.</em>
+    </td>
+
+    <td align="center" width="50%">
+      <img src="https://github.com/user-attachments/assets/21d6f10f-765a-4546-b93d-87d4ae171c3a" width="425"><br>
+      <em>Utah teapot rendered using Phong lighting with ambient, diffuse, and specular material properties.</em>
+    </td>
+  </tr>
+</table>
+
+---
+
+
 
 * **Submesh system** — OBJ files can define multiple materials per mesh. Each submesh holds an `indexStart`, `indexCount`, and its own `Material`, enabling per-section rendering
 * **Texture class** — Handles creation, binding, GPU upload, mipmap generation, and texture parameter configuration
