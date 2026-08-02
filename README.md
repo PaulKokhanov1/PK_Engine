@@ -334,7 +334,7 @@ Here I realized that the cubemap filepaths MUST be passed in a proper order to t
 </p>
 
 <p align="center">
-  <img src="YOUR_POINTLIGHT_SHADOW.gif">
+  <img src="https://github.com/user-attachments/assets/c14692ae-a2cb-49d7-90b9-2eecff63d815">
   <br>
   <em><strong>Point Light Shadow Mapping</strong><br>
   Omnidirectional shadows generated using a depth cubemap rendered from six light-space views.</em>
