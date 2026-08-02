@@ -1,4 +1,4 @@
-# PK Engine — A Modern OpenGL Rendering Engine in C++
+<img width="798" height="826" alt="Render_to_texture_proj_5" src="https://github.com/user-attachments/assets/8608c707-e71d-4ac4-bd6c-29030128b565" /># PK Engine — A Modern OpenGL Rendering Engine in C++
 
 > A hobby rasterization engine built with OpenGL. My focus is not only on learning the ins and outs of rendering, but also building an engine in a scalable and maintainable way — following and extending [Cem Yuksel's Interactive Computer Graphics](https://graphics.cs.utah.edu/courses/cs6610/) curriculum.
 
@@ -242,19 +242,17 @@ A subtle but important lesson here was around the EBO unbinding order: the EBO m
 
 ### Project 4 — Texture System & Multi-Material Meshes
 
-<table align="center">
-  <tr>
-    <td align="center" width="50%">
-      <img src="https://github.com/user-attachments/assets/7edeab85-af8c-465d-80bf-1e1a1a825393" width="425"><br>
-      <em>Yoda mesh loaded from an OBJ/MTL pair demonstrating multiple materials assigned to individual submeshes.</em>
-    </td>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7edeab85-af8c-465d-80bf-1e1a1a825393">
+  <br>
+  <em>Yoda mesh loaded from an OBJ/MTL pair demonstrating multiple materials assigned to individual submeshes.</em>
+</p>
 
-    <td align="center" width="50%">
-      <img src="https://github.com/user-attachments/assets/21d6f10f-765a-4546-b93d-87d4ae171c3a" width="425"><br>
-      <em>Utah teapot rendered using Phong lighting with ambient, diffuse, and specular material properties.</em>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/21d6f10f-765a-4546-b93d-87d4ae171c3a">
+  <br>
+  <em>Utah teapot rendered using Phong lighting with ambient, diffuse, and specular material properties.</em>
+</p>
 
 ---
 
@@ -272,8 +270,20 @@ One thing I learned here: `glUniform1i(samplerUniform, unit)` doesn't *send* tex
 
 ### Project 5 — Render to Texture & FBO
 
-<!-- ADD: Screenshot of the render-to-texture plane showing the reflected/captured scene -->
-<!-- ADD: GIF of ALT+drag rotating the texture plane -->
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/7eb47a1d-95c5-4052-96ed-605477fbc7b0" width="850"><br>
+      <em>Render-to-texture reflection showing the mirrored scene projected onto the reflective surface.</em>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/bad762f4-f499-4e30-8960-9703fa202caf">
+<br>
+<em>Interactive demonstration of the reflection plane being rotated using <strong>ALT + Drag</strong>, dynamically updating the reflected scene in real time.</em>
+</p>
 
 * **FBO class** — Abstracts framebuffer creation, configuration (color attachment, depth attachment, or depth-only for shadows), binding/unbinding, and resize handling
 * **FBODescriptor / TextureDescriptor / RenderBufferDescriptor** — Separate descriptor structs for clean FBO construction without entangling texture parameters with framebuffer configuration
