@@ -539,7 +539,6 @@ Normal and displacement maps are configured in `SceneLoader.cpp`.
 [(back to top)](#table-of-contents)
 
 ---
-
 ## Rant and Informal Discussion
 
 Now that the formalities are out of the way, I can get into the actual conversation about what it was like to build this.
@@ -550,14 +549,39 @@ Beyond those stories (that I wont share here), I kept finding myself comparing t
 
 ### So many techniques
 
+As I continue to learn about the different ways graphics programmers "mimic" reality, you get to a point where you have to question, how viable/reasonable of a change/technique is this?
 
+For example, as I learn about soft shadows, I was watching a video on percentage closer filtering and implementing percentage closer soft shadows (PCSS) and you realize how many resources such a technique would require. You have to do your occluder search and then percentage closer filtering on each one. This is all for one light source. Now there is a discussion about how many light sources would even need to be required, but ultimately what I'm getting at, is that it's expensive.
+
+Yet, there are newer technqiues coming in order to approximate PCSS, such as Variance Shadow Maps (VSM), Convolution Shadow Maps (CSM), etc... , and sure, they're old and we probably have better techniques now, but once again the point is that there is endless amount of techniques.
+
+Now this brings the question, how do you find the appropriate one for your situation? Genuinly I have not clue. It feels like it'd become an analysis paralisys situation, and your best bet might just be to make up one on your own. And then you may need different techniques for different parts of your application and/or scene. Thus, it comes down to this ever evolving choice of ways to render a scene thats always losing older techniques and creating new ones.
+
+I guess this rant is more about how do you handle finding what you need for your situation, and then how do you keep improving at it while also focusing on other aspects of the render? I guess that's the point of a group of people working on a project, be that a engine, video, game or anything involving graphics
 
 ### RenderDoc and PIX
 
+Despite using RenderDoc at times in my project, it was never really extremely useful. 
+
+However, given that I have this phenonmenal opportunity to work at Activision, I get to use PIX quite often.
+
+Seeing it be used in such a huge codebase such as Call of Duty is astounding. From, the simplicity to quickly take a capture and see all the different render passes, to the ridiculously useful debugger, where, you can make an edit to the code, re-compile and have that frame showcase the changes. This tool, isn't only a tremendous help in debugging, but I've already learned so much about directX 12 thank to it. 
+
+For example, getting to see the GPU time allocated for specific passes or actions within the pass led me to find a bug where we were allocating ~ 1 million threads to write to a buffer. Like imagine trying to debug "why your application is slow" without such a tool, it'd be extremely tedious. I guess it just gives me that much more appreciation for current tooling and more appreciation for all the grpahics programmers who found novel ways to debug their application before such tools 
 
 
 ### I Still cant figure out TBN matrices
 
+Sigh... I really still am struggling with my TBN matrices. The ones I use in my engine jsut simply are not right. I diagnosed this by rendering the normal map on a plane and then rotating it and monitoring the method light interacted with it. In the flat vs rotated positiom the lighting was entirely different. This led me to an issue regarding the normals. 
+
+I checked a variety of other properties such as: light direction, world space attributes (normal, tangent & bitangent) and even rendering the world normals via:
+`vec3 worldNormal = normalize(transpose(TBNMatrix) * Normal_tangentSpace); `
+
+This is how I concluded it had to do with my TBN. Now I think the calcualtion itself it fine, but the way the normal map is exported and how it interacts with my existing TBN matrix is clearly out of whack. 
+
+So, really all this section is, is a plea for help or a suggestion on how do you calculate the appropriate TBN matrix based on how the normal map is exported, is there even a way to check how the normal map is exported in order to determine the appropriate way to calcualte the TBN. OR is it simply that all TBN's should be the same regardless of the exportation of a normal map and its just my calculations are wrong?
+
+If anyone ever reads this and feels willing to help a clueless graphics programmer, I'd be in your debt. :D 
 
 
 ### How to continue improving Architecture
