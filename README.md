@@ -486,8 +486,8 @@ Normal and displacement maps are configured in `SceneLoader.cpp`.
 * **VAO / VBO / EBO abstraction** — Clean GPU buffer management; VAO owns attribute layout and EBO reference
 * **OBJ/MTL mesh loading** — Full submesh support with per-face material assignment and vertex deduplication
 * **Modular Shader class** — Supports VS + optional GS + optional TCS/TES + FS; runtime hot-reload via F6; uniform cache to avoid redundant `glGetUniformLocation` calls each frame
-* **Blinn-Phong lighting** — Point, directional, and spot lights; per-component intensity (ambient/diffuse/specular separate); all computed in world space
-* **Multi-pass renderer** — Collect → Shadow → Draw → Post-process; render layer bitmask filters objects per pass
+* **Blinn-Phong lighting** — Point, directional, and spot lights; per-component intensity (ambient/diffuse/specular separate)
+* **Multi-pass renderer** — Collect → Pre-process → Draw → Post-process; render layer bitmask filters objects per pass
 * **Render-to-Texture** — Full FBO pipeline with color and depth attachments; mipmapped rendered textures
 * **Cubemap Environment Mapping** — Sky triangle background, environment reflections on objects
 * **Shadow Mapping** — 2D depth texture for spot/directional lights; cube shadow map for point lights; PCF soft shadows; polygon offset shadow acne removal
@@ -497,6 +497,8 @@ Normal and displacement maps are configured in `SceneLoader.cpp`.
 * **Quaternion rotations** — Direct quaternion manipulation for object and camera rotations; no gimbal lock
 * **Event Dispatcher** — Token-based pub/sub callback system for input and window events
 * **TextureManager** — Texture caching by descriptor; fallback 1×1 textures; centralized unit slot policy
+* **Internal Logging System** — Internal messaging system, filter based on TRACE, INFO, WARN, ERROR & CRITICAL
+
 
 [(back to top)](#table-of-contents)
 
@@ -509,16 +511,17 @@ Normal and displacement maps are configured in `SceneLoader.cpp`.
 | EBO unbound before VAO destroyed the index buffer link | VAO must be unbound *after* EBO; EBO reference is stored in the VAO, not separately |
 | Vertex normals skewed by non-uniform model scaling | Use `inverse(transpose(mat3(modelMatrix)))` as the normal matrix |
 | Texture sampler aliasing — two samplers accidentally reading the same unit | Assigned dedicated texture units per texture type in `EngineConfig.h`; sampler uniforms set to specific integer unit slots, not shared |
-| Render-to-texture quad moving with the camera | Separated camera control from texture-plane transform; quad stores its own transform with quaternion rotation |
+| Render-to-texture Reflection texture drifted with camera movement | Implemented projective texture mapping using the reflected camera's perspective instead of mesh UVs |
 | Shadow acne on lit surfaces | `glPolygonOffset` in shadow pass pushes stored depth values slightly further from light; combined slope-scale factor + constant bias |
 | Point light shadow cube map — incorrect depth values | Switched from projected depth to radial depth (`length(fragPos - lightPos) / farPlane`), stored manually via `gl_FragDepth` |
 | PCF soft shadows for directional light failing | 2D kernel averaging was incorrect; also required adjusting bias separately from spot light |
-| Physics instability at large delta time (RopePlugin) | Fixed-timestep accumulator — accumulate elapsed time, run multiple fixed-step simulation cycles per frame to catch up |
 | TBN matrix computed with wrong normals causing distorted normal map | TBN was built from raw positions instead of the transformed normals from `NormalWrld` attribute; switching input fixed the distortion |
 | Tessellation + shadow pass mismatch — displaced geometry didn't cast correct shadows | Added TCS and TES stages to the shadow shader program so displaced vertices are captured correctly in the depth pass |
 | Light mesh receiving its own light contribution | Introduced render layer bitmask — each object declares layer bits; shadow and draw passes filter with bitwise AND to exclude light meshes from the shadow pass |
 | `glActiveTexture` slot confusion during render-to-texture | Removed auto-binding from `Texture::bind()`; texture unit is now explicitly passed at the call site; `texTypeToUnit` removed in favor of `EngineConfig::TextureSlots` namespace |
-| Camera movement applying during FBO render incorrectly | Properly separated the "mirror" camera (used for reflection FBO) from the scene camera; ensured normal matrix was uploaded correctly in the reflection pass |
+| Consistent errors in shader not being noticed | Implemented shader compilation system recording if shader was correctly compiled, otherwise outputting message error |
+| Meshes missing vertex positions with appropriate normals | Duplicated vertices as needed to build a unique interleaved vertex buffer while reusing identical vertices through the EBO  |
+
 
 [(back to top)](#table-of-contents)
 
@@ -529,11 +532,9 @@ Normal and displacement maps are configured in `SceneLoader.cpp`.
 * Internalized the full OpenGL rendering pipeline: how data moves from CPU memory through vertex buffers, vertex shaders, rasterization, fragment shaders, and finally to the framebuffer
 * Understood coordinate space transformations end-to-end (Local → World → View → Clip → NDC → Screen) and when each is appropriate for different operations (e.g. lighting in world space, ray intersection in world space, shading in view space)
 * Built a complete multi-pass shadow pipeline from scratch — including depth texture FBOs, light-space matrix construction, shadow sampling with PCF, and cube shadow maps for omnidirectional lights
-* Learned the TBN matrix construction and its role in transforming lighting calculations into tangent space to correctly apply normal maps
-* Extended the OpenGL pipeline with optional geometry shaders and tessellation shaders (TCS/TES), understanding the full VS → TCS → TES → GS → FS data flow
 * Designed and iterated on an engine architecture with separable concerns: the renderer doesn't know about scene loading, materials don't manage their own textures, lights own their shadow maps
-* Experienced first-hand why a fixed simulation timestep matters for physics stability, and how a timestep accumulator pattern solves it
 * Got familiar with GPU debugging using RenderDoc to isolate rendering artifacts and verify depth map correctness
+* Learned creation and construction of shaders using GLSL 
 
 [(back to top)](#table-of-contents)
 
@@ -543,35 +544,23 @@ Normal and displacement maps are configured in `SceneLoader.cpp`.
 
 Now that the formalities are out of the way, I can get into the actual conversation about what it was like to build this.
 
-I'll be real: I started this project because I wanted to understand what engine programmers actually *do*. Not the hand-wavy version, but the actual math, the actual API calls, the actual debugging sessions that end with "wait, I needed to unbind the EBO *after* the VAO??" I've been a game developer, a gameplay programmer, and now I've thrown myself headfirst into the lowest level of the stack I could find while staying above raw Vulkan.
+Genuinely I loved this project. Not only because of what I learned, but just everything that was going on with my life during this point and how I was still able to keep up with this project taught me many key lessons.
 
-And I have zero regrets.
+Beyond those stories (that I wont share here), I kept finding myself comparing this project to something like a Minecraft survivial world. Creating a rendering engine felt exactly like creating a "world" in a sandbox game and building, automating and testing new ideas and things, and having this "entity" just keep growing with all the history of where it started to where it is now.
 
-### The Pipeline
+### So many techniques
 
-Every time I show someone what this project does, I resist the urge to just play the demo. I want to walk them through what's *actually happening* each frame. There are (in the full Project 8 scene) potentially 4+ render passes before a single pixel hits the screen:
 
-1. Shadow pass from the spot light's POV — rendering scene depth into a 2D texture
-2. Shadow pass from the directional light — orthographic depth texture
-3. Six shadow passes from the point light — one per face of a cube shadow map
-4. The main draw pass — using all of the above to compute shadows, apply Blinn-Phong shading, sample normal maps, and output to an FBO
-5. Post-process — copy to screen quad
 
-The fact that this runs in real time still kind of amazes me. The GPU is just an absolute monster.
+### RenderDoc and PIX
 
-### Shadow Mapping Nearly Broke Me
 
-The shadow acne problem was particularly humbling. I kept looking at the math, convinced I had the bias applied correctly in the fragment shader, and then it hit me — you can't just subtract a constant from the depth comparison *after* the fact, because the comparison is baked into the depth test. You have to *push the stored values slightly further away* during the shadow pass itself, which is what `glPolygonOffset` does. Once I understood that, the whole thing clicked.
 
-The cube shadow map was a different kind of pain. The key insight that unlocked it: a 2D shadow map stores projected depth (already transformed by a projection matrix, so it lives in `[0,1]` naturally). A cube shadow map doesn't have that luxury — you're indexing it with a 3D direction vector, so you need *actual distance* from the light, not projected depth. Hence storing radial distance normalized by the far plane. That's not something you find in the first tutorial you read; you have to reach a point of confusion and work backwards.
+### I Still cant figure out TBN matrices
 
-### Tessellation: Worth It?
 
-Honestly, tessellation in OpenGL is kind of a pain to set up. The `VS → TCS → TES → GS → FS` pipeline requires each shader to pass all its data through in an array form — because TCS operates on an entire patch, not individual vertices — and then the data magically reassembles into per-triangle format when it exits TES. Getting that data flow right took a while.
 
-Was it worth it? Absolutely. Watching a flat plane turn into a rippling, displaced surface in real time by just bumping the tessellation level with an arrow key is incredibly satisfying.
-
-### The Architecture Evolves
+### How to continue improving Architecture
 
 One thing nobody tells you about writing an engine from scratch: your architecture will be wrong. Multiple times. The version of the renderer I ended up with is the fifth or sixth meaningful refactor. At some point I had the material setting texture units inside the renderer. Then I had the renderer reaching into the TextureManager on every draw call. Then I had textures auto-binding to whatever unit they felt like.
 
@@ -579,7 +568,7 @@ The architecture I landed on — centralized texture unit slots in `EngineConfig
 
 ### What's Next
 
-The plan is to port this to Vulkan. Yes, I know. But having built this in OpenGL means I understand *why* Vulkan is designed the way it is. Every explicit render pass, every command buffer, every synchronization primitive — they all make more sense now that I've felt the pain of implicit state management in OpenGL. The groundwork is laid.
+Pretty simple: Port Engine to Vulkan and make it better
 
 [(back to top)](#table-of-contents)
 
