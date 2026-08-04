@@ -2,8 +2,8 @@
 
 > A hobby rasterization engine built with OpenGL. My focus is not only on learning the ins and outs of rendering, but also building an engine in a scalable and maintainable way — following and extending [Cem Yuksel's Interactive Computer Graphics](https://graphics.cs.utah.edu/courses/cs6610/) curriculum.
 
-<!-- ADD: A banner GIF or image showing the final rendered scene (Project 8 - tessellation + shadows + normal mapping) -->
-<!-- EXAMPLE: ![PK Engine Demo](assets/demo.gif) -->
+<img width="1402" height="1122" alt="project_thumbnail" src="https://github.com/user-attachments/assets/8b6e6709-8032-4c33-92d1-3db019b79e75" />
+
 
 [![Watch Full Demo](https://img.shields.io/badge/Watch-Full%20Demo-red?style=for-the-badge&logo=youtube)](https://youtube.com/shorts/q2Ntzx203HA?feature=share)
 
