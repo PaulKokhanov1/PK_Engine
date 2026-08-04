@@ -584,11 +584,13 @@ So, really all this section is, is a plea for help or a suggestion on how do you
 If anyone ever reads this and feels willing to help a clueless graphics programmer, I'd be in your debt. :D 
 
 
-### How to continue improving Architecture
+### My thoughts on Architecture
 
-One thing nobody tells you about writing an engine from scratch: your architecture will be wrong. Multiple times. The version of the renderer I ended up with is the fifth or sixth meaningful refactor. At some point I had the material setting texture units inside the renderer. Then I had the renderer reaching into the TextureManager on every draw call. Then I had textures auto-binding to whatever unit they felt like.
+One goal coming into this project was to focus on architecting a system to be maintainable and scalable. Despite the refactors and existing "questionable" systems, I'd say it was accomplished. It taught me quite a bit about how little I know regarding design patterns and when to use what type of architecture.
 
-The architecture I landed on — centralized texture unit slots in `EngineConfig`, explicit `bind(unit)` calls at the draw site, `TextureManager` purely responsible for caching and creation — is a product of every one of those mistakes. Good architecture isn't discovered, it's excavated.
+For example, in my input handling system, I now have an event dispatcher to allow the Observer pattern to be used, however, initially I naively just had to throw around bool's and have each modules "update" function monitor them continously. Or when I had to rearchitect my application class to avoid creating and handling multiple key modules like all the shader's, the different render passes, or the inputs. 
+
+The funny thing is, is that it still worked previously, and potentially would've continued to still work as I continued to complete the future projects. Which is a really interesting idea to me, specifically that, you can just create a quite large system just using a TON of if else statments. Would it be fast or easy to read, I doubt it, but it just highlights how there really is no "right" way to go about programming, but just ways that might save you (or others) a headache in the future.
 
 ### What's Next
 
