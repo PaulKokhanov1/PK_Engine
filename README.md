@@ -5,7 +5,7 @@
 <!-- ADD: A banner GIF or image showing the final rendered scene (Project 8 - tessellation + shadows + normal mapping) -->
 <!-- EXAMPLE: ![PK Engine Demo](assets/demo.gif) -->
 
-[![Watch Full Demo](https://img.shields.io/badge/Watch-Full%20Demo-red?style=for-the-badge&logo=youtube)](<!-- ADD YOUR YOUTUBE LINK HERE -->)
+[![Watch Full Demo](https://img.shields.io/badge/Watch-Full%20Demo-red?style=for-the-badge&logo=youtube)](https://youtube.com/shorts/q2Ntzx203HA?feature=share)
 
 ---
 
