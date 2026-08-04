@@ -500,8 +500,6 @@ void Renderer::DrawPlaneWithShader(Scene* scene)
 	// Upload Environment Data
 	UploadEnvironmentData(planeReflectionShader, scene);
 	UploadCameraData(planeReflectionShader, scene);
-	GL_CHECK_ERROR();
-
 
 	// Upload env light intensity and specular lighting to Vertex Shader
 	for (auto& light : scene->getLights()) {
