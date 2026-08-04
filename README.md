@@ -40,11 +40,11 @@
 
 My goal with this project was to build a real-time 3D rendering engine completely from scratch in modern OpenGL and C++.
 
-Does this renderer revolutionize the way we do 3D graphics? ... no. Does this renderer solve any of life's biggest problems? ... no. Does this renderer provide any incentive for an employer to hire me? ... I hope. Regardless of what this engine does or doesnt do for my future, it was a ton of fun to build and learn how to create a maintainable piece of code that can actually be used an interacted with.
+Does this renderer revolutionize the way we do 3D graphics? ... no. Does this renderer solve any of life's biggest problems? ... no. Does this renderer provide any incentive for an employer to hire me? ... I hope. Regardless of what this engine does or doesnt do for my future, it was a ton of fun to build and learn how to create a maintainable piece of code that can actually be used and interacted with.
 
-This isn't a game. There's no gameplay loop, no assets store, no drag-and-drop editor. It's an engine — simply just a framework that gives a programmer the tools to describe a scene, and then renders it correctly and efficiently. Every class, every shader, every abstraction was designed and debugged by hand, starting from a blank `.cpp` file and a blinking triangle.
+This isn't a game... yet. There's no gameplay loop, no assets store, no drag-and-drop editor. It's an engine — simply just a framework that gives a programmer the tools to describe a scene, and then renders it (partially) correctly and efficiently. Every class, every shader, every abstraction was designed and debugged by hand, starting from a blank `.cpp` file and a blinking triangle.
 
-The driving motivation was simple: I want to work on engine development. I've always envied the engineers who build the tools that other developers use to make great games. This project was my attempt to take real steps in that direction.
+My driving motivation was simple: I want to work on engine development, specifically graphics. I've always envied the engineers who build the tools that other developers use to make great games. This project was my attempt to take real steps in that direction.
 
 [(back to top)](#table-of-contents)
 
@@ -166,7 +166,7 @@ Application (singleton entry point)
 2. **Reflection Pass** — For each shader: bind → upload scene uniforms aswell as mirrored camera matrices → for each material: upload material/texture uniforms → draw submeshes.
 2. **Draw Pass** — For each shader: bind → upload scene uniforms → for each material: upload material/texture uniforms → draw submeshes.
 3. **Post-Process Pass** — Render to quad texture, apply any screen-space effects.
-3. **Draw Triangle Lines Pass** — Using "lines" shader program, For each shader: bind → upload scene uniforms → for each material: upload material/texture uniforms → draw submeshes.
+3. **Draw Triangle Lines Pass** — Using "lines" shader program, For each shader: bind → upload scene uniforms → for each material: upload material/texture uniforms → draw submeshes as lines.
 3. **Draw Plane With Shader Pass** — Usign Plane Reflection shader program, paste reflected rendered texture → draw plane submesh
 3. **Env Map Pass** — Use large triangle to cover viewport of camera and map corresponding environment cubmap position onto triangle uv coordinates
 
@@ -235,7 +235,7 @@ A subtle but important lesson here was around the EBO unbinding order: the EBO m
 * **Material class** — Holds ambient (Ka), diffuse (Kd), specular (Ks), and shininess parameters; owns shader association; handles uniform uploading
 * **Blinn-Phong shading in world space** — Diffuse, specular (half-vector method), and ambient components computed per-fragment in the fragment shader
 * **Normal matrix** — Because non-uniform scaling skews normals under the model matrix, normals are transformed using the inverse-transpose of the model matrix: `normalMatrix = inverse(transpose(mat3(modelMatrix)))`
-* **Light system** — Point light struct with position, color, and per-component intensity (ambient, diffuse, specular broken out separately to prevent ambient from overpowering)
+* **Light system** — Point light struct with position, color, and per-component intensity (ambient, diffuse, specular)
 * **Light controller** — Ability to hold down CTRL and move light around object by defining fixed position from center always pointing at the center
 * **Transform struct** — Translation, rotation, scale per mesh; passed to shader as a model matrix each frame
 
@@ -262,7 +262,7 @@ A subtle but important lesson here was around the EBO unbinding order: the EBO m
 * **Submesh system** — OBJ files can define multiple materials per mesh. Each submesh holds an `indexStart`, `indexCount`, and its own `Material`, enabling per-section rendering
 * **Texture class** — Handles creation, binding, GPU upload, mipmap generation, and texture parameter configuration
 * **TextureManager** — Centralized texture caching (keyed on filepath + descriptor), fallback 1×1 textures for meshes missing ambient/diffuse/specular maps, texture unit slot assignment
-* **MTL file parsing** — Diffuse (map_Kd), specular (map_Ks), and ambient (map_Ka) texture maps extracted and assigned per submesh
+* **MTL file parsing** — Diffuse (map_Kd), specular (map_Ks), ambient (map_Ka), and displacement (map_disp) texture maps extracted and assigned per submesh
 * **Texture unit policy** — Each texture type (diffuse, specular, ambient, shadow, etc.) is assigned a dedicated texture unit defined in `EngineConfig.h`, preventing sampler aliasing bugs
 
 One thing I learned here: `glUniform1i(samplerUniform, unit)` doesn't *send* texture data — it tells the shader *which unit to read from*. If two samplers point to the same unit, they share the same texture.
@@ -534,7 +534,7 @@ Normal and displacement maps are configured in `SceneLoader.cpp`.
 * Built a complete multi-pass shadow pipeline from scratch — including depth texture FBOs, light-space matrix construction, shadow sampling with PCF, and cube shadow maps for omnidirectional lights
 * Designed and iterated on an engine architecture with separable concerns: the renderer doesn't know about scene loading, materials don't manage their own textures, lights own their shadow maps
 * Got familiar with GPU debugging using RenderDoc to isolate rendering artifacts and verify depth map correctness
-* Learned creation and construction of shaders using GLSL 
+* Learned creation and usage of shaders using GLSL 
 
 [(back to top)](#table-of-contents)
 
@@ -553,9 +553,9 @@ As I continue to learn about the different ways graphics programmers "mimic" rea
 
 For example, as I learn about soft shadows, I was watching a video on percentage closer filtering and implementing percentage closer soft shadows (PCSS) and you realize how many resources such a technique would require. You have to do your occluder search and then percentage closer filtering on each one. This is all for one light source. Now there is a discussion about how many light sources would even need to be required, but ultimately what I'm getting at, is that it's expensive.
 
-Yet, there are newer technqiues coming in order to approximate PCSS, such as Variance Shadow Maps (VSM), Convolution Shadow Maps (CSM), etc... , and sure, they're old and we probably have better techniques now, but once again the point is that there is endless amount of techniques.
+Yet, there were newer techniques that came in order to approximate PCSS, such as Variance Shadow Maps (VSM), Convolution Shadow Maps (CSM), etc... , and sure, they're old and we probably have better techniques now, but once again the point is that there is endless amount of techniques.
 
-Now this brings the question, how do you find the appropriate one for your situation? Genuinly I have not clue. It feels like it'd become an analysis paralisys situation, and your best bet might just be to make up one on your own. And then you may need different techniques for different parts of your application and/or scene. Thus, it comes down to this ever evolving choice of ways to render a scene thats always losing older techniques and creating new ones.
+Now this brings the question, how do you find the appropriate one for your situation? Genuinely I have no clue. It feels like it'd become an analysis paralysis situation, and your best bet might just be to make up one on your own. And then you may need different techniques for different parts of your application and/or scene. Thus, it comes down to this ever evolving choice of ways to render a scene thats always losing older techniques and creating new ones.
 
 I guess this rant is more about how do you handle finding what you need for your situation, and then how do you keep improving at it while also focusing on other aspects of the render? I guess that's the point of a group of people working on a project, be that a engine, video, game or anything involving graphics
 
@@ -565,21 +565,21 @@ Despite using RenderDoc at times in my project, it was never really extremely us
 
 However, given that I have this phenonmenal opportunity to work at Activision, I get to use PIX quite often.
 
-Seeing it be used in such a huge codebase such as Call of Duty is astounding. From, the simplicity to quickly take a capture and see all the different render passes, to the ridiculously useful debugger, where, you can make an edit to the code, re-compile and have that frame showcase the changes. This tool, isn't only a tremendous help in debugging, but I've already learned so much about directX 12 thank to it. 
+Seeing it be used in such a huge codebase such as Call of Duty is astounding. From, the simplicity to quickly take a capture and see all the different render passes, to the ridiculously useful debugger, where, you can make an edit to the code, re-compile and have that frame showcase the changes. This tool, isn't only a tremendous help in debugging, but I've already learned so much about directX 12 thanks to it. 
 
-For example, getting to see the GPU time allocated for specific passes or actions within the pass led me to find a bug where we were allocating ~ 1 million threads to write to a buffer. Like imagine trying to debug "why your application is slow" without such a tool, it'd be extremely tedious. I guess it just gives me that much more appreciation for current tooling and more appreciation for all the grpahics programmers who found novel ways to debug their application before such tools 
+For example, getting to see the GPU time allocated for specific passes or actions within the pass led me to find a bug where we were allocating ~ 1 million threads to write to a buffer. Like imagine trying to debug "why your application is slow" without such a tool, it'd be extremely tedious. I guess it just gives me that much more appreciation for current tooling and more appreciation for all the graphics programmers who found novel ways to debug their application before such tools 
 
 
 ### I Still cant figure out TBN matrices
 
-Sigh... I really still am struggling with my TBN matrices. The ones I use in my engine jsut simply are not right. I diagnosed this by rendering the normal map on a plane and then rotating it and monitoring the method light interacted with it. In the flat vs rotated positiom the lighting was entirely different. This led me to an issue regarding the normals. 
+Sigh... I really still am struggling with my TBN matrices. The ones I use in my engine just simply are not right. I diagnosed this by rendering the normal map on a plane and then rotating it and monitoring the method light interacted with it. In the flat vs rotated position the lighting was entirely different. This led me to an issue regarding the normals. 
 
 I checked a variety of other properties such as: light direction, world space attributes (normal, tangent & bitangent) and even rendering the world normals via:
 `vec3 worldNormal = normalize(transpose(TBNMatrix) * Normal_tangentSpace); `
 
-This is how I concluded it had to do with my TBN. Now I think the calcualtion itself it fine, but the way the normal map is exported and how it interacts with my existing TBN matrix is clearly out of whack. 
+This is how I concluded it had to do with my TBN. Now I think the calculation itself it fine, but the way the normal map is exported and how it interacts with my existing TBN matrix is clearly out of whack. 
 
-So, really all this section is, is a plea for help or a suggestion on how do you calculate the appropriate TBN matrix based on how the normal map is exported, is there even a way to check how the normal map is exported in order to determine the appropriate way to calcualte the TBN. OR is it simply that all TBN's should be the same regardless of the exportation of a normal map and its just my calculations are wrong?
+So, really all this section is, is a plea for help or a suggestion on how do you calculate the appropriate TBN matrix based on how the normal map is exported, is there even a way to check how the normal map is exported in order to determine the appropriate way to calculate the TBN. OR is it simply that all TBN's should be the same regardless of the exportation of a normal map and its just my calculations are wrong?
 
 If anyone ever reads this and feels willing to help a clueless graphics programmer, I'd be in your debt. :D 
 
@@ -590,7 +590,7 @@ One goal coming into this project was to focus on architecting a system to be ma
 
 For example, in my input handling system, I now have an event dispatcher to allow the Observer pattern to be used, however, initially I naively just had to throw around bool's and have each modules "update" function monitor them continously. Or when I had to rearchitect my application class to avoid creating and handling multiple key modules like all the shader's, the different render passes, or the inputs. 
 
-The funny thing is, is that it still worked previously, and potentially would've continued to still work as I continued to complete the future projects. Which is a really interesting idea to me, specifically that, you can just create a quite large system just using a TON of if else statments. Would it be fast or easy to read, I doubt it, but it just highlights how there really is no "right" way to go about programming, but just ways that might save you (or others) a headache in the future.
+The funny thing is, is that it still worked previously, and potentially would've continued to still work as I continued to complete the future projects. Which is a really interesting idea to me, specifically that, you can create a large system just using a TON of if else statments. Would it be fast or easy to read, I doubt it, but it just highlights how there really is no "right" way to go about programming (as long as the application works), but just ways that might save you (or others) a headache in the future.
 
 ### What's Next
 
