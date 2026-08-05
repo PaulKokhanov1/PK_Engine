@@ -29,7 +29,12 @@ public:
 	// Default constructor
 	Shader();
 	// Constructor that build the Shader Program from 2 different shaders
-	Shader(const char* vertexFile, const char* fragmentFile, std::optional<const char*> geometryFile, std::optional<const char*> tcsFile, std::optional<const char*> tesFile);
+	Shader(
+		const std::string& vertexFile,
+		const std::string& fragmentFile,
+		std::optional<std::string> geometryFile,
+		std::optional<std::string> tcsFile,
+		std::optional<std::string> tesFile);
 	~Shader();
 
 	GLuint compileShader(GLenum type, const char* filename, errorType err);
@@ -43,11 +48,11 @@ public:
 	bool checkCompileErrors(GLuint id, errorType type);
 	bool isValid() const;
 
-	const char* getVertexFile();
-	const char* getFragmentFile();
-	std::optional<const char*> getGeometryFile();
-	std::optional<const char*> getTCSFile();
-	std::optional<const char*> getTESFile();
+	const std::string& getVertexFile();
+	const std::string& getFragmentFile();
+	std::optional<std::string> getGeometryFile();
+	std::optional<std::string> getTCSFile();
+	std::optional<std::string> getTESFile();
 
 	int getUniformLocation(const std::string& name) const;
 
@@ -67,11 +72,11 @@ public:
 private:
 	
 	// Used for "hot-reload" of shader's via F6
-	const char* vertexFile;
-	const char* fragmentFile;
-	std::optional<const char*> geometryFile;
-	std::optional<const char*> tcsFile;
-	std::optional<const char*> tesFile;
+	std::string vertexFile;
+	std::string fragmentFile;
+	std::optional<std::string> geometryFile;
+	std::optional<std::string> tcsFile;
+	std::optional<std::string> tesFile;
 
 	// cache shader uniform location
 	mutable std::unordered_map<std::string, int> shaderUniformLocations;

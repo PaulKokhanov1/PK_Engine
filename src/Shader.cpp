@@ -25,7 +25,7 @@ Shader::Shader()
 	geometryFile = "";
 }
 
-Shader::Shader(const char* vertexFile, const char* fragmentFile, std::optional<const char*> geometryFile, std::optional<const char*> tcsFile, std::optional<const char*> tesFile)
+Shader::Shader(const std::string& vertexFile, const std::string& fragmentFile, std::optional<std::string> geometryFile, std::optional<std::string> tcsFile, std::optional<std::string> tesFile)
 {
 	this->vertexFile = vertexFile;
 	this->fragmentFile = fragmentFile;
@@ -33,11 +33,11 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile, std::optional<c
 	this->tcsFile = tcsFile;
 	this->tesFile = tesFile;
 
-	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexFile, VERTEXSHADER);
-	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentFile, FRAGMENTSHADER);
-	GLuint geometryShader = compileShader(GL_GEOMETRY_SHADER, geometryFile ? geometryFile.value() : "", GEOMETRYSHADER);
-	GLuint tcsShader = compileShader(GL_TESS_CONTROL_SHADER, tcsFile ? tcsFile.value() : "", TESSELLATIONCONTROLSHADER);
-	GLuint tesShader = compileShader(GL_TESS_EVALUATION_SHADER, tesFile ? tesFile.value() : "", TESSELLATIONEVALUTATIONSHADER);
+	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexFile.c_str(), VERTEXSHADER);
+	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentFile.c_str(), FRAGMENTSHADER);
+	GLuint geometryShader = compileShader(GL_GEOMETRY_SHADER, geometryFile ? geometryFile->c_str() : "", GEOMETRYSHADER);
+	GLuint tcsShader = compileShader(GL_TESS_CONTROL_SHADER, tcsFile ? tcsFile->c_str() : "", TESSELLATIONCONTROLSHADER);
+	GLuint tesShader = compileShader(GL_TESS_EVALUATION_SHADER, tesFile ? tesFile->c_str() : "", TESSELLATIONEVALUTATIONSHADER);
 
 	// Create program
 	ID = glCreateProgram();
@@ -164,27 +164,27 @@ bool Shader::isValid() const {
 	return glIsProgram(ID) == GL_TRUE;
 }
 
-const char* Shader::getVertexFile()
+const std::string& Shader::getVertexFile()
 {
 	return vertexFile;
 }
 
-const char* Shader::getFragmentFile()
+const std::string& Shader::getFragmentFile()
 {
 	return fragmentFile;
 }
 
-std::optional<const char*> Shader::getGeometryFile()
+std::optional<std::string> Shader::getGeometryFile()
 {
 	return geometryFile;
 }
 
-std::optional<const char*> Shader::getTCSFile()
+std::optional<std::string> Shader::getTCSFile()
 {
 	return tcsFile;
 }
 
-std::optional<const char*> Shader::getTESFile()
+std::optional<std::string> Shader::getTESFile()
 {
 	return tesFile;
 }

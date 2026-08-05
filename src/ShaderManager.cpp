@@ -4,10 +4,20 @@ ShaderManager::ShaderManager()
 {
 }
 
+constexpr const char* ShaderDir = "shaders/";
+
+auto prependPath = [](const std::optional<std::string>& shader)
+	{
+		if (!shader.has_value())
+			return shader;
+
+		return std::optional<std::string>(std::string(ShaderDir) + shader.value());
+	};
+
 void ShaderManager::load(const std::string& programName, const char* vertexShader, const char* fragmentShader, std::optional<const char*> geometryShader, std::optional<const char*> tcsFile, std::optional<const char*> tesFile)
 {
 	try {
-		shaderPrograms[programName] = std::make_unique<Shader>(vertexShader, fragmentShader, geometryShader, tcsFile, tesFile);
+		shaderPrograms[programName] = std::make_unique<Shader>(prependPath(vertexShader).value(), prependPath(fragmentShader).value(), prependPath(geometryShader), prependPath(tcsFile), prependPath(tesFile));
 
 		if (!shaderPrograms[programName]->isValid()) {
 			LogShaderManagerError("Invalid shader created.");

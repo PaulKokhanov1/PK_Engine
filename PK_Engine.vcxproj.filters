@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Resource Files\Shaders">
-      <UniqueIdentifier>{2649719a-b692-4b3d-81d1-cd3c05358569}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Utils">
       <UniqueIdentifier>{089742d3-62ce-409b-b81c-360e3377d424}</UniqueIdentifier>
     </Filter>
@@ -24,9 +21,6 @@
     </Filter>
     <Filter Include="Header Files\ThirdParty\cy">
       <UniqueIdentifier>{38f7dda7-8c5b-4ce3-b829-aabacccdc86e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Models">
-      <UniqueIdentifier>{1c3c7e55-de9d-42f4-9cb8-7335ecc88196}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -295,95 +289,95 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="default.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\debugShadowMap.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="default.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\debugShadowMap.vert">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="framebuffer.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\default.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="framebuffer.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\default.vert">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="skybox.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\framebuffer.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="skybox.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\framebuffer.vert">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="planeReflection.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\lines.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="planeReflection.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\lines.geom">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="shadowMap.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\lines.vert">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="shadowMap.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\planeReflection.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="debugShadowMap.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\planeReflection.vert">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="debugShadowMap.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\shadowCubemap.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="shadowCubemap.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\shadowCubemap.vert">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="shadowCubemap.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\shadowCubemapTess.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="lines.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\shadowCubemapTess.tesc">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="lines.geom">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\shadowCubemapTess.tese">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="lines.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\shadowCubemapTess.vert">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="tess.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\shadowMap.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="tess.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\shadowMap.vert">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="tess.tesc">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\ShadowMapTess.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="tess.tese">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\ShadowMapTess.tesc">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="tess.geom">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\ShadowMapTess.tese">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="ShadowMapTess.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\ShadowMapTess.vert">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="ShadowMapTess.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\skybox.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="ShadowMapTess.tesc">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\skybox.vert">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="ShadowMapTess.tese">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\tess.frag">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="shadowCubemapTess.tesc">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\tess.geom">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="shadowCubemapTess.tese">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\tess.tesc">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="shadowCubemapTess.vert">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\tess.tese">
+      <Filter>Resource Files</Filter>
     </None>
-    <None Include="shadowCubemapTess.frag">
-      <Filter>Resource Files\Shaders</Filter>
+    <None Include="shaders\tess.vert">
+      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
 </Project>
