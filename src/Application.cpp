@@ -36,7 +36,7 @@ bool Application::Init()
 	m_Window->registerCallbacks();
 
 	// CHOOSE PROJECT HERE
-	Project::ProjectNumber proj = Project::ProjectNumber::PROJECT7;
+	Project::ProjectNumber proj = Project::ProjectNumber::PROJECT8;
 	InitializeRenderSettings(proj);
 
 	m_InputManager = std::make_shared<InputManager>(m_Window->getGLFWwindow());

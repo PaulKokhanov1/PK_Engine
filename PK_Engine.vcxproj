@@ -85,6 +85,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,6 +116,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,92 +141,95 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CubeMap.cpp" />
-    <ClCompile Include="EBO.cpp" />
-    <ClCompile Include="EventDispatcher.cpp" />
-    <ClCompile Include="FBO.cpp" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="InputManager.cpp" />
-    <ClCompile Include="Light.cpp" />
-    <ClCompile Include="LightController.cpp" />
-    <ClCompile Include="lodepng.cpp" />
-    <ClCompile Include="Logging.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Material.cpp" />
-    <ClCompile Include="MeshComponent.cpp" />
-    <ClCompile Include="MeshFactory.cpp" />
-    <ClCompile Include="Mirror.cpp" />
-    <ClCompile Include="QuadController.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SceneException.cpp" />
-    <ClCompile Include="SceneLoader.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="ShaderCommon.cpp" />
-    <ClCompile Include="ShaderException.cpp" />
-    <ClCompile Include="ShaderManager.cpp" />
-    <ClCompile Include="ShadowMap.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="TextureManager.cpp" />
-    <ClCompile Include="Transform.cpp" />
-    <ClCompile Include="VAO.cpp" />
-    <ClCompile Include="VBO.cpp" />
-    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\CubeMap.cpp" />
+    <ClCompile Include="src\EBO.cpp" />
+    <ClCompile Include="src\EventDispatcher.cpp" />
+    <ClCompile Include="src\FBO.cpp" />
+    <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\Light.cpp" />
+    <ClCompile Include="src\LightController.cpp" />
+    <ClCompile Include="src\lodepng.cpp" />
+    <ClCompile Include="src\Logging.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Material.cpp" />
+    <ClCompile Include="src\MeshComponent.cpp" />
+    <ClCompile Include="src\MeshFactory.cpp" />
+    <ClCompile Include="src\Mirror.cpp" />
+    <ClCompile Include="src\QuadController.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\SceneException.cpp" />
+    <ClCompile Include="src\SceneLoader.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\ShaderCommon.cpp" />
+    <ClCompile Include="src\ShaderException.cpp" />
+    <ClCompile Include="src\ShaderManager.cpp" />
+    <ClCompile Include="src\ShadowMap.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\TextureManager.cpp" />
+    <ClCompile Include="src\Transform.cpp" />
+    <ClCompile Include="src\VAO.cpp" />
+    <ClCompile Include="src\VBO.cpp" />
+    <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Downloads\cyCore.h" />
     <ClInclude Include="..\..\..\Downloads\cyTriMesh.h" />
     <ClInclude Include="..\..\..\Downloads\cyVector.h" />
-    <ClInclude Include="Application.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="CubeMap.h" />
-    <ClInclude Include="EBO.h" />
-    <ClInclude Include="EngineConfig.h" />
-    <ClInclude Include="EventDispatcher.h" />
-    <ClInclude Include="FBO.h" />
-    <ClInclude Include="FBODescriptor.h" />
-    <ClInclude Include="GLDebug.h" />
-    <ClInclude Include="InputManager.h" />
-    <ClInclude Include="Light.h" />
-    <ClInclude Include="LightController.h" />
-    <ClInclude Include="lodepng.h" />
-    <ClInclude Include="LogCamera.h" />
-    <ClInclude Include="Logging.h" />
-    <ClInclude Include="LogInputManager.h" />
-    <ClInclude Include="LogLight.h" />
-    <ClInclude Include="LogMesh.h" />
-    <ClInclude Include="LogRenderer.h" />
-    <ClInclude Include="LogShaderManager.h" />
-    <ClInclude Include="LogTexture.h" />
-    <ClInclude Include="LogTextureManager.h" />
-    <ClInclude Include="LogWindow.h" />
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="MathCommon.h" />
-    <ClInclude Include="MeshComponent.h" />
-    <ClInclude Include="MeshFactory.h" />
-    <ClInclude Include="Mirror.h" />
-    <ClInclude Include="QuadController.h" />
-    <ClInclude Include="RenderBufferDescriptor.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="SceneException.h" />
-    <ClInclude Include="SceneLoader.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="ShaderCommon.h" />
-    <ClInclude Include="ShaderException.h" />
-    <ClInclude Include="ShaderManager.h" />
-    <ClInclude Include="ShadowMap.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="TextureDescriptor.h" />
-    <ClInclude Include="TextureManager.h" />
-    <ClInclude Include="Transform.h" />
-    <ClInclude Include="VAO.h" />
-    <ClInclude Include="VBO.h" />
-    <ClInclude Include="Vertex.h" />
-    <ClInclude Include="VertexKey.h" />
-    <ClInclude Include="Window.h" />
+    <ClInclude Include="src\Application.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\CubeMap.h" />
+    <ClInclude Include="src\cyCore.h" />
+    <ClInclude Include="src\cyTriMesh.h" />
+    <ClInclude Include="src\cyVector.h" />
+    <ClInclude Include="src\EBO.h" />
+    <ClInclude Include="src\EngineConfig.h" />
+    <ClInclude Include="src\EventDispatcher.h" />
+    <ClInclude Include="src\FBO.h" />
+    <ClInclude Include="src\FBODescriptor.h" />
+    <ClInclude Include="src\GLDebug.h" />
+    <ClInclude Include="src\InputManager.h" />
+    <ClInclude Include="src\Light.h" />
+    <ClInclude Include="src\LightController.h" />
+    <ClInclude Include="src\lodepng.h" />
+    <ClInclude Include="src\LogCamera.h" />
+    <ClInclude Include="src\Logging.h" />
+    <ClInclude Include="src\LogInputManager.h" />
+    <ClInclude Include="src\LogLight.h" />
+    <ClInclude Include="src\LogMesh.h" />
+    <ClInclude Include="src\LogRenderer.h" />
+    <ClInclude Include="src\LogShaderManager.h" />
+    <ClInclude Include="src\LogTexture.h" />
+    <ClInclude Include="src\LogTextureManager.h" />
+    <ClInclude Include="src\LogWindow.h" />
+    <ClInclude Include="src\Material.h" />
+    <ClInclude Include="src\MathCommon.h" />
+    <ClInclude Include="src\MeshComponent.h" />
+    <ClInclude Include="src\MeshFactory.h" />
+    <ClInclude Include="src\Mirror.h" />
+    <ClInclude Include="src\QuadController.h" />
+    <ClInclude Include="src\RenderBufferDescriptor.h" />
+    <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\Scene.h" />
+    <ClInclude Include="src\SceneException.h" />
+    <ClInclude Include="src\SceneLoader.h" />
+    <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\ShaderCommon.h" />
+    <ClInclude Include="src\ShaderException.h" />
+    <ClInclude Include="src\ShaderManager.h" />
+    <ClInclude Include="src\ShadowMap.h" />
+    <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\TextureDescriptor.h" />
+    <ClInclude Include="src\TextureManager.h" />
+    <ClInclude Include="src\Transform.h" />
+    <ClInclude Include="src\VAO.h" />
+    <ClInclude Include="src\VBO.h" />
+    <ClInclude Include="src\Vertex.h" />
+    <ClInclude Include="src\VertexKey.h" />
+    <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="debugShadowMap.frag" />

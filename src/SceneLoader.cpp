@@ -28,7 +28,7 @@ std::unique_ptr<Scene> SceneLoader::createBasicScene()
 	createProject(project, basic.get());
 
 	// CHANGE LIGHT HERE
-	basic->Addlight(move(createLight(LightType::POINT, win)));
+	basic->Addlight(move(createLight(LightType::DIRECTIONAL, win)));
 	basic->setCamera(std::make_unique<Camera>(engineConfig::DEFAULT_WIDTH, engineConfig::DEFAULT_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f), 45.0f, 0.1f, 100.0f));
 	basic->setLightController(std::make_unique<LightController>());
 	basic->setCubeMap(std::make_unique<CubeMap>(paths));
